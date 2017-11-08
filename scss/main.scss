@@ -1,10 +1,26 @@
-#header {
+//For now, this will just be a regular css-file.
+
+body {
+  background-color: LightGray;
+}
+
+#banner {
   background-color: #08F;
   padding: 5px 25%;
 }
-img {
+
+#banner img {
   width: 100%;
 }
-body {
-  background-color: LightGray;
+
+#services {
+  margin: 5px;
+  border: 4px solid #F00;
+  float: left;
+  width: 120px;
+}
+
+#services img {
+  width: 100%;
+  height: auto;
 }
