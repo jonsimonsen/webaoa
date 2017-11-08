@@ -7,3 +7,5 @@ Testing git pulling...
 
 Note that the Author of commits is not currently correct, since git wasn't correctly configured on the client.  
 Website files will be added, but no particular setup is currently planned.  
+
+Moved local git folder. Minor change in index.html.
