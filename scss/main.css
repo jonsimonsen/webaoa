@@ -1,7 +1,11 @@
-//For now, this will just be a regular css-file.
+/*For now, this will just be a regular css-file.*/
 
 body {
   background-color: #BBB;
+}
+
+p {
+  clear: left;  /*To make it display below preceding divs*/
 }
 
 #banner {
@@ -14,7 +18,8 @@ body {
 }
 
 #services {
-  width: 100%;
+  display: table;
+  margin: 0 auto;
 }
 
 #services .imgbox {
@@ -30,7 +35,21 @@ body {
 }
 
 #services p {
-  color: #888;
+  color: #444;
   font-size: 12px;
   font-weight: bold;
+}
+
+#footer {
+  min-with: 160px;
+}
+
+#footer img {
+  margin: 0 auto;
+  display: block;
+  text-align: center;
+}
+
+#footer p {
+  text-align: center;
 }
