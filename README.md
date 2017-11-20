@@ -19,5 +19,7 @@ v0.15: Going to attempt changing the css to use grid.
 v0.2: Several possibilities. Planning to attempt to make additional pages and links.  
 -Could add menus as a next step.  
 -Under development...  
--Added navbar. No links provided yet.  
+-Added navbar. No links provided yet (TODO).  
 -Refactored banner to use flexbox (easier vertical alignment inside divs).  
+-Added some links (so far only internal). Some are styled as buttons.  
+-Using fixed position for the banner, and added a placeholder image under it.  

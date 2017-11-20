@@ -14,11 +14,13 @@ h2 {
 
 /*banner*/
 #banner {
-  padding: 5px;
-  width: 100%;
+  padding: 0.4%;
+  width: 98%;
+  position: fixed;
   display: flex;
   align-items: flex-end;
   background-color: #08F;
+  z-index: 10;
 }
 
 #banner img {
@@ -36,7 +38,69 @@ h2 {
 }
 
 #navbar li {
+  padding: 3px;
   display: inline;
+  font-size: 18px;
+  background-color: #FFA;
+}
+
+#illustrasjon {
+  postion: relative;
+  text-align: center;
+}
+
+/*Illustrasjon*/
+#illustrasjon img {
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+#ill-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 5;
+  color: #FFF;
+}
+
+#ill-text a {
+  padding: 5px;
+  border: 1px solid #FFF;
+  font-size: 20px;
+  text-decoration: none;
+  color: #FFF;
+}
+
+#ill-text a:hover {
+  background-color: #08F;
+}
+
+/*info*/
+#info {
+  text-align: center;
+}
+
+/*options*/
+#options {
+  height: 160px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#options a {
+  padding: 40px;
+  border: 4px solid #FFF;
+  border-radius: 20px;
+  font-size: 40px;
+  text-decoration: none;
+  color: #FFF;
+  background-color: #08F;
+}
+
+#options a:hover {
+  background-color: #00F;
 }
 
 /*services*/
