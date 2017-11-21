@@ -46,7 +46,6 @@ h2 {
 
 #illustrasjon {
   postion: relative;
-  text-align: center;
 }
 
 /*Illustrasjon*/
@@ -59,7 +58,9 @@ h2 {
 #ill-text {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 0%;
+  text-align: center;
+  width: 100%;
   z-index: 5;
   color: #FFF;
 }
