@@ -9,6 +9,16 @@ h2 {
   margin: 5px;
 }
 
+a {
+  margin: 2px;
+  padding: 10px;
+  border: 2px solid #FFF;
+  border-radius: 5px;
+  text-align: center;
+  color: #FFF;
+  background-color: #00F;
+}
+
 /*div-specific styling
 --------------------/*
 
@@ -44,6 +54,13 @@ h2 {
   background-color: #FFA;
 }
 
+#navbar a {
+  padding: 1px;
+  border: none;
+  color: #08F;
+  background-color: transparent;
+}
+
 #illustrasjon {
   postion: relative;
 }
@@ -71,6 +88,7 @@ h2 {
   font-size: 20px;
   text-decoration: none;
   color: #FFF;
+  background-color: transparent;
 }
 
 #ill-text a:hover {
@@ -183,5 +201,10 @@ h2 {
 }not currently used*/
 
 #footer p {
+  text-align: center;
+}
+
+.home {
+  margin-top: 20px;
   text-align: center;
 }

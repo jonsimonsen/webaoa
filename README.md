@@ -28,3 +28,4 @@ v0.25: Start working on sub-pages and/or making DRY code/common banner and foote
 -Under development...  
 -Added some longer text for placeholder user stories with a picture.  
 -Should look into how to transfer the content of these directly to the home page.  
+-Added a link home from user story pages.  
