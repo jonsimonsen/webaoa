@@ -9,18 +9,22 @@
 
   <body>
 
-    <div id="banner">
-      <img src="Bilder/logo_aoa.jpg" alt="Logoen til Arbeid og Aktivitet">
-      <div id="navbar">
-        <ul>
-          <li><a href="./user_alice.html">Alice</a></li>
-          <li><a href="./user_charlie.html">Charlie</a></li>
-          <li><a href="./user_espen.html">Espen</a></li>
-          <li><a href="./user_hallstein.html">Hallstein</a></li>
-        </ul>
+    <!-- Banner. Should look into making some include or AJAX to make this site-wide -->
+    <div id="banner-wrapper">
+      <div id="banner">
+        <img src="Bilder/logo_aoa.jpg" alt="Logoen til Arbeid og Aktivitet">
+        <div id="navbar">
+          <ul>
+            <li><a href="./user_alice.html">Alice</a></li>
+            <li><a href="./user_charlie.html">Charlie</a></li>
+            <li><a href="./user_espen.html">Espen</a></li>
+            <li><a href="./user_hallstein.html">Hallstein</a></li>
+          </ul>
+        </div>
       </div>
     </div>
 
+    <!-- General illustration photo for the site with some text on it. -->
     <div id="illustrasjon">
       <img src="Bilder/prisf.jpg" alt="Demobilde for A og A">
       <div id="ill-text">
@@ -30,6 +34,7 @@
       </div>
     </div>
 
+    <!-- General description of the unit the site belongs to. -->
     <div id="info">
       <h2>Arbeid og aktivitet er et tilbud for de som har behov for tilrettelagt aktivisering.</h2>
       <p>Vi er en kommunal enhet som jobber med å få brukergrupper med spesielle behov ut i jobb og annen aktivitet. <br>
@@ -37,47 +42,17 @@
       <hr>
     </div>
 
+    <!-- Intuitive navigation to closest sub-pages. -->
+    <!-- Could add some tematic pictures to the links later. -->
     <h2>Tjenestevalg</h2>
-
     <div id="options">
       <a href="#footer">Arbeid</a>
       <a href="#footer">Aktivitet</a>
     </div>
 
-    <!--
-
-    <div id="services">
-      <div class="imgbox">
-        <img src="Bilder/almehaven.jpg" alt="Almehaven Cafe">
-        <div class="bildetekst"><p>Almehaven Cafe</p></div>
-      </div>
-      <div class="imgbox">
-        <img src="Bilder/kurskonf.jpg" alt="Dreis kurs- og konferanseavdeling">
-        <div class="bildetekst"><p>Dreis kurs- og konferanseavdeling</p></div>
-      </div>
-      <div class="imgbox">
-        <img src="Bilder/bilservice.jpg" alt="Dreis bilservice">
-        <div class="bildetekst"><p>Dreis bilservice</p></div>
-      </div>
-      <div class="imgbox">
-        <img src="Bilder/produksjon.jpg" alt="Dreis produksjonsavdeling">
-        <div class="bildetekst"><p>Dreis produksjonsavdeling</p></div>
-      </div>
-      <div class="imgbox">
-        <img src="Bilder/serviceavd.jpg" alt="Dreis serviceavdeling">
-        <div class="bildetekst"><p>Dreis serviceavdeling</p></div>
-      </div>
-      <div class="imgbox">
-        <img src="Bilder/admin.jpg" alt="Dreis administrasjon">
-        <div class="bildetekst"><p>Dreis administrasjon</p></div>
-      </div>
-    </div>
-
-    -->
-
-    <h2>Sitat fra brukerne</h2>
-
+    <!-- Excerpts of user stories/feedback. Needs some modification yet. -->
     <!-- Should deal with overflow from descriptions -->
+    <h2>Sitat fra brukerne</h2>
     <div id="stories">
       <div class="storybox">
         <p class="story">Etter at jeg begynte å arbeide med bilservice under Arbeid og Aktivitet, er alt bærre lekkert.</p>
@@ -97,6 +72,7 @@
       </div>
     </div>
 
+    <!-- Banner. Should look into making some include or AJAX to make this site-wide -->
     <div id="footer">
       <h2>Kontakt</h2>
       <p>Evjenvegen 116 | 9024 Tromsø | <b>Telefon:</b> 918 36 037</p>

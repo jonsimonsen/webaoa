@@ -3,6 +3,7 @@
 /*General html objects*/
 body {
   background-color: #BBB;
+  margin: 5px;
 }
 
 h2 {
@@ -10,33 +11,37 @@ h2 {
 }
 
 a {
-  margin: 2px;
   padding: 10px;
-  border: 2px solid #FFF;
   border-radius: 5px;
-  text-align: center;
   color: #FFF;
   background-color: #00F;
+  text-decoration: none;
 }
 
-/*div-specific styling
---------------------/*
+/*home page styling/*
 
-/*banner*/
-#banner {
-  padding: 0.4%;
-  width: 98%;
+/*banner/*
+/*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
+/*Will need to retest if the navbar (or other content) is altered.*/
+
+#banner-wrapper {
+  width: 100%
   position: fixed;
+  background-color: #08F;
+}
+
+#banner {
+  padding: 5px;
   display: flex;
   align-items: flex-end;
-  background-color: #08F;
-  z-index: 10;
 }
 
 #banner img {
-  width: 20%;
+  margin-right: 5px;
+  width: 160px;
 }
 
+/*navbar is part of the banner*/
 #navbar {
   margin-left: auto;
 }
@@ -56,29 +61,29 @@ a {
 
 #navbar a {
   padding: 1px;
-  border: none;
   color: #08F;
   background-color: transparent;
+  text-decoration: underline;
 }
+
+/*illustrasjon*/
+/*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
+/*Will need to retest if the image (or other content) is altered.*/
 
 #illustrasjon {
   postion: relative;
 }
 
-/*Illustrasjon*/
 #illustrasjon img {
   width: 100%;
-  top: 0;
-  left: 0;
 }
 
 #ill-text {
   position: absolute;
   top: 50%;
-  left: 0%;
   text-align: center;
   width: 100%;
-  z-index: 5;
+  z-index: 5; /*Didn't matter in current version (with Chrome), but leaving it in just in case*/
   color: #FFF;
 }
 
@@ -205,6 +210,6 @@ a {
 }
 
 .home {
-  margin-top: 20px;
+  margin: 20px 0px;
   text-align: center;
 }
