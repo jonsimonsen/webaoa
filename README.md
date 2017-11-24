@@ -29,3 +29,6 @@ v0.25: Start working on sub-pages and/or making DRY code/common banner and foote
 -Added some longer text for placeholder user stories with a picture.  
 -Should look into how to transfer the content of these directly to the home page.  
 -Added a link home from user story pages.  
+-Added links from home to the user story pages.  
+-Should examine if the user story grid can be simplified using DRY.  
+-Did major cleanup of layout file.  

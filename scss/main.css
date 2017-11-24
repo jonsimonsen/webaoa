@@ -6,6 +6,7 @@ body {
   --theme-color: #08F; /*For banner, buttons and some borders*/
   --contrast-color: #FFA; /*Contrast to theme color. For button background and some textboxes.*/
   --link-color: #FFF; /*Default color of links/button text and their borders*/
+  --select-color: #00F; /*Default button color when hovering*/
   --sub-bgcolor: #DDD; /*Background color for subsections*/
 
   /*Margins, borders, paddings*/
@@ -105,13 +106,14 @@ a {
 }
 
 #ill-text a {
-  border: 1px solid var(--link-color);
+  border: 2px solid var(--link-color);
   font-size: 20px;
   background-color: transparent;
 }
 
 #ill-text a:hover {
-  background-color: var(--theme-color);
+  background-color: var(--select-color);
+  border-color: #000;
 }
 
 /*info*/
@@ -131,16 +133,19 @@ a {
 
 #options a {
   padding: 30px;
+  border: 2px solid transparent;
   border-radius: 20px;
   font-size: 40px;
 }
 
 #options a:hover {
-  background-color: #00F;
-  border: 2px solid #000;
+  background-color: var(--select-color);
+  border-color: #000;
 }
 
 /*Stories from users*/
+/*221117: Tested and seems ok at browser widths (600, 1360) in Chrome.*/
+/*For smaller widths, should try to make it single-columned.*/
 #stories {
   width: 100%;
   display: grid;
@@ -161,21 +166,41 @@ a {
   font-size: 20px;
 }
 
+#storylink {
+  margin-left: 5px;
+  height: 44px;
+  width: 160px;
+  bottom: 10px;
+  position: relative;
+  float: left;
+}
+
+#storylink a {
+  padding: 5px 5px 5px 45px;
+  border: 2px solid transparent;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--contrast-color);
+}
+
+#storylink a:hover {
+  background-color: var(--select-color);
+  border-color: #000;
+}
+
 #polygon {
-  color: #000;
-  z-index: 20px;
-}
-
-.user {
-  margin-left: 20%;
-  margin-right: 20%;
-  padding: 10px;
-  border: 2px solid #00F;
-  background-color: #FFA;
-}
-
-.user img{
-  width: 100%;
+  margin-left: 5px;
+  position: absolute;
+  top: 6px;
+  left: 0px;
+  width: 32px;
+  height: 32px;
+  background-color: var(--contrast-color);
+  clip-path: polygon(0% 75%, 0% 25%, 50% 25%, 50% 0%, 100% 50%, 50% 100%, 50% 75%);
+  z-index: 10;
 }
 
 .sign {
@@ -185,10 +210,10 @@ a {
 }
 
 /*footer*/
+/*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 #footer {
   margin-top: 20px;
-  border-top: 2px solid #08F;
-  min-with: 160px;
+  border-top: 2px solid var(--theme-color);
   background-color: var(--sub-bgcolor);
 }
 
@@ -202,7 +227,23 @@ a {
   text-align: center;
 }
 
+.user {
+  margin-left: 20%;
+  margin-right: 20%;
+  padding: 10px;
+  border: 2px solid var(--theme-color);
+  background-color: var(--contrast-color);
+}
+
+.user img{
+  width: 100%;
+}
+
 .home {
   margin: 20px 0px;
   text-align: center;
+}
+
+.home a:hover {
+  background-color: var(--select-color);
 }
