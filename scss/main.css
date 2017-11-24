@@ -29,10 +29,16 @@ h2 {
 
 a {
   padding: 10px;
+  border: 2px solid transparent;
   border-radius: 5px;
   color: var(--link-color);
   background-color: var(--theme-color);
   text-decoration: none;
+}
+
+a:hover {
+  border-color: #000;
+  background-color: var(--select-color);
 }
 
 /*home page styling/*
@@ -81,6 +87,11 @@ a {
   color: var(--theme-color);
   background-color: transparent;
   text-decoration: underline;
+}
+
+#navbar a:hover {
+  border-color: transparent;
+  color: var(--select-color);
 }
 
 /*illustrasjon*/
@@ -133,14 +144,8 @@ a {
 
 #options a {
   padding: 30px;
-  border: 2px solid transparent;
   border-radius: 20px;
   font-size: 40px;
-}
-
-#options a:hover {
-  background-color: var(--select-color);
-  border-color: #000;
 }
 
 /*Stories from users*/
@@ -177,18 +182,12 @@ a {
 
 #storylink a {
   padding: 5px 5px 5px 45px;
-  border: 2px solid transparent;
   position: absolute;
   top: 0px;
   left: 0px;
   font-size: 18px;
   line-height: 30px;
   color: var(--contrast-color);
-}
-
-#storylink a:hover {
-  background-color: var(--select-color);
-  border-color: #000;
 }
 
 #polygon {
@@ -242,8 +241,4 @@ a {
 .home {
   margin: 20px 0px;
   text-align: center;
-}
-
-.home a:hover {
-  background-color: var(--select-color);
 }

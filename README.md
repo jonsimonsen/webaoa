@@ -25,10 +25,11 @@ v0.2: Several possibilities. Planning to attempt to make additional pages and li
 -Made slight fixes to the layout. Have a reasonably-looking front page. External links does not work correctly, since no external pages exist yet.  
 
 v0.25: Start working on sub-pages and/or making DRY code/common banner and footer.  
--Under development...  
 -Added some longer text for placeholder user stories with a picture.  
 -Should look into how to transfer the content of these directly to the home page.  
 -Added a link home from user story pages.  
 -Added links from home to the user story pages.  
 -Should examine if the user story grid can be simplified using DRY.  
--Did major cleanup of layout file.  
+-Did major cleanup of layout file, including "global consts" and more inheritance.  
+
+v0.3: Under development...  
