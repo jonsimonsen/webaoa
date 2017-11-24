@@ -32,4 +32,5 @@ v0.25: Start working on sub-pages and/or making DRY code/common banner and foote
 -Should examine if the user story grid can be simplified using DRY.  
 -Did major cleanup of layout file, including "global consts" and more inheritance.  
 
-v0.3: Under development...  
+v0.3: Attempting to write DRY code (common banner and footer, maybe other "deduplication")  
+-Looking into snippets and includes.  
