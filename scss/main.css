@@ -229,6 +229,13 @@ a:hover {
   text-align: center;
 }
 
+/*Styling link to home page*/
+.home {
+  margin: 20px 0px;
+  text-align: center;
+}
+
+/*User feedback styling*/
 .user {
   margin-left: 20%;
   margin-right: 20%;
@@ -241,7 +248,47 @@ a:hover {
   width: 100%;
 }
 
-.home {
-  margin: 20px 0px;
+/*Dreis styles*/
+/*services styling*/
+#services {
+  /*margin: 0 auto;*/
+}
+
+#services .imgbox {
+  margin-bottom: 10px;
+}
+
+#services .imgtext-wrapper {
+  display: inline;
+  padding-bottom: 10px;
+  box-sizing: border-box;
+}
+
+#services .imgtext {
+  border: 2px solid var(--theme-color);
+  height: var(--logo-width);
+  overflow-y: auto;
+  background-color: var(--contrast-color);
+  box-sizing: content-box;
+}
+
+#services img {
+  border: 2px solid var(--theme-color);
+  width: var(--logo-width);
+  height: var(--logo-width);
+  float: left;
+}
+
+#services h4 {
+  width: 100%
+  display: inline;
   text-align: center;
+  font-size: 18px;
+  color: #333;
+}
+
+#services p {
+  padding: 0px 10px;
+  font-size: 16px;
+  color: #000;
 }
