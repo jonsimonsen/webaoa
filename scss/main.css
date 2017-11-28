@@ -3,11 +3,14 @@
 /*CSS custom properties(variables). Source claims non-compatibility with IE and some other browsers.*/
 body {
   /*Thematic colors*/
-  --theme-color: #08F; /*For banner, buttons and some borders*/
-  --contrast-color: #FFA; /*Contrast to theme color. For button background and some textboxes.*/
+
+  /*For banner, buttons and some borders. Alt. 09F, 06F*/
+  --theme-color: #09F;
+  /*Contrast to theme color. For button background and some textboxes. Alt FF9,FC6,CC6*/
+  --contrast-color: #FC6;
   --link-color: #FFF; /*Default color of links/button text and their borders*/
-  --select-color: #00F; /*Default button color when hovering*/
-  --sub-bgcolor: #DDD; /*Background color for subsections*/
+  --select-color: #009; /*Default button color when hovering. Alt 009, 00F*/
+  --sub-bgcolor: #CCC; /*Background color for subsections*/
 
   /*Margins, borders, paddings*/
   --main-pad: 5px;
@@ -19,7 +22,7 @@ body {
 
 /*General html objects*/
 body {
-  background-color: #BBB;
+  background-color: #999; /*Alt. 999,CC9*/
   margin: 5px;
 }
 
