@@ -44,6 +44,10 @@ a:hover {
   background-color: var(--select-color);
 }
 
+/*td {
+  border: 2px solid var(--theme-color);
+}*/
+
 /*home page styling/*
 
 /*banner/*
@@ -296,4 +300,36 @@ a:hover {
   padding: 0px 10px;
   font-size: 16px;
   color: #000;
+}
+
+#servo {
+  border-spacing: 5px;
+  width: 100%;
+}
+
+#servo .imgcell {
+  padding: 0px;
+  width: 1px;   /*To prevent the cell from expanding past the width of the image.*/
+}
+
+#servo .imgcell img {
+  border: 2px solid var(--theme-color);
+  width: var(--logo-width);
+  height: var(--logo-width);
+  background-color: var(--contrast-color);
+}
+
+#servo .infocell {
+  padding: 0px;
+  vertical-align: top;
+}
+
+#servo .infobox {
+  border: 2px solid var(--theme-color);
+  background-color: var(--contrast-color);
+  height: var(--logo-width);
+}
+
+#servo p {
+  margin: 0px;
 }
