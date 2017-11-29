@@ -174,7 +174,7 @@ a:hover {
   font-size: 20px;
 }
 
-#storylink {
+#stories .storylink {
   margin-left: 5px;
   height: 44px;
   width: 160px;
@@ -183,7 +183,7 @@ a:hover {
   float: left;
 }
 
-#storylink a {
+#stories .storylink a {
   padding: 5px 5px 5px 45px;
   position: absolute;
   top: 0px;
@@ -193,7 +193,7 @@ a:hover {
   color: var(--contrast-color);
 }
 
-#polygon {
+#stories .polygon {
   margin-left: 5px;
   position: absolute;
   top: 6px;
@@ -229,6 +229,10 @@ a:hover {
   text-align: center;
 }
 
+#footer .tlf {
+  font-weight: bold;
+}
+
 /*Styling link to home page*/
 .home {
   margin: 20px 0px;
@@ -251,25 +255,11 @@ a:hover {
 /*Dreis styles*/
 /*services styling*/
 #services {
-  /*margin: 0 auto;*/
+  margin: 0 auto;
 }
 
-#services .imgbox {
+#services > .imgbox {
   margin-bottom: 10px;
-}
-
-#services .imgtext-wrapper {
-  display: inline;
-  padding-bottom: 10px;
-  box-sizing: border-box;
-}
-
-#services .imgtext {
-  border: 2px solid var(--theme-color);
-  height: var(--logo-width);
-  overflow-y: auto;
-  background-color: var(--contrast-color);
-  box-sizing: content-box;
 }
 
 #services img {
@@ -277,6 +267,21 @@ a:hover {
   width: var(--logo-width);
   height: var(--logo-width);
   float: left;
+}
+
+#services > .imgbox > .imgtext-wrapper {
+  border: 2px solid var(--theme-color);
+  height: var(--logo-width);
+  width: 100%;
+  display: inline;
+  /*padding-bottom: 10px;*/
+  background-color: var(--contrast-color);
+}
+
+#services > .imgbox > .imgtext-wrapper > .imgtext {
+  height: 100%;
+  overflow-y: auto;
+  background-color: transparent;
 }
 
 #services h4 {
