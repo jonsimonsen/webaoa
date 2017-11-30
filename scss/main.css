@@ -44,9 +44,9 @@ a:hover {
   background-color: var(--select-color);
 }
 
-/*td {
-  border: 2px solid var(--theme-color);
-}*/
+hr {
+  border: 1px solid var(--theme-color);
+}
 
 /*home page styling/*
 
@@ -324,12 +324,31 @@ a:hover {
   vertical-align: top;
 }
 
-#servo .infobox {
+#servo .info-wrapper {
   border: 2px solid var(--theme-color);
-  background-color: var(--contrast-color);
   height: var(--logo-width);
+  display: flex;
+  align-items: center;
+  background-color: var(--contrast-color);
+}
+
+#servo .infobox {
+  padding: 0px 10px;
+  height: calc(var(--logo-width) - 32px);
+  overflow-y: auto;
+}
+
+#servo h4 {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 100%
+  display: inline;
+  text-align: center;
+  font-size: 18px;
+  color: #666;
 }
 
 #servo p {
   margin: 0px;
+  font-size: 16px;
 }

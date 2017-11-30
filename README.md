@@ -32,5 +32,12 @@ v0.25: Start working on sub-pages and/or making DRY code/common banner and foote
 -Should examine if the user story grid can be simplified using DRY.  
 -Did major cleanup of layout file, including "global consts" and more inheritance.  
 
-v0.3: Attempting to write DRY code (common banner and footer, maybe other "deduplication")  
--Looking into snippets and includes.  
+v0.3: Attempting to write DRY code (common banner and footer, maybe other "deduplication").  
+-Decided to keep working before adding and refactoring the common elements (possibly with JS).  
+-Did some minor fixes to layout, including alternative color configurations.  
+-Made a new subpage for Dreis. Temporarily linking here from "Arbeid".  
+-Added Picture and description similar to that on the home page.  Home link as for other subpages.  
+-Added description of services as a table.  
+
+v0.35: Planning to try some cleanup.  
+-After v0.3, there are some elements with the same id on different pages. Should refactor these to use class instead.  
