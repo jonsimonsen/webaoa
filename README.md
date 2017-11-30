@@ -41,3 +41,4 @@ v0.3: Attempting to write DRY code (common banner and footer, maybe other "dedup
 
 v0.35: Planning to try some cleanup.  
 -After v0.3, there are some elements with the same id on different pages. Should refactor these to use class instead.  
+-Fixed some misleading text, and solved an issue that generated a horizontal scroll bar (overflow-x).  

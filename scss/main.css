@@ -24,6 +24,7 @@ body {
 body {
   background-color: #999; /*Alt. 999,CC9*/
   margin: 5px;
+  overflow-x: hidden;
 }
 
 h2 {
