@@ -14,7 +14,8 @@ body {
   --sub-bgcolor: #CCC; /*Background color for subsections*/
 
   /*Margins, borders, paddings*/
-  --main-pad: 4px;
+  --pads: 4px;
+  --big-pads: 8px;
 
   /*Dimensional vars*/
   --logo-width: 160px;
@@ -30,23 +31,23 @@ body {
 
 body {
   background-color: #999; /*Alt. 999,CC9*/
-  margin: 4px;
+  margin: var(--pads);
   overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
 }
 
 h2 {
-  margin: 8px;
+  margin: var(--big-pads);
 }
 
 p {
-  margin: 8px;
+  margin: var(--big-pads);
 }
 
 /*Styling links as buttons. Might want to adopt a more modern implementation later.*/
 a {
-  padding: 8px;
+  padding: var(--big-pads);
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--big-pads);
   color: var(--link-color);
   background-color: var(--theme-color);
   text-decoration: none;
@@ -91,39 +92,31 @@ p.sign {
 }
 
 #banner {
-  padding: var(--main-pad);
   display: flex;
   align-items: flex-end;
 }
 
 #banner img {
-  margin-right: var(--main-pad); /*As a padding between img and the next element*/
+  margin: var(--pads); /*As a margin between img and the next element*/
   width: var(--logo-width);
 }
 
 /*navbar is part of the banner*/
 #navbar {
   margin-left: auto;
-}
-
-#navbar ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-}
-
-#navbar li {
-  padding: 3px;
-  display: inline;
-  font-size: 18px;
-  background-color: var(--contrast-color);
+  margin-right: 4px;
+  display: flex;
 }
 
 #navbar a {
-  padding: 1px;
-  color: var(--theme-color);
-  background-color: transparent;
+  padding: var(--pads);
+  margin-bottom: var(--pads);
+  margin-left: 1px;
+  border-radius: 0;
   text-decoration: underline;
+  font-size: 18px;
+  background-color: var(--contrast-color);
+  color: var(--theme-color);
 }
 
 #navbar a:hover {
@@ -154,7 +147,9 @@ p.sign {
 }
 
 .ill-text a {
-  border: 2px solid var(--link-color);
+  margin-top: 16px;
+  border-color: var(--link-color);
+  display: inline-block;
   font-size: 20px;
   background-color: transparent;
 }
