@@ -40,5 +40,7 @@ v0.3: Attempting to write DRY code (common banner and footer, maybe other "dedup
 -Added description of services as a table.  
 
 v0.35: Planning to try some cleanup.  
--After v0.3, there are some elements with the same id on different pages. Should refactor these to use class instead.  
+-Under development...  
+-After v0.3, Some elements had the same id on different pages. These have been refactored to use classes instead.  
+-Used chaining and started using elements with multiple classes.  
 -Fixed some misleading text, and solved an issue that generated a horizontal scroll bar (overflow-x).  

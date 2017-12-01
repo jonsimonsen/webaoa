@@ -1,5 +1,6 @@
 /*For now, this will just be a regular css-file.*/
 
+
 /*CSS custom properties(variables). Source claims non-compatibility with IE and some other browsers.*/
 body {
   /*Thematic colors*/
@@ -20,17 +21,19 @@ body {
   --imgtxt-offset: 200px; /*Since the height of the banner depends on the width of the logo, this needs to change if the logo size changes*/
 }
 
+
 /*General html objects*/
 body {
   background-color: #999; /*Alt. 999,CC9*/
-  margin: 5px;
-  overflow-x: hidden;
+  margin: 5px;  /*Override default 10px val*/
+  overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
 }
 
 h2 {
   margin: 5px;
 }
 
+/*Styling links as buttons. Might want to adopt a more modern implementation later.*/
 a {
   padding: 10px;
   border: 2px solid transparent;
@@ -49,11 +52,29 @@ hr {
   border: 1px solid var(--theme-color);
 }
 
+
+/*General styles (used for different kinds of things)*/
+
+/*Provides box styling for information/descriptions/histories and similar.*/
+.storybox {
+  border: 2px solid var(--theme-color);
+  background-color: var(--contrast-color);
+}
+
+/*General signature*/
+p.sign {
+  margin: 10px;
+  text-align: right;
+  font-style: italic;
+}
+
+
 /*home page styling/*
 
 /*banner/*
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 /*Will need to retest if the navbar (or other content) is altered.*/
+/*Might want to look into bootstrap for easier customization*/
 
 #banner-wrapper {
   width: 100%
@@ -106,38 +127,38 @@ hr {
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 /*Will need to retest if the image (or other content) is altered.*/
 
-#illustrasjon {
+.illustrasjon {
   postion: relative;
 }
 
-#illustrasjon img {
+.illustrasjon img {
   width: 100%;
 }
 
 /*Text/button to be written on top of image*/
-#ill-text {
+.ill-text {
   position: absolute;
-  top: var(--imgtxt-offset); /*From top of page*/
+  top: var(--imgtxt-offset); /*From top of page.*/
   text-align: center;
   width: 100%;
   z-index: 5; /*Didn't matter in current version (with Chrome), but leaving it in just in case*/
   color: var(--link-color); /*Change to some other var or value if necessary*/
 }
 
-#ill-text a {
+.ill-text a {
   border: 2px solid var(--link-color);
   font-size: 20px;
   background-color: transparent;
 }
 
-#ill-text a:hover {
+.ill-text a:hover {
   background-color: var(--select-color);
   border-color: #000;
 }
 
 /*info*/
 /*221117: Works well with sizes (450, 1360) and probably somewhat smaller ones as well.*/
-#info {
+.info {
   text-align: center;
 }
 
@@ -166,12 +187,7 @@ hr {
   grid-gap: 10px;
 }
 
-#stories .storybox {
-  border: 2px solid var(--theme-color);
-  background-color: var(--contrast-color);
-}
-
-#stories .story {
+p.story {   /*Using this generally with some potential modification might be done later*/
   margin: 10px;
   height: 96px;
   overflow: hidden;
@@ -198,22 +214,16 @@ hr {
   color: var(--contrast-color);
 }
 
-#stories .polygon {
+#stories .arrow {
   margin-left: 5px;
   position: absolute;
   top: 6px;
   left: 0px;
   width: 32px;
   height: 32px;
-  background-color: var(--contrast-color);
+  background-color: var(--contrast-color);  /*Actual color of arrow*/
   clip-path: polygon(0% 75%, 0% 25%, 50% 25%, 50% 0%, 100% 50%, 50% 100%, 50% 75%);
   z-index: 10;
-}
-
-.sign {
-  margin: 10px;
-  text-align: right;
-  font-style: italic;
 }
 
 /*footer*/
@@ -238,108 +248,67 @@ hr {
   font-weight: bold;
 }
 
+
+/*Common sub-page styles*/
+
 /*Styling link to home page*/
 .home {
   margin: 20px 0px;
   text-align: center;
 }
 
-/*User feedback styling*/
+/*Styling user pages*/
+
+/*User feedback initially should also have a storybox class*/
 .user {
   margin-left: 20%;
   margin-right: 20%;
   padding: 10px;
-  border: 2px solid var(--theme-color);
-  background-color: var(--contrast-color);
 }
 
 .user img{
   width: 100%;
 }
 
+
 /*Dreis styles*/
+
 /*services styling*/
 #services {
-  margin: 0 auto;
-}
-
-#services > .imgbox {
-  margin-bottom: 10px;
-}
-
-#services img {
-  border: 2px solid var(--theme-color);
-  width: var(--logo-width);
-  height: var(--logo-width);
-  float: left;
-}
-
-#services > .imgbox > .imgtext-wrapper {
-  border: 2px solid var(--theme-color);
-  height: var(--logo-width);
-  width: 100%;
-  display: inline;
-  /*padding-bottom: 10px;*/
-  background-color: var(--contrast-color);
-}
-
-#services > .imgbox > .imgtext-wrapper > .imgtext {
-  height: 100%;
-  overflow-y: auto;
-  background-color: transparent;
-}
-
-#services h4 {
-  width: 100%
-  display: inline;
-  text-align: center;
-  font-size: 18px;
-  color: #333;
-}
-
-#services p {
-  padding: 0px 10px;
-  font-size: 16px;
-  color: #000;
-}
-
-#servo {
   border-spacing: 5px;
   width: 100%;
 }
 
-#servo .imgcell {
+#services .imgcell {
   padding: 0px;
   width: 1px;   /*To prevent the cell from expanding past the width of the image.*/
 }
 
-#servo .imgcell img {
+#services .imgcell img {
   border: 2px solid var(--theme-color);
   width: var(--logo-width);
   height: var(--logo-width);
-  background-color: var(--contrast-color);
+  /*background-color: var(--contrast-color); Uncomment to test that there is no padding*/
 }
 
-#servo .infocell {
+#services .infocell {
   padding: 0px;
   vertical-align: top;
 }
 
-#servo .info-wrapper {
-  border: 2px solid var(--theme-color);
+#services .info-wrapper {
   height: var(--logo-width);
   display: flex;
   align-items: center;
-  background-color: var(--contrast-color);
 }
 
-#servo .infobox {
+#services .infotext {
   padding: 0px 10px;
   height: calc(var(--logo-width) - 32px);
   overflow-y: auto;
 }
 
-#servo h4 {
+#services h4 {
   margin-top: 5px;
   margin-bottom: 10px;
   width: 100%
@@ -349,7 +318,7 @@ hr {
   color: #666;
 }
 
-#servo p {
+#services p {
   margin: 0px;
   font-size: 16px;
 }
