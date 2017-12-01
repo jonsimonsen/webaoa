@@ -14,7 +14,7 @@ body {
   --sub-bgcolor: #CCC; /*Background color for subsections*/
 
   /*Margins, borders, paddings*/
-  --main-pad: 5px;
+  --main-pad: 4px;
 
   /*Dimensional vars*/
   --logo-width: 160px;
@@ -23,21 +23,30 @@ body {
 
 
 /*General html objects*/
+* {
+  margin: 0px;
+  padding: 0px;
+}
+
 body {
   background-color: #999; /*Alt. 999,CC9*/
-  margin: 5px;  /*Override default 10px val*/
+  margin: 4px;
   overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
 }
 
 h2 {
-  margin: 5px;
+  margin: 8px;
+}
+
+p {
+  margin: 8px;
 }
 
 /*Styling links as buttons. Might want to adopt a more modern implementation later.*/
 a {
-  padding: 10px;
+  padding: 8px;
   border: 2px solid transparent;
-  border-radius: 5px;
+  border-radius: 8px;
   color: var(--link-color);
   background-color: var(--theme-color);
   text-decoration: none;
@@ -63,7 +72,6 @@ hr {
 
 /*General signature*/
 p.sign {
-  margin: 10px;
   text-align: right;
   font-style: italic;
 }
