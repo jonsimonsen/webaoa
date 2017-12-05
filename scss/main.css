@@ -104,7 +104,7 @@ p.sign {
 /*navbar is part of the banner*/
 #navbar {
   margin-left: auto;
-  margin-right: 4px;
+  margin-right: var(--pads);
   display: flex;
 }
 
@@ -168,7 +168,7 @@ p.sign {
 /*options (button row)*/
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 #options {
-  padding: 10px;
+  padding: var(--big-pads);
   display: flex;
   justify-content: space-around;
   background-color: var(--sub-bgcolor);
@@ -184,14 +184,13 @@ p.sign {
 /*221117: Tested and seems ok at browser widths (600, 1360) in Chrome.*/
 /*For smaller widths, should try to make it single-columned.*/
 #stories {
-  width: 100%;
   display: grid;
   grid-template: 1fr 1fr / 1fr 1fr;
   grid-gap: 10px;
 }
 
 p.story {   /*Using this generally with some potential modification might be done later*/
-  margin: 10px;
+  margin: var(--big-pads);
   height: 96px;
   overflow: hidden;
   text-align: center;
@@ -199,7 +198,7 @@ p.story {   /*Using this generally with some potential modification might be don
 }
 
 #stories .storylink {
-  margin-left: 5px;
+  margin-left: var(--pads);
   height: 44px;
   width: 160px;
   bottom: 10px;
@@ -210,18 +209,15 @@ p.story {   /*Using this generally with some potential modification might be don
 #stories .storylink a {
   padding: 5px 5px 5px 45px;
   position: absolute;
-  top: 0px;
-  left: 0px;
   font-size: 18px;
   line-height: 30px;
   color: var(--contrast-color);
 }
 
 #stories .arrow {
-  margin-left: 5px;
+  margin-left: var(--pads);
   position: absolute;
-  top: 6px;
-  left: 0px;
+  top: 6px; /*To align the arrow inside a link button*/
   width: 32px;
   height: 32px;
   background-color: var(--contrast-color);  /*Actual color of arrow*/
@@ -266,7 +262,7 @@ p.story {   /*Using this generally with some potential modification might be don
 .user {
   margin-left: 20%;
   margin-right: 20%;
-  padding: 10px;
+  padding: var(--big-pads);
 }
 
 .user img{
@@ -279,12 +275,6 @@ p.story {   /*Using this generally with some potential modification might be don
 /*services styling*/
 #services {
   border-spacing: 5px;
-  width: 100%;
-}
-
-#services .imgcell {
-  padding: 0px;
-  width: 1px;   /*To prevent the cell from expanding past the width of the image.*/
 }
 
 #services .imgcell img {
@@ -295,7 +285,6 @@ p.story {   /*Using this generally with some potential modification might be don
 }
 
 #services .infocell {
-  padding: 0px;
   vertical-align: top;
 }
 
@@ -306,22 +295,19 @@ p.story {   /*Using this generally with some potential modification might be don
 }
 
 #services .infotext {
-  padding: 0px 10px;
+  padding: 0px var(--big-pads);
   height: calc(var(--logo-width) - 32px);
   overflow-y: auto;
 }
 
 #services h4 {
-  margin-top: 5px;
-  margin-bottom: 10px;
-  width: 100%
-  display: inline;
+  margin-top: var(--pads);
+  margin-bottom: var(--big-pads);
   text-align: center;
   font-size: 18px;
   color: #666;
 }
 
 #services p {
-  margin: 0px;
   font-size: 16px;
 }
