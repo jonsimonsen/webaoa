@@ -60,6 +60,7 @@ typings/
 
 # Project specific ignores
 Bilder/
+Info/
 Skisser/
 #Ignoring until worthwhile content is available
 arbeid.html

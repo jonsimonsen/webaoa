@@ -44,3 +44,9 @@ v0.35: Planning to try some cleanup.
 -Used chaining and started using elements with multiple classes.  
 -Fixed some misleading text, and solved an issue that generated a horizontal scroll bar (overflow-x).  
 -Refactored more css, and now have a seemingly satisfactory stylesheet for the pages so far.  
+
+v0.4: Either refatoring/DRY or adding more pages and/or content to dreis.html  
+-Under development...  
+-Starting by adding contact info to dreis.html.  
+-Replacing some of the placeholders with actual suggestions.  
+-Fixed a bug that caused the banner to not be in a fixed position, and dimensioned it reasonably.  

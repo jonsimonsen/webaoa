@@ -11,6 +11,7 @@ body {
   --contrast-color: #FC6;
   --link-color: #FFF; /*Default color of links/button text and their borders*/
   --select-color: #009; /*Default button color when hovering. Alt 009, 00F*/
+  --bgcolor: #999; /*Default background color. Alt. 999, CC9*/
   --sub-bgcolor: #CCC; /*Background color for subsections*/
 
   /*Margins, borders, paddings*/
@@ -30,16 +31,17 @@ body {
 }
 
 body {
-  background-color: #999; /*Alt. 999,CC9*/
   margin: var(--pads);
+  margin-top: 120px;    /*Make room for wrapper*/
   overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
+  background-color: var(--bgcolor); /*Alt. 999,CC9*/
 }
 
 h2 {
   margin: var(--big-pads);
 }
 
-p {
+p, li {
   margin: var(--big-pads);
 }
 
@@ -58,12 +60,21 @@ a:hover {
   background-color: var(--select-color);
 }
 
+ul {
+  list-style-position: inside;
+}
+
 hr {
   border: 1px solid var(--theme-color);
 }
 
 
 /*General styles (used for different kinds of things)*/
+
+/*To optionally remove debugging content from the document flow*/
+.debug {
+  display: none;
+}
 
 /*Provides box styling for information/descriptions/histories and similar.*/
 .storybox {
@@ -86,14 +97,28 @@ p.sign {
 /*Might want to look into bootstrap for easier customization*/
 
 #banner-wrapper {
-  width: 100%
+  border: var(--pads) solid var(--bgcolor);
   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;   /*Make sure that the banner covers other content.*/
   background-color: var(--theme-color);
 }
 
 #banner {
   display: flex;
   align-items: flex-end;
+}
+
+#banner a {
+  padding: 0;
+  border: 0;
+  margin: 0;
+}
+
+#banner a:hover {
+  border-color: transparent;
 }
 
 #banner img {
@@ -129,7 +154,7 @@ p.sign {
 /*Will need to retest if the image (or other content) is altered.*/
 
 .illustrasjon {
-  postion: relative;
+  /*margin-top: 100px;*/
 }
 
 .illustrasjon img {
@@ -138,17 +163,17 @@ p.sign {
 
 /*Text/button to be written on top of image*/
 .ill-text {
+  width: 100%;
   position: absolute;
   top: var(--imgtxt-offset); /*From top of page.*/
   text-align: center;
-  width: 100%;
-  z-index: 5; /*Didn't matter in current version (with Chrome), but leaving it in just in case*/
   color: var(--link-color); /*Change to some other var or value if necessary*/
 }
 
 .ill-text a {
   margin-top: 16px;
-  border-color: var(--link-color);
+  border-color: var(--contrast-color);
+  color: var(--contrast-color);
   display: inline-block;
   font-size: 20px;
   background-color: transparent;
@@ -227,7 +252,7 @@ p.story {   /*Using this generally with some potential modification might be don
 
 /*footer*/
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
-#footer {
+.footer {
   margin-top: 20px;
   border-top: 2px solid var(--theme-color);
   background-color: var(--sub-bgcolor);
@@ -239,11 +264,11 @@ p.story {   /*Using this generally with some potential modification might be don
   text-align: center;
 }not currently used*/
 
-#footer p {
+.footer p {
   text-align: center;
 }
 
-#footer .tlf {
+.footer .tlf {
   font-weight: bold;
 }
 
@@ -297,6 +322,7 @@ p.story {   /*Using this generally with some potential modification might be don
 #services .infotext {
   padding: 0px var(--big-pads);
   height: calc(var(--logo-width) - 32px);
+  width: 100%;
   overflow-y: auto;
 }
 
