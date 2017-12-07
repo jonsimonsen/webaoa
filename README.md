@@ -50,3 +50,5 @@ v0.4: Either refatoring/DRY or adding more pages and/or content to dreis.html
 -Starting by adding contact info to dreis.html.  
 -Replacing some of the placeholders with actual suggestions.  
 -Fixed a bug that caused the banner to not be in a fixed position, and dimensioned it reasonably.  
+-Made the logo into an image link to the home page.  
+-Added a debug class for hiding debugging elements (actually remove them from the flow).  

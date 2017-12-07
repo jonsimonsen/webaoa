@@ -114,16 +114,12 @@ p.sign {
 #banner a {
   padding: 0;
   border: 0;
-  margin: 0;
-}
-
-#banner a:hover {
-  border-color: transparent;
 }
 
 #banner img {
-  margin: var(--pads); /*As a margin between img and the next element*/
+  margin: var(--pads);    /*As a margin between img and the next element*/
   width: var(--logo-width);
+  display: flex;          /*Prevents extra bottom-padding for image link*/
 }
 
 /*navbar is part of the banner*/
