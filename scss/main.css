@@ -251,6 +251,7 @@ p.story {   /*Using this generally with some potential modification might be don
 .footer {
   margin-top: 20px;
   border-top: 2px solid var(--theme-color);
+  overflow: hidden;
   background-color: var(--sub-bgcolor);
 }
 
@@ -262,10 +263,27 @@ p.story {   /*Using this generally with some potential modification might be don
 
 .footer p {
   text-align: center;
+  clear: right;   /*Had to use this to force it below the facebook link*/
 }
 
 .footer .tlf {
   font-weight: bold;
+}
+
+.footer a.logo-link {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  margin: var(--pads);
+  float: right;
+  display: inline;
+}
+
+.footer .logo-link img{
+  margin: 2px;
+  width: 32px;
+  height: 32px;
+  display: flex;
 }
 
 
