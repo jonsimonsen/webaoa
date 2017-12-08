@@ -104,6 +104,7 @@ p.sign {
   right: 0;
   z-index: 99;   /*Make sure that the banner covers other content.*/
   background-color: var(--theme-color);
+  opacity: 0.95;
 }
 
 #banner {
@@ -340,7 +341,7 @@ p.story {   /*Using this generally with some potential modification might be don
   overflow-y: auto;
 }
 
-#services h4 {
+h4 {
   margin-top: var(--pads);
   margin-bottom: var(--big-pads);
   text-align: center;
