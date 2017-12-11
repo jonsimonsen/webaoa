@@ -104,7 +104,7 @@ p.sign {
   right: 0;
   z-index: 99;   /*Make sure that the banner covers other content.*/
   background-color: var(--theme-color);
-  opacity: 0.95;
+  /*opacity: 0.95;*/
 }
 
 #banner {
@@ -150,17 +150,15 @@ p.sign {
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 /*Will need to retest if the image (or other content) is altered.*/
 
-.illustrasjon {
-  /*margin-top: 100px;*/
-}
-
 .illustrasjon img {
-  width: 100%;
+  width: 100%;    /*Attempted to do this with block display, but that doesn't work on replaced elements (images).*/
+  min-height: 320px;  /*To align content if the image doesn't load correctly*/
+  background-color: var(--theme-color);
 }
 
 /*Text/button to be written on top of image*/
 .ill-text {
-  width: 100%;
+  width: 100%;    /*Not automatic when pos is absolute*/
   position: absolute;
   top: var(--imgtxt-offset); /*From top of page.*/
   text-align: center;
@@ -255,12 +253,6 @@ p.story {   /*Using this generally with some potential modification might be don
   overflow: hidden;
   background-color: var(--sub-bgcolor);
 }
-
-/*#footer img {
-  margin: 0 auto;
-  display: block;
-  text-align: center;
-}not currently used*/
 
 .footer p {
   text-align: center;
