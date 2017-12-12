@@ -79,11 +79,6 @@ hr {
 
 /*General styles (used for different kinds of things)*/
 
-/*To optionally remove debugging content from the document flow*/
-.debug {
-  display: none;
-}
-
 /*Provides box styling for information/descriptions/histories and similar.*/
 .storybox {
   border: 2px solid var(--theme-color);
@@ -338,4 +333,12 @@ p.story {   /*Using this generally with some potential modification might be don
 
 #services p {
   font-size: 16px;
+}
+
+
+/*Classes that need to override other classes*/
+
+/*To optionally remove debugging content from the document flow*/
+.debug {
+  display: none;
 }
