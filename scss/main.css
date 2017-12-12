@@ -313,7 +313,7 @@ p.story {   /*Using this generally with some potential modification might be don
   grid-gap: 10px;
 }
 
-#services .infocell {
+.infocell {   /*Not using id to prevent overriding the debug class*/
   display: flex;
   align-items: center;
 }
