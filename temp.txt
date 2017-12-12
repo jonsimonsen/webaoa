@@ -1,1 +1,5 @@
-no temp content currently
+TODOS:
+
+-Refactoring code (banner, footer, storylinks etc.).
+-Consider looking more closely at fonts.
+-Consider looking more closely at scss.

@@ -41,6 +41,14 @@ h2 {
   margin: var(--big-pads);
 }
 
+h4 {
+  margin-top: var(--pads);
+  margin-bottom: var(--big-pads);
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+}
+
 p, li {
   margin: var(--big-pads);
 }
@@ -265,11 +273,9 @@ p.story {   /*Using this generally with some potential modification might be don
 
 .footer a.logo-link {
   padding: 0;
-  border: 0;
   border-radius: 0;
   margin: var(--pads);
   float: right;
-  display: inline;
 }
 
 .footer .logo-link img{
@@ -307,6 +313,7 @@ p.story {   /*Using this generally with some potential modification might be don
 /*services styling*/
 #services {
   border-spacing: 5px;
+  width: 100%;
 }
 
 #services .imgcell img {
@@ -331,14 +338,6 @@ p.story {   /*Using this generally with some potential modification might be don
   height: calc(var(--logo-width) - 32px);
   width: 100%;
   overflow-y: auto;
-}
-
-h4 {
-  margin-top: var(--pads);
-  margin-bottom: var(--big-pads);
-  text-align: center;
-  font-size: 18px;
-  color: #666;
 }
 
 #services p {
