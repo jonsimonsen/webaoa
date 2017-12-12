@@ -81,7 +81,7 @@ hr {
 
 /*To optionally remove debugging content from the document flow*/
 .debug {
-  display: none;
+  /*display: none;*/
 }
 
 /*Provides box styling for information/descriptions/histories and similar.*/
@@ -312,32 +312,28 @@ p.story {   /*Using this generally with some potential modification might be don
 
 /*services styling*/
 #services {
-  border-spacing: 5px;
-  width: 100%;
-}
-
-#services .imgcell img {
-  border: 2px solid var(--theme-color);
-  width: var(--logo-width);
-  height: var(--logo-width);
-  /*background-color: var(--contrast-color); Uncomment to test that there is no padding*/
+  margin: 5px;
+  display: grid;
+  grid-template: calc(var(--logo-width) + 4px) / calc(var(--logo-width) + 4px) 1fr;
+  grid-gap: 10px;
 }
 
 #services .infocell {
-  vertical-align: top;
-}
-
-#services .info-wrapper {
-  height: var(--logo-width);
   display: flex;
   align-items: center;
 }
 
 #services .infotext {
   padding: 0px var(--big-pads);
-  height: calc(var(--logo-width) - 32px);
   width: 100%;
+  height: calc(var(--logo-width) - 32px);
   overflow-y: auto;
+}
+
+#services img {
+  width: var(--logo-width);
+  height: var(--logo-width);
+  display: flex;
 }
 
 #services p {
