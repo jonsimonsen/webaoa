@@ -81,7 +81,7 @@ hr {
 
 /*To optionally remove debugging content from the document flow*/
 .debug {
-  /*display: none;*/
+  display: none;
 }
 
 /*Provides box styling for information/descriptions/histories and similar.*/
