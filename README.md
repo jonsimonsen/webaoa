@@ -63,3 +63,6 @@ v0.4: Either refatoring/DRY or adding more pages and/or content to dreis.html
 
 v0.45: Planning to use bootstrap for some content.  
 -Under development...  
+-Since the bootstrap styles tend to override the existing styles, bootstrap might not be the next step after all. In fact, plans of using bootstrap have been scrapped for now.  
+-Changed the absolutely positioned image text to be centered inside the image by adjusting it to the right and making the parent div a flexbox.  
+-Made an invisible element (p.usynlig) to adjust the position of image text and other elements.  

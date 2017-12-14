@@ -85,6 +85,11 @@ hr {
   background-color: var(--contrast-color);
 }
 
+/*Used above or below other content to change its position*/
+p.usynlig {
+  visibility: hidden;
+}
+
 /*General signature*/
 p.sign {
   text-align: right;
@@ -153,17 +158,22 @@ p.sign {
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 /*Will need to retest if the image (or other content) is altered.*/
 
+.illustrasjon {
+  display: flex;
+  align-items: center;
+}
+
 .illustrasjon img {
   width: 100%;    /*Attempted to do this with block display, but that doesn't work on replaced elements (images).*/
-  min-height: 320px;  /*To align content if the image doesn't load correctly*/
+  min-height: 160px;  /*To align content if the image doesn't load correctly*/
   background-color: var(--theme-color);
 }
 
 /*Text/button to be written on top of image*/
 .ill-text {
-  width: 100%;    /*Not automatic when pos is absolute*/
   position: absolute;
-  top: var(--imgtxt-offset); /*From top of page.*/
+  width: 100%;    /*Not automatic when pos is absolute*/
+  right: 0px;   /*Prevents the element from flowing outside the body margins.*/
   text-align: center;
   color: var(--link-color); /*Change to some other var or value if necessary*/
 }
