@@ -1,12 +1,19 @@
 # webaoa
 Using my repo for these files for now. The project owner is Tromsø kommune.  
-A different solution for version control should probably be implemented before the scope of the project becomes too large.
+A different solution for version control should probably be implemented before the scope of the project becomes too large.  
 
-pre-versions:  
+# browser compatibility
+-Chrome  
+-Firefox (seems to give about the same result as Chrome)  
+-Early versions of Edge yields poor layout. Should presumably be fixable by updating Windows.  
+-Internet Explorer does not support the CSS syntax used, and there is no current plans to make the site compatible with IE.  
+
+# pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
 -Website files will be added, but no particular setup is currently planned.  
 -Moved local git folder. Minor change in index.html.  
 
+# version history:
 v0.1: Have a decent-looking site. The following things to consider:  
 -Make images into links.  
 -Having some content that is static across the site (banner- and footer elements).  
@@ -53,3 +60,6 @@ v0.4: Either refatoring/DRY or adding more pages and/or content to dreis.html
 -Made the logo into an image link to the home page.  Added an image link to facebook.  
 -Made a (so far) sketchy page for activities (aktiv.html).  
 -Added a debug class for hiding debugging elements (actually remove them from the flow).  
+
+v0.45: Planning to use bootstrap for some content.  
+-Under development...  
