@@ -66,3 +66,6 @@ v0.45: Planning to use bootstrap for some content.
 -Since the bootstrap styles tend to override the existing styles, bootstrap might not be the next step after all. In fact, plans of using bootstrap have been scrapped for now.  
 -Changed the absolutely positioned image text to be centered inside the image by adjusting it to the right and making the parent div a flexbox.  
 -Made an invisible element (p.usynlig) to adjust the position of image text and other elements.  
+-Refactor to use sections where appropriate.  
+-Went back to using bootstrap by using a class on body elements and giving links high enough specificity not to be overridden by Bootstrap.  
+-Fixed the visibility of image text and links by giving them an opaque background instead of a transparent one.  
