@@ -1,3 +1,5 @@
+/*@media only screen and (max-width: 480px){css}*/
+
 /*For now, this will just be a regular css-file.*/
 
 
@@ -41,6 +43,12 @@ body.base {
 
 .base h2 {
   margin: var(--big-pads);
+}
+
+@media only screen and (max-width: 600px) {
+  .base h2 {
+    font-size: 24px;
+  }
 }
 
 .base h4 {
@@ -100,6 +108,17 @@ p.sign {
   font-style: italic;
 }
 
+/*For causing line breaks at small screen widths.*/
+span.newline {
+  display: none;
+}
+
+@media only screen and (max-width: 600px) {
+  span.newline {
+    display: inline;
+  }
+}
+
 
 /*home page styling/*
 
@@ -155,6 +174,23 @@ p.sign {
   color: var(--select-color);
 }
 
+@media only screen and (max-width: 600px) {
+  #navbar {
+    display: block;
+    margin-top: var(--pads);
+    margin-bottom: var(--pads);
+  }
+
+  #navbar a {
+    padding: 0;
+    margin-top: 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1;
+    display: block;
+  }
+}
+
 /*illustrasjon*/
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 /*Will need to retest if the image (or other content) is altered.*/
@@ -176,7 +212,6 @@ p.sign {
   width: 100%;    /*Not automatic when pos is absolute*/
   right: 0px;   /*Prevents the element from flowing outside the body margins.*/
   text-align: center;
-  /*color: var(--link-color);*/ /*Change to some other var or value if necessary*/
 }
 
 .ill-link {
@@ -207,6 +242,12 @@ p.sign {
   opacity: 0.5;
 }
 
+@media only screen and (max-width: 600px) {
+  .ill-text h3 {
+    font-size: 20px;
+  }
+}
+
 /*info*/
 /*221117: Works well with sizes (450, 1360) and probably somewhat smaller ones as well.*/
 .info {
@@ -226,6 +267,14 @@ p.sign {
   padding: 30px;
   border-radius: 20px;
   font-size: 40px;
+}
+
+@media only screen and (max-width: 600px) {
+  .options a {
+    padding: 18px;
+    border-radius: 12px;
+    font-size: 24px;
+  }
 }
 
 /*Stories from users*/
@@ -278,6 +327,20 @@ p.story {   /*Using this generally with some potential modification might be don
   z-index: 10;
 }
 
+@media only screen and (max-width: 600px) {
+  .stories {
+    grid-template: 1fr 3fr / 1fr;
+  }
+
+  .stories h2 {
+    grid-column: 1 / 2;
+  }
+
+  p.story {
+    font-size: 18px;
+  }
+}
+
 /*footer*/
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
 .footer {
@@ -308,6 +371,13 @@ p.story {   /*Using this generally with some potential modification might be don
   width: 32px;
   height: 32px;
   display: flex;
+}
+
+
+@media only screen and (max-width: 600px) {
+  .sep {
+    visibility: hidden;
+  }
 }
 
 
