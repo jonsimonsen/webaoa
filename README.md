@@ -62,7 +62,6 @@ v0.4: Either refatoring/DRY or adding more pages and/or content to dreis.html
 -Added a debug class for hiding debugging elements (actually remove them from the flow).  
 
 v0.45: Planning to use bootstrap for some content.  
--Under development...  
 -Since the bootstrap styles tend to override the existing styles, bootstrap might not be the next step after all. In fact, plans of using bootstrap have been scrapped for now.  
 -Changed the absolutely positioned image text to be centered inside the image by adjusting it to the right and making the parent div a flexbox.  
 -Made an invisible element (p.usynlig) to adjust the position of image text and other elements.  
@@ -71,3 +70,6 @@ v0.45: Planning to use bootstrap for some content.
 -Fixed the visibility of image text and links by giving them an opaque background instead of a transparent one.  
 -Fixed grids to include a header and more easily accept additional items (getting the same height as the previous ones).  
 -Changed css rules for browser widths below 600px. Seems ok except that the images for DREIS services have been removed completely in small browsers.  
+
+v0.5: Planning to experiment with JQuery.  
+-Under development...  
