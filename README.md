@@ -70,4 +70,4 @@ v0.45: Planning to use bootstrap for some content.
 -Went back to using bootstrap by using a class on body elements and giving links high enough specificity not to be overridden by Bootstrap.  
 -Fixed the visibility of image text and links by giving them an opaque background instead of a transparent one.  
 -Fixed grids to include a header and more easily accept additional items (getting the same height as the previous ones).  
--Changed css rules for browser widths below 600px.  
+-Changed css rules for browser widths below 600px. Seems ok except that the images for DREIS services have been removed completely in small browsers.  
