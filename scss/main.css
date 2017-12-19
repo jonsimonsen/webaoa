@@ -36,9 +36,15 @@ body {
 /*base is a generic class for page bodies to override bootstrap styles.*/
 body.base {
   margin: var(--pads);
-  margin-top: 120px;    /*Make room for wrapper*/
+  /*margin-top: 120px;*/    /*Make room for wrapper*/
   overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
   background-color: var(--bgcolor); /*Alt. 999,CC9*/
+}
+
+/*For navigating to the top of a page. Should be exactly high enough to contain the banner*/
+#top {
+  margin: 0;
+  height: 116px;
 }
 
 .base h2 {
@@ -108,6 +114,11 @@ p.sign {
   font-style: italic;
 }
 
+/*Unclickable links*/
+a.void {
+  pointer-events: none;
+}
+
 /*For causing line breaks at small screen widths.*/
 span.newline {
   display: none;
@@ -127,7 +138,7 @@ span.newline {
 /*Will need to retest if the navbar (or other content) is altered.*/
 /*Might want to look into bootstrap for easier customization*/
 
-#banner-wrapper {
+.banner-wrapper {
   border: var(--pads) solid var(--bgcolor);
   position: fixed;
   top: 0;
@@ -138,29 +149,29 @@ span.newline {
   /*opacity: 0.95;*/
 }
 
-#banner {
+.banner {
   display: flex;
   align-items: flex-end;
 }
 
-#banner a {
+.banner a {
   padding: 0;
   margin: 2px;  /*When added to border-width, the result should equal var(--pads)*/
 }
 
-#banner img {
+.banner img {
   width: var(--logo-width);
   display: flex;          /*Prevents extra bottom-padding for image link*/
 }
 
 /*navbar is part of the banner*/
-#navbar {
+.nav-top {
   margin-left: auto;
   margin-right: var(--pads);
   display: flex;
 }
 
-#navbar a {
+.nav-top a {
   padding: var(--pads);
   margin-bottom: var(--pads);
   margin-left: 1px;
@@ -170,18 +181,19 @@ span.newline {
   color: var(--theme-color);
 }
 
-#navbar a:hover {
+.nav-top a:hover {
   color: var(--select-color);
+  background-color: var(--contrast-color);
 }
 
 @media only screen and (max-width: 600px) {
-  #navbar {
+  .nav-top {
     display: block;
     margin-top: var(--pads);
     margin-bottom: var(--pads);
   }
 
-  #navbar a {
+  .nav-top a {
     padding: 0;
     margin-top: 2px;
     margin-bottom: 0;
