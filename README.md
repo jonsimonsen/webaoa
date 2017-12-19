@@ -72,4 +72,5 @@ v0.45: Planning to use bootstrap for some content.
 -Changed css rules for browser widths below 600px. Seems ok except that the images for DREIS services have been removed completely in small browsers.  
 
 v0.5: Planning to experiment with JQuery.  
--Under development...  
+-The user story links are now created by JQuery, using the custom linksrc attribute to store the address.  
+-Should probably look into Banner next.  
