@@ -16,7 +16,7 @@ $(document).ready( () => {
   /*Map with link address as key and link text as value*/
   let links = new Map();
   links.set("./index.html", "Hjem");
-  links.set("./dreis.html", "Arbeid");
+  links.set("./arbeid.html", "Arbeid");
   links.set("./aktiv.html", "Aktivitet");
 
   let total = START;

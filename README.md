@@ -76,3 +76,4 @@ v0.5: Planning to experiment with JQuery.
 -The user story links are now created by JQuery, using the custom linksrc attribute to store the address.  
 -Renamed the user pages in accordance with simplicity and policy.  
 -Should probably look into Banner next.  
+-Made pages for DagsJobben(DJ) and restructured the rest to link via the new page arbeid.html to DREIS or DJ.  

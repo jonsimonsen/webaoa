@@ -3,6 +3,4 @@ TODOS:
 -Refactoring code (banner, footer, storylinks etc.).
 -Consider looking more closely at fonts.
 -Consider looking more closely at scss.
-
-https://stackoverflow.com/questions/406192/get-current-url-in-javascript
-https://stackoverflow.com/questions/10276133/how-to-disable-html-links
+-possibly making a dynamic div that can alternate between DREIS and DagsJobben.
