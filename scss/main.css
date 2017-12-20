@@ -462,6 +462,19 @@ p.story {   /*Using this generally with some potential modification might be don
   }
 }
 
+/*Jobs styling*/
+.jobs ul {
+  display: inline-block;
+}
+
+.jobs li {
+  /*display: block;*/
+}
+
+.jobs img {
+  max-height: 200px;
+  float: right;
+}
 
 /*Classes that need to override other classes*/
 
