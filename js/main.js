@@ -40,6 +40,9 @@ $(document).ready( () => {
   else if (window.location.pathname.endsWith("/dreis.html")) {
     total += '<a href="#con_dreis">Kontakt</a>';
   }
+  else if (window.location.pathname.endsWith("/dagsjobb.html")) {
+    total += '<a href="#con_djob">Kontakt</a>';
+  }
   else {
     total += '<a href="#" class="unlink">Kontakt</a>';
   }
