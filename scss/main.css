@@ -36,15 +36,9 @@ body {
 /*base is a generic class for page bodies to override bootstrap styles.*/
 body.base {
   margin: var(--pads);
-  /*margin-top: 120px;*/    /*Make room for wrapper*/
+  margin-top: 120px;    /*Make room for wrapper*/
   overflow-x: hidden;     /*Prevent scroll-bar and remove the overflowing content. Possible issue at small screen widths.*/
   background-color: var(--bgcolor); /*Alt. 999,CC9*/
-}
-
-/*For navigating to the top of a page. Should be exactly high enough to contain the banner*/
-#top {
-  margin: 0;
-  height: 116px;
 }
 
 .base h2 {
@@ -112,11 +106,6 @@ body.base {
 p.sign {
   text-align: right;
   font-style: italic;
-}
-
-/*Unclickable links*/
-a.void {
-  pointer-events: none;
 }
 
 /*For causing line breaks at small screen widths.*/
@@ -479,4 +468,10 @@ p.story {   /*Using this generally with some potential modification might be don
 /*To optionally remove debugging content from the document flow*/
 .debug {
   display: none;
+}
+
+/*Unclickable links*/
+a.unlink {
+  background-color: #CC9;
+  pointer-events: none;
 }
