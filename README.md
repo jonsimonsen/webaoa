@@ -77,3 +77,7 @@ v0.5: Planning to experiment with JQuery.
 -Created footer with JQuery. A potential development is to put all social media icons inside a div.  
 -Renamed the user pages in accordance with simplicity and policy.  
 -Made pages for DagsJobben(DJ) and restructured the rest to link via the new page arbeid.html to DREIS or DJ.  
+
+v0.51: Possibly the last version in 2017. Has slightly more updated info about DREIS (still needs some more input before it's in a reasonably publishable state).  
+
+TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
