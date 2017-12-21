@@ -1,7 +1,7 @@
 /*Generate html for storylinks for user stories*/
 $(document).ready( () => {
 
-  /*Banner*/
+  /*** Banner ***/
 
   /*Site wide content*/
   const START = `<div class="banner">
@@ -51,6 +51,28 @@ $(document).ready( () => {
 
   /*Append the banner to its wrapper div*/
   $(".banner-wrapper").append(total);
+
+
+  /*** Footer ***/
+
+  /*Add header*/
+  $(".footer").append('<h2>Kontakt</h2>');
+
+  /*If a facebook attribute exists, add a link*/
+  let fadr = $(".footer").attr("fb");
+
+  if ((typeof fadr !== typeof undefined) && fadr !== false) {
+    $(".footer").append('<a href="' + fadr + '" class="logo-link">');
+    $(".footer").append('  <img src="Bilder/fb_logo.jpg" alt="Enheten sin Facebook-side">');
+    $(".footer").append('</a>');
+  }
+
+  /*Add contact info*/
+  const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>'
+
+  $(".footer").append('<p>' + $(".footer").attr("adr") + SEPS +
+  $(".footer").attr("padr") + SEPS + '<span class="tlf">Telefon:</span> ' +
+  $(".footer").attr("tel") + "</p>");
 
   /*Add arrow symbol to each storylink*/
   $(".storylink").append('<div class="arrow"></div>');
