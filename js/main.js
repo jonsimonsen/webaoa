@@ -1,6 +1,20 @@
 /*Generate html for storylinks for user stories*/
 $(document).ready( () => {
 
+  /*** Identify the current page ***/
+  let page = "";
+  let path = window.location.pathname;
+
+  if (path.endsWith("/index.html")) {
+    page = "Arbeid og Aktivitet";
+  }
+  else if (path.endsWith("/dreis.html")) {
+    page = "DREIS";
+  }
+  else if (path.endsWith("/dagsjobb.html")) {
+    page = "DagsJobben";
+  }
+
   /*** Banner ***/
 
   /*Site wide content*/
@@ -34,13 +48,13 @@ $(document).ready( () => {
   });
 
   /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  if(window.location.pathname.endsWith("/index.html")) {
+  if(page === "Arbeid og Aktivitet") {
     total += '<a href="#con_aoa">Kontakt</a>';
   }
-  else if (window.location.pathname.endsWith("/dreis.html")) {
+  else if (page === "DREIS") {
     total += '<a href="#con_dreis">Kontakt</a>';
   }
-  else if (window.location.pathname.endsWith("/dagsjobb.html")) {
+  else if (page === "DagsJobben") {
     total += '<a href="#con_djob">Kontakt</a>';
   }
   else {
@@ -62,9 +76,9 @@ $(document).ready( () => {
   let fadr = $(".footer").attr("fb");
 
   if ((typeof fadr !== typeof undefined) && fadr !== false) {
-    $(".footer").append('<a href="' + fadr + '" class="logo-link">');
-    $(".footer").append('  <img src="Bilder/fb_logo.jpg" alt="Enheten sin Facebook-side">');
-    $(".footer").append('</a>');
+    $(".footer").append('<a href="' + fadr + `" class="logo-link">
+      <img src="Bilder/fb_logo.jpg" alt="` + page + ` på Facebook">
+    </a>`);
   }
 
   /*Add contact info*/
