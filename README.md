@@ -72,8 +72,8 @@ v0.45: Planning to use bootstrap for some content.
 -Changed css rules for browser widths below 600px. Seems ok except that the images for DREIS services have been removed completely in small browsers.  
 
 v0.5: Planning to experiment with JQuery.  
--Under development...  
 -The user story links are now created by JQuery, using the custom linksrc attribute to store the address.  
+-Created banner with JQuery. The current version has some html in the JS file. This is probably not best.  
+-Created footer with JQuery. A potential development is to put all social media icons inside a div.  
 -Renamed the user pages in accordance with simplicity and policy.  
--Creating banner with JQuery. The current version has some html in the JS file. This is probably not best.  
 -Made pages for DagsJobben(DJ) and restructured the rest to link via the new page arbeid.html to DREIS or DJ.  

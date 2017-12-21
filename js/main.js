@@ -66,7 +66,6 @@ $(document).ready( () => {
   /*Append the banner to its wrapper div*/
   $(".banner-wrapper").append(total);
 
-
   /*** Footer ***/
 
   /*Add header*/
@@ -88,6 +87,8 @@ $(document).ready( () => {
   $(".footer").attr("padr") + SEPS + '<span class="tlf">Telefon:</span> ' +
   $(".footer").attr("tel") + "</p>");
 
+  /*** Story link creation ***/
+
   /*Add arrow symbol to each storylink*/
   $(".storylink").append('<div class="arrow"></div>');
 
@@ -95,4 +96,5 @@ $(document).ready( () => {
   $(".storylink").each( function(index) {
     $(this).append('<a href=' + $(this).attr("linksrc") + '>Les mer...</a>');
   });
+
 });
