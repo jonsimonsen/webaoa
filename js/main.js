@@ -84,8 +84,8 @@ $(document).ready( () => {
   const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>'
 
   $(".footer").append('<p>' + $(".footer").attr("adr") + SEPS +
-  $(".footer").attr("padr") + SEPS + '<span class="tlf">Telefon:</span> ' +
-  $(".footer").attr("tel") + "</p>");
+  $(".footer").attr("padr") + SEPS + 'Telefon: <span class="tlf">' +
+  $(".footer").attr("tel") + "</span></p>");
 
   /*** Story link creation ***/
 
