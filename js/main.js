@@ -17,7 +17,7 @@ $(document).ready( () => {
 
   /*** Banner ***/
 
-  /*Site wide content*/
+  /*Site wide content
   const START = `<div class="banner">
   <a href="./index.html">
     <img src="Bilder/logo_aoa.jpg" alt="Logoen til Arbeid og Aktivitet">
@@ -25,7 +25,7 @@ $(document).ready( () => {
   <nav class="nav-top">`;
 
   const END = `</nav>
-</div>`;
+</div>`;*/
 
   /*Map with link address as key and link text as value*/
   let links = new Map();
@@ -33,38 +33,56 @@ $(document).ready( () => {
   links.set("./arbeid.html", "Arbeid");
   links.set("./aktiv.html", "Aktivitet");
 
-  let total = START;
+  /*let total = START;*/
+  let addendum = "";
   let contact = "";
+  $(".banner-wrapper").load("./bannerz.html", function() {
+    alert("Error");
+  });
 
   /*Add links, but give self-pointing links class unlink (not clickable)*/
-  links.forEach(function(text, address) {
-    total += '<a href="' + address;
+  /*links.forEach(function(text, address) {
+    addendum = '<a href="' + address;
+
+    if(window.location.pathname.endsWith(address.slice(1))) {
+      addendum += '" class="unlink';
+    }
+
+    addendum += '">' + text + '</a>';
+
+    $("nav-top").append(addendum);*/
+
+    /*total += '<a href="' + address;
 
     if(window.location.pathname.endsWith(address.slice(1))) {
       total += '" class="unlink';
     }
 
-    total += '">' + text + '</a>';
-  });
+    total += '">' + text + '</a>';*/
+  /*});*/
 
   /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  if(page === "Arbeid og Aktivitet") {
-    total += '<a href="#con_aoa">Kontakt</a>';
-  }
+  /*if(page === "Arbeid og Aktivitet") {
+    $(".nav-top").append('<a href="#con_aoa">Kontakt</a>');*/
+    /*total += '<a href="#con_aoa">Kontakt</a>';*/
+  /*}
   else if (page === "DREIS") {
-    total += '<a href="#con_dreis">Kontakt</a>';
-  }
+    $(".nav-top").append('<a href="#con_dreis">Kontakt</a>');*/
+    /*total += '<a href="#con_dreis">Kontakt</a>';*/
+  /*}
   else if (page === "DagsJobben") {
-    total += '<a href="#con_djob">Kontakt</a>';
-  }
+    $(".nav-top").append('<a href="#con_djob">Kontakt</a>');*/
+    /*total += '<a href="#con_djob">Kontakt</a>';*/
+  /*}
   else {
-    total += '<a href="#" class="unlink">Kontakt</a>';
-  }
+    $(".nav-top").append('<a href="#" class="unlink">Kontakt</a>');*/
+    /*total += '<a href="#" class="unlink">Kontakt</a>';*/
+  /*}*/
 
-  total += END;
+  /*total += END;*/
 
   /*Append the banner to its wrapper div*/
-  $(".banner-wrapper").append(total);
+  /*$(".banner-wrapper").append(total);*/
 
   /*** Footer ***/
 
