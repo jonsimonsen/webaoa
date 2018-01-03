@@ -84,5 +84,8 @@ v0.55: Expand the activity page, and possibly the job pages.
 -Under development...  
 -Added images and description to the different activity centers.  
 -Made a slight change in how phone numbers are displayed.  
+-Changed the JS to read additional html from files. Does this for the banner so far.  
+-Firefox still works fine, but Chrome must be started from cmd (start chrome --allow-file-access-from-files).  
+-Planning to make some changes to how info is passed from html files to JS files.  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  

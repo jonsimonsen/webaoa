@@ -1,3 +1,25 @@
+/*Function for reading a file (Should use a different one when going live)*/
+function readFile(file){
+  let rawFile = new XMLHttpRequest();
+  let allText = "";
+  rawFile.open("GET", file, false);
+  rawFile.onreadystatechange = function () {
+    if(rawFile.readyState === 4) {
+      if(rawFile.status === 200 || rawFile.status == 0) {
+        allText = rawFile.responseText;
+      }
+      else {
+        allText = "";
+      }
+    }
+    else {
+      allText = "";
+    }
+  }
+  rawFile.send(null);
+  return allText;
+}
+
 /*Generate html for storylinks for user stories*/
 $(document).ready( () => {
 
@@ -17,31 +39,21 @@ $(document).ready( () => {
 
   /*** Banner ***/
 
-  /*Site wide content
-  const START = `<div class="banner">
-  <a href="./index.html">
-    <img src="Bilder/logo_aoa.jpg" alt="Logoen til Arbeid og Aktivitet">
-  </a>
-  <nav class="nav-top">`;
-
-  const END = `</nav>
-</div>`;*/
-
   /*Map with link address as key and link text as value*/
   let links = new Map();
   links.set("./index.html", "Hjem");
   links.set("./arbeid.html", "Arbeid");
   links.set("./aktiv.html", "Aktivitet");
 
-  /*let total = START;*/
   let addendum = "";
   let contact = "";
-  $(".banner-wrapper").load("./bannerz.html", function() {
-    alert("Error");
-  });
+  console.log("before");
+  let bannerCode = readFile("./bannerz.html");
+  $(".banner-wrapper").append(bannerCode);
+  console.log("after");
 
   /*Add links, but give self-pointing links class unlink (not clickable)*/
-  /*links.forEach(function(text, address) {
+  links.forEach(function(text, address) {
     addendum = '<a href="' + address;
 
     if(window.location.pathname.endsWith(address.slice(1))) {
@@ -50,43 +62,26 @@ $(document).ready( () => {
 
     addendum += '">' + text + '</a>';
 
-    $("nav-top").append(addendum);*/
-
-    /*total += '<a href="' + address;
-
-    if(window.location.pathname.endsWith(address.slice(1))) {
-      total += '" class="unlink';
-    }
-
-    total += '">' + text + '</a>';*/
-  /*});*/
+    $(".nav-top").append(addendum);
+  });
 
   /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  /*if(page === "Arbeid og Aktivitet") {
-    $(".nav-top").append('<a href="#con_aoa">Kontakt</a>');*/
-    /*total += '<a href="#con_aoa">Kontakt</a>';*/
-  /*}
+  if(page === "Arbeid og Aktivitet") {
+    $(".nav-top").append('<a href="#con_aoa">Kontakt</a>');
+  }
   else if (page === "DREIS") {
-    $(".nav-top").append('<a href="#con_dreis">Kontakt</a>');*/
-    /*total += '<a href="#con_dreis">Kontakt</a>';*/
-  /*}
+    $(".nav-top").append('<a href="#con_dreis">Kontakt</a>');
+  }
   else if (page === "DagsJobben") {
-    $(".nav-top").append('<a href="#con_djob">Kontakt</a>');*/
-    /*total += '<a href="#con_djob">Kontakt</a>';*/
-  /*}
+    $(".nav-top").append('<a href="#con_djob">Kontakt</a>');
+  }
   else {
-    $(".nav-top").append('<a href="#" class="unlink">Kontakt</a>');*/
-    /*total += '<a href="#" class="unlink">Kontakt</a>';*/
-  /*}*/
-
-  /*total += END;*/
-
-  /*Append the banner to its wrapper div*/
-  /*$(".banner-wrapper").append(total);*/
+    $(".nav-top").append('<a href="#" class="unlink">Kontakt</a>');
+  }
 
   /*** Footer ***/
 
-  /*Add header*/
+  /*Add footer*/
   $(".footer").append('<h2>Kontakt</h2>');
 
   /*If a facebook attribute exists, add a link*/
