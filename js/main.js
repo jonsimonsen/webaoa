@@ -48,7 +48,7 @@ $(document).ready( () => {
   let addendum = "";
   let contact = "";
   console.log("before");
-  let bannerCode = readFile("./bannerz.html");
+  let bannerCode = readFile("./banner.html");
   $(".banner-wrapper").append(bannerCode);
   console.log("after");
 
