@@ -1,4 +1,4 @@
-/*Function for reading a file (Should use a different one when going live)*/
+/*Function for reading a file (Should use a different one/load when going live)*/
 function readFile(file){
   let rawFile = new XMLHttpRequest();
   let allText = "";
@@ -8,12 +8,6 @@ function readFile(file){
       if(rawFile.status === 200 || rawFile.status == 0) {
         allText = rawFile.responseText;
       }
-      else {
-        allText = "";
-      }
-    }
-    else {
-      allText = "";
     }
   }
   rawFile.send(null);
@@ -39,6 +33,10 @@ $(document).ready( () => {
 
   /*** Banner ***/
 
+  /*Read banner file and append it to its wrapper div.*/
+  let bannerCode = readFile("./banner.html");
+  $(".banner-wrapper").append(bannerCode);
+
   /*Map with link address as key and link text as value*/
   let links = new Map();
   links.set("./index.html", "Hjem");
@@ -46,11 +44,6 @@ $(document).ready( () => {
   links.set("./aktiv.html", "Aktivitet");
 
   let addendum = "";
-  let contact = "";
-  console.log("before");
-  let bannerCode = readFile("./banner.html");
-  $(".banner-wrapper").append(bannerCode);
-  console.log("after");
 
   /*Add links, but give self-pointing links class unlink (not clickable)*/
   links.forEach(function(text, address) {
@@ -66,7 +59,17 @@ $(document).ready( () => {
   });
 
   /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  if(page === "Arbeid og Aktivitet") {
+  let contact = "";
+  if($(".footer")[0]) {
+    contact = $(".footer").attr("id");
+  }
+  else {
+    contact = '" class="unlink';
+  }
+
+  $(".nav-top").append('<a href="#' + contact + '">Kontakt</a>');
+
+  /*if(page === "Arbeid og Aktivitet") {
     $(".nav-top").append('<a href="#con_aoa">Kontakt</a>');
   }
   else if (page === "DREIS") {
@@ -77,7 +80,7 @@ $(document).ready( () => {
   }
   else {
     $(".nav-top").append('<a href="#" class="unlink">Kontakt</a>');
-  }
+  }*/
 
   /*** Footer ***/
 
