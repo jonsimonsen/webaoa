@@ -69,19 +69,6 @@ $(document).ready( () => {
 
   $(".nav-top").append('<a href="#' + contact + '">Kontakt</a>');
 
-  /*if(page === "Arbeid og Aktivitet") {
-    $(".nav-top").append('<a href="#con_aoa">Kontakt</a>');
-  }
-  else if (page === "DREIS") {
-    $(".nav-top").append('<a href="#con_dreis">Kontakt</a>');
-  }
-  else if (page === "DagsJobben") {
-    $(".nav-top").append('<a href="#con_djob">Kontakt</a>');
-  }
-  else {
-    $(".nav-top").append('<a href="#" class="unlink">Kontakt</a>');
-  }*/
-
   /*** Footer ***/
 
   /*Add footer*/
