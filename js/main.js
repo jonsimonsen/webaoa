@@ -17,20 +17,6 @@ function readFile(file){
 /*Generate html for storylinks for user stories*/
 $(document).ready( () => {
 
-  /*** Identify the current page ***/
-  let page = "";
-  let path = window.location.pathname;
-
-  if (path.endsWith("/index.html")) {
-    page = "Arbeid og Aktivitet";
-  }
-  else if (path.endsWith("/dreis.html")) {
-    page = "DREIS";
-  }
-  else if (path.endsWith("/dagsjobb.html")) {
-    page = "DagsJobben";
-  }
-
   /*** Banner ***/
 
   /*Read banner file and append it to its wrapper div.*/
@@ -72,23 +58,33 @@ $(document).ready( () => {
   /*** Footer ***/
 
   /*Add footer*/
-  $(".footer").append('<h2>Kontakt</h2>');
+  if($(".footer")[0]) {
+    let footerCode = readFile("./footer.html");
+    $(".footer").append(footerCode);
+    let fadr = $(".footer").attr("data-fb");
+
+    if ((typeof fadr !== typeof undefined) && fadr !== false) {
+      $(".socials").append('<a href="' + fadr + `" class="logo-link">
+        <img src="Bilder/fb_logo.jpg" alt="` + ` på Facebook">
+      </a>`);
+  }
+  /*$(".footer").append('<h2>Kontakt</h2>');*/
 
   /*If a facebook attribute exists, add a link*/
-  let fadr = $(".footer").attr("fb");
+  let fadr = $(".footer").attr("data-fb");
 
   if ((typeof fadr !== typeof undefined) && fadr !== false) {
     $(".footer").append('<a href="' + fadr + `" class="logo-link">
-      <img src="Bilder/fb_logo.jpg" alt="` + page + ` på Facebook">
+      <img src="Bilder/fb_logo.jpg" alt="` + ` på Facebook">
     </a>`);
   }
 
   /*Add contact info*/
   const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>'
 
-  $(".footer").append('<p>' + $(".footer").attr("adr") + SEPS +
-  $(".footer").attr("padr") + SEPS + 'Telefon: <span class="tlf">' +
-  $(".footer").attr("tel") + "</span></p>");
+  $(".footer").append('<p>' + $(".footer").attr("data-adr") + SEPS +
+  $(".footer").attr("data-padr") + SEPS + 'Telefon: <span class="tlf">' +
+  $(".footer").attr("data-tel") + "</span></p>");
 
   /*** Story link creation ***/
 
