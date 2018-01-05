@@ -23,29 +23,52 @@ $(document).ready( () => {
   let bannerCode = readFile("./banner.html");
   $(".banner-wrapper").append(bannerCode);
 
-  /*Map with link address as key and link text as value*/
-  let links = new Map();
-  links.set("./index.html", "Hjem");
-  links.set("./arbeid.html", "Arbeid");
-  links.set("./aktiv.html", "Aktivitet");
+  let links = Array.from($(".nav-top").children());
+  console.log(links);
+  for(let i = 0; i < links.length; i++){
+    let target = $(links[i]).attr("href");
 
-  let addendum = "";
-
-  /*Add links, but give self-pointing links class unlink (not clickable)*/
-  links.forEach(function(text, address) {
-    addendum = '<a href="' + address;
-
-    if(window.location.pathname.endsWith(address.slice(1))) {
-      addendum += '" class="unlink';
+    if(typeof target !== typeof undefined && target !== false){
+      if(window.location.pathname.endsWith(target.slice(1))){
+        $(links[i]).addClass("unlink");
+      }
     }
+    else{
+      if($(".footer")[0]){
+        $(links[i]).attr("href", "#" + $(".footer").attr("id"));
+      }
+      else{
+        $(links[i]).attr("href", "#");
+        $(links[i]).addClass("unlink");
+      }
+    }
+  }
 
-    addendum += '">' + text + '</a>';
+  /*Give self-pointing links class unlink (not clickable)*/
+  /*Array.from($(".nav.top").children()).forEach(function(link) {
+    let target = link.attr("href");
+    console.log("a");
 
-    $(".nav-top").append(addendum);
-  });
+    if(typeof target !== typeof undefined && target !== false){
+      if(window.location.pathname.endsWith(target.slice(1))){
+        link.addClass("unlink");
+        console.log("ab");
+      }
+    }
+    else{
+      if($(".footer")[0]) {
+        link.attr("href", $(".footer").attr("id"));
+        console.log("aca");
+      }
+      else {*/
+        /*$(this).addClass("unlink");*/
+        /*console.log("acb");
+      }
+    }
+  });*/
 
   /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  let contact = "";
+  /*let contact = "";
   if($(".footer")[0]) {
     contact = $(".footer").attr("id");
   }
@@ -53,12 +76,12 @@ $(document).ready( () => {
     contact = '" class="unlink';
   }
 
-  $(".nav-top").append('<a href="#' + contact + '">Kontakt</a>');
+  $(".nav-top").append('<a href="#' + contact + '">Kontakt</a>');*/
 
   /*** Footer ***/
 
   /*Add footer*/
-  if($(".footer")[0]) {
+  /*if($(".footer")[0]) {
     let footerCode = readFile("./footer.html");
     $(".footer").append(footerCode);
     let fadr = $(".footer").attr("data-fb");
@@ -67,7 +90,7 @@ $(document).ready( () => {
       $(".socials").append('<a href="' + fadr + `" class="logo-link">
         <img src="Bilder/fb_logo.jpg" alt="` + ` på Facebook">
       </a>`);
-  }
+  }*/
   /*$(".footer").append('<h2>Kontakt</h2>');*/
 
   /*If a facebook attribute exists, add a link*/
