@@ -23,16 +23,16 @@ $(document).ready( () => {
   let bannerCode = readFile("./banner.html");
   $(".banner-wrapper").append(bannerCode);
 
-  let links = Array.from($(".nav-top").children());
+  let links = $(".nav-top").children();
 
   /*Add links to banner.*/
   for(let i = 0; i < links.length; i++){
-    let target = $(links[i]).attr("href");
+    let target = $(links).eq(i).attr("href");
 
     if(typeof target !== typeof undefined && target !== false){
       /*Give self-pointing links class unlink (not clickable).*/
       if(window.location.pathname.endsWith(target.slice(1))){
-        $(links[i]).addClass("unlink");
+        $(links).eq(i).addClass("unlink");
       }
     }
     else{
@@ -43,10 +43,10 @@ $(document).ready( () => {
         dest += $(".footer").attr("id");
       }
       else{
-        $(links[i]).addClass("unlink");
+        $(links).eq(i).addClass("unlink");
       }
 
-      $(links[i]).attr("href", dest);
+      $(links).eq(i).attr("href", dest);
     }
   }
 
@@ -83,12 +83,16 @@ $(document).ready( () => {
 
   /*** Story link creation ***/
 
-  /*Add arrow symbol to each storylink*/
-  $(".storylink").append('<div class="arrow"></div>');
+  /*Read storylink file and append it to the storylink divs*/
+  if($(".storylink")[0]){
+    let storyCode = readFile("./storylink.html");
+    $(".storylink").append(storyCode);
 
-  /*Add the actual link to each storylink by reading the linksrc attribute.*/
-  $(".storylink").each( function(index) {
-    $(this).append('<a href=' + $(this).attr("linksrc") + '>Les mer...</a>');
-  });
+    for(let i = 0; i < $(".storylink").length; i++){
+      /*eq is used to target a single tag of the storylink class and being able to use the selector methods on it*/
+      let dest = $(".storylink").eq(i).attr("data-src");
+      $(".storylink").eq(i).find("a").attr("href", dest);
+    }
+  }
 
 });
