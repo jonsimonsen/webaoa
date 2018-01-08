@@ -24,59 +24,31 @@ $(document).ready( () => {
   $(".banner-wrapper").append(bannerCode);
 
   let links = Array.from($(".nav-top").children());
-  console.log(links);
+
+  /*Add links to banner.*/
   for(let i = 0; i < links.length; i++){
     let target = $(links[i]).attr("href");
 
     if(typeof target !== typeof undefined && target !== false){
+      /*Give self-pointing links class unlink (not clickable).*/
       if(window.location.pathname.endsWith(target.slice(1))){
         $(links[i]).addClass("unlink");
       }
     }
     else{
+      /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
+      let dest = "#";
+
       if($(".footer")[0]){
-        $(links[i]).attr("href", "#" + $(".footer").attr("id"));
+        dest += $(".footer").attr("id");
       }
       else{
-        $(links[i]).attr("href", "#");
         $(links[i]).addClass("unlink");
       }
+
+      $(links[i]).attr("href", dest);
     }
   }
-
-  /*Give self-pointing links class unlink (not clickable)*/
-  /*Array.from($(".nav.top").children()).forEach(function(link) {
-    let target = link.attr("href");
-    console.log("a");
-
-    if(typeof target !== typeof undefined && target !== false){
-      if(window.location.pathname.endsWith(target.slice(1))){
-        link.addClass("unlink");
-        console.log("ab");
-      }
-    }
-    else{
-      if($(".footer")[0]) {
-        link.attr("href", $(".footer").attr("id"));
-        console.log("aca");
-      }
-      else {*/
-        /*$(this).addClass("unlink");*/
-        /*console.log("acb");
-      }
-    }
-  });*/
-
-  /*Add contact link. Should not be clickable if there is no contact info on the current page.*/
-  /*let contact = "";
-  if($(".footer")[0]) {
-    contact = $(".footer").attr("id");
-  }
-  else {
-    contact = '" class="unlink';
-  }
-
-  $(".nav-top").append('<a href="#' + contact + '">Kontakt</a>');*/
 
   /*** Footer ***/
 
@@ -103,7 +75,7 @@ $(document).ready( () => {
   }
 
   /*Add contact info*/
-  const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>'
+  const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>';
 
   $(".footer").append('<p>' + $(".footer").attr("data-adr") + SEPS +
   $(".footer").attr("data-padr") + SEPS + 'Telefon: <span class="tlf">' +
