@@ -14,6 +14,34 @@ function readFile(file){
   return allText;
 }
 
+/*Function for parsing a text. Returns the index of the last character of the first paragraph. The separator is a double newline.*/
+function parsePara(text){
+  let lines = text.split("\n");
+  let para = "";
+  let paras = [];
+
+  for(let i = 0; i < lines.length; i++){
+    if(lines[i] === ""){
+      if(para !== ""){
+        paras.push(para);
+      }
+      para = "";
+    }
+    else{
+      para += lines[i] + "\n";
+    }
+  }
+
+  if(para !== ""){
+    paras.push(para);
+  }
+
+  paras.forEach(function(graph) {
+    console.log(graph);
+    console.log("-");
+  });
+}
+
 /*Generate html for storylinks for user stories*/
 $(document).ready( () => {
 
@@ -90,5 +118,8 @@ $(document).ready( () => {
       $(".storylink").eq(i).find("a").attr("href", dest);
     }
   }
+
+  testy = readFile("./Info/alice.txt");
+  parsePara(testy);
 
 });
