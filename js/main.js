@@ -16,8 +16,20 @@ function readFile(file){
 
 /*Function for parsing a text. Returns the index of the last character of the first paragraph. The separator is a double newline.*/
 function parsePara(text){
-  let lines = text.split("\n");
-  let para = "";
+  /*Use the following in conjunction with test.txt to examine ASCII codes.*/
+  /*for(let i = 0; i < text.length; i++){
+    console.log(text.charCodeAt(i));
+  }*/
+
+  let lines = text.split("\r\n\r\n");
+
+  for(let i = lines.length - 1; i >= 0; i--){
+    if($.trim(lines[i]).length === 0){
+
+    }
+  }
+
+/*  let para = "";
   let paras = [];
 
   for(let i = 0; i < lines.length; i++){
@@ -39,7 +51,7 @@ function parsePara(text){
   paras.forEach(function(graph) {
     console.log(graph);
     console.log("-");
-  });
+  });*/
 }
 
 /*Generate html for storylinks for user stories*/
@@ -120,6 +132,11 @@ $(document).ready( () => {
   }
 
   testy = readFile("./Info/alice.txt");
-  parsePara(testy);
+  let testz = testy.split("\r\n\r\n");
+  for(let i=0; i < testz.length; i++){
+    if($.trim(testz[i]).length > 0){
+      console.log(testz[i]);
+    }
+  }
 
 });
