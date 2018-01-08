@@ -53,33 +53,29 @@ $(document).ready( () => {
   /*** Footer ***/
 
   /*Add footer*/
-  /*if($(".footer")[0]) {
+  if($(".footer")[0]) {
+    /*Read footer file and append it to the footer div.*/
     let footerCode = readFile("./footer.html");
     $(".footer").append(footerCode);
+
+    /*Add social media links (initially Facebook)*/
     let fadr = $(".footer").attr("data-fb");
 
     if ((typeof fadr !== typeof undefined) && fadr !== false) {
-      $(".socials").append('<a href="' + fadr + `" class="logo-link">
-        <img src="Bilder/fb_logo.jpg" alt="` + ` på Facebook">
-      </a>`);
-  }*/
-  /*$(".footer").append('<h2>Kontakt</h2>');*/
-
-  /*If a facebook attribute exists, add a link*/
-  let fadr = $(".footer").attr("data-fb");
-
-  if ((typeof fadr !== typeof undefined) && fadr !== false) {
-    $(".footer").append('<a href="' + fadr + `" class="logo-link">
-      <img src="Bilder/fb_logo.jpg" alt="` + ` på Facebook">
-    </a>`);
+      $(".fb-link").attr("href", fadr);
+      $(".fb-link").attr("alt", $(".footer").attr("data-avd") + " på Facebook");
+    }
+    else{
+      $(".fb-link").addClass("usynlig");
+    }
   }
 
   /*Add contact info*/
   const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>';
 
-  $(".footer").append('<p>' + $(".footer").attr("data-adr") + SEPS +
-  $(".footer").attr("data-padr") + SEPS + 'Telefon: <span class="tlf">' +
-  $(".footer").attr("data-tel") + "</span></p>");
+  $(".adr").append($(".footer").attr("data-adr") + SEPS);
+  $(".padr").append($(".footer").attr("data-padr") + SEPS);
+  $(".tlf").append($(".footer").attr("data-tel"));
 
   /*** Story link creation ***/
 

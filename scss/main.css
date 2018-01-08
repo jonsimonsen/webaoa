@@ -358,27 +358,32 @@ p.story {   /*Using this generally with some potential modification might be don
   clear: right;   /*Had to use this to force it below the facebook link*/
 }
 
-.footer a.logo-link {
-  padding: 0;
-  border-radius: 0;
-  margin: var(--pads);
-  float: right;
-}
-
-.footer .logo-link img{
-  margin: 2px;
-  width: 32px;
-  height: 32px;
-  display: flex;
-}
-
-
 @media only screen and (max-width: 600px) {
   .sep {
     visibility: hidden;
   }
 }
 
+.socials {
+  height: 64px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.socials a.fb-link {
+  padding: 0;
+  border-radius: 0;
+  margin: var(--pads);
+  float: right;
+}
+
+.socials a.fb-link img{
+  margin: 2px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+}
 
 /*Common sub-page styles*/
 

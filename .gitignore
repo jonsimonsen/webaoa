@@ -60,7 +60,7 @@ typings/
 
 # Project specific ignores
 Bilder/
-Info/
+Text/
 Skisser/
 #Ignoring until worthwhile content is available
 intern.html
