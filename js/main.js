@@ -113,13 +113,17 @@ $(document).ready( () => {
         let paragraphs = storyCode.split("\r\n\r\n");
 
         /*Add paragraphs to the html code*/
-        $(".employee").prepend("<p>" + paragraphs[0] + "</p>");
-        $(".employee").append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
+        $(".employee").eq(i).prepend("<p>" + paragraphs[0] + "</p>");
+        $(".employee").eq(i).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
       }
+      $(".employee").find("p").addClass("excerpt");
     }
 
     /*Make the last paragraph into a signature*/
-    $(".employee").children().last().addClass("sign");
+    $(".employee").each(function() {
+      $(this).children().last().removeClass("excerpt");
+      $(this).children().last().addClass("sign");
+    });
   }
 
   /*Home link creation*/

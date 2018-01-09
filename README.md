@@ -81,11 +81,13 @@ v0.5: Planning to experiment with JQuery.
 v0.51: Possibly the last version in 2017. Has slightly more updated info about DREIS (still needs some more input before it's in a reasonably publishable state).  
 
 v0.55: Expand the activity page, and possibly the job pages.  
--Under development...  
 -Added images and description to the different activity centers.  
 -Made a slight change in how phone numbers are displayed.  
 -Changed the JS to read additional html from files.  
 -Firefox still works fine, but Chrome must be started from cmd (start chrome --allow-file-access-from-files).  
--Look into using JS to read user stories from text files.  
+-Now using JS to read user stories from text files.  
+
+v0.56: Clean up the JS file, and try to incorporate more JS in arbeid.html.  
+-Under development...  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
