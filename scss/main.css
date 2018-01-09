@@ -393,21 +393,21 @@ p.story {   /*Using this generally with some potential modification might be don
   text-align: center;
 }
 
-/*Styling user pages*/
+/*Styling employee pages*/
 
-/*User feedback initially should also have a storybox class*/
-.user {
+/*Employee feedback initially should also have a storybox class*/
+.employee {
   margin-left: 20%;
   margin-right: 20%;
   padding: var(--big-pads);
 }
 
-.user img{
+.employee img{
   width: 100%;
 }
 
 @media only screen and (max-width: 600px) {
-  .user {
+  .employee {
     margin-left: 10%;
     margin-right: 10%;
   }

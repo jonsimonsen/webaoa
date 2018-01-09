@@ -121,8 +121,8 @@ $(document).ready( () => {
 
   /*Read storylink file and append it to the storylink divs*/
   if($(".storylink")[0]){
-    let storyCode = readFile("./storylink.html");
-    $(".storylink").append(storyCode);
+    let linkCode = readFile("./storylink.html");
+    $(".storylink").append(linkCode);
 
     for(let i = 0; i < $(".storylink").length; i++){
       /*eq is used to target a single tag of the storylink class and being able to use the selector methods on it*/
@@ -131,12 +131,21 @@ $(document).ready( () => {
     }
   }
 
-  testy = readFile("./Info/alice.txt");
-  let testz = testy.split("\r\n\r\n");
-  for(let i=0; i < testz.length; i++){
-    if($.trim(testz[i]).length > 0){
-      console.log(testz[i]);
+  /*User story creation*/
+  if($(".employee")[0]){
+    let storyCode = readFile("./Info/alice.txt");
+    let paragraphs = storycode.split("\r\n\r\n");
+
+    /*Add paragraphs to the html code*/
+    for(let i=0; i < paragraphs.length; i++){
+      if($.trim(paragraphs[i]).length > 0){
+        $(".employee").append("<p>" + paragraphs[i] + "</p>");
+        /*console.log(testz[i]);*/
+      }
     }
+
+    /*Make the last paragraph into a signature*/
+    $(".employee").children().last().addClass("sign");
   }
 
 });
