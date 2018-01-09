@@ -2,8 +2,16 @@
 Using my repo for these files for now. The project owner is Tromsø kommune.  
 A different solution for version control should probably be implemented before the scope of the project becomes too large.  
 
+At the start of the project, it was based on just html and css (scss was attempted, but is not being used anymore).  
+
+Relatively early, some machanism for global constants were considered. The decision was to use global attributes. These are not compatible with all browsers (especially outdated ones like IE).  
+
+Bootstrap is being imported, but the design has not been done with bootstrap in mind. Maybe it would be ok to not import it. Uncommenting to see the effects of Bootstrap is probably ok for aynone that is curious about this.  
+
+Around version 0.5, the project started using JavaScript and JQuery to prevent unnecessary code duplication and enable reading content from files. Note that a new function must probably be written for file reading before the site is published, since the current version isn't made with the online environment in mind.  
+
 # browser compatibility
--Chrome  
+-Chrome  (Versions prior to 0.55 work in Chrome. The current file reading function is not automatically allowed in Chrome. See the notes in the version history for details)
 -Firefox (seems to give about the same result as Chrome)  
 -Early versions of Edge yields poor layout. Should presumably be fixable by updating Windows.  
 -Internet Explorer does not support the CSS syntax used, and there is no current plans to make the site compatible with IE.  
