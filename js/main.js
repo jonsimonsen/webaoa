@@ -1,4 +1,5 @@
 /*Function for reading a file (Should use a different one/load when going live)*/
+/*https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
 function readFile(file){
   let rawFile = new XMLHttpRequest();
   let allText = "";
@@ -17,117 +18,123 @@ function readFile(file){
 /*Generate html for banners, footers and other page elements*/
 $(document).ready( () => {
 
+  /*** JQuery variables that are used multiple times below. ***/
+  /* Should consider testing that there are not multiple footers or hlinks on a single page. */
+  let $foot = $(".footer");
+  let $slinks = $(".storylink");
+  let $hlink = $(".home");
+  let $emps = $(".employee");
+
   /*** Banner ***/
 
   /*Read banner file and append it to its wrapper div.*/
   let bannerCode = readFile("./banner.html");
   $(".banner-wrapper").append(bannerCode);
 
-  let links = $(".nav-top").children();
+  $(".nav-top").children().each(function (){
+    let target = $(this).attr("href");
 
-  /*Add links to banner.*/
-  for(let i = 0; i < links.length; i++){
-    let target = $(links).eq(i).attr("href");
-
+    /*Give self-pointing links class unlink (not clickable).*/
     if(typeof target !== typeof undefined && target !== false){
-      /*Give self-pointing links class unlink (not clickable).*/
       if(window.location.pathname.endsWith(target.slice(1))){
-        $(links).eq(i).addClass("unlink");
+        $(this).addClass("unlink");
       }
     }
-    else{
-      /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
+    /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
+    else {
       let dest = "#";
 
-      if($(".footer")[0]){
-        dest += $(".footer").attr("id");
+      if($foot[0]){
+        dest += $foot.attr("id");
       }
       else{
-        $(links).eq(i).addClass("unlink");
+        $(this).addClass("unlink");
       }
 
-      $(links).eq(i).attr("href", dest);
+      $(this).attr("href", dest);
     }
-  }
+  });
 
   /*** Footer ***/
 
   /*Add footer*/
-  if($(".footer")[0]) {
+  if($foot[0]) {
     /*Read footer file and append it to the footer div.*/
     let footerCode = readFile("./footer.html");
-    $(".footer").append(footerCode);
+    $foot.append(footerCode);
 
     /*Add social media links (initially Facebook)*/
-    let fadr = $(".footer").attr("data-fb");
+    let fadr = $foot.attr("data-fb");
+    let $fblink = $(".fb-link");
 
     if ((typeof fadr !== typeof undefined) && fadr !== false) {
-      $(".fb-link").attr("href", fadr);
-      $(".fb-link").attr("alt", $(".footer").attr("data-avd") + " på Facebook");
+      $fblink.attr("href", fadr);
+      $fblink.attr("alt", $foot.attr("data-avd") + " på Facebook");
     }
     else{
-      $(".fb-link").addClass("usynlig");
+      $fblink.addClass("usynlig");
     }
   }
 
   /*Add contact info*/
   const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>';
 
-  $(".adr").append($(".footer").attr("data-adr") + SEPS);
-  $(".padr").append($(".footer").attr("data-padr") + SEPS);
-  $(".tlf").append($(".footer").attr("data-tel"));
+  $(".adr").append($foot.attr("data-adr") + SEPS);
+  $(".padr").append($foot.attr("data-padr") + SEPS);
+  $(".tlf").append($foot.attr("data-tel"));
 
   /*** Story link creation ***/
 
   /*Read storylink file and append it to the storylink divs*/
-  if($(".storylink")[0]){
+  if($slinks[0]){
     let linkCode = readFile("./storylink.html");
-    $(".storylink").append(linkCode);
+    $slinks.append(linkCode);
 
-    for(let i = 0; i < $(".storylink").length; i++){
-      /*eq is used to target a single tag of the storylink class and being able to use the selector methods on it*/
-      let dest = $(".storylink").eq(i).attr("data-src");
-      $(".storylink").eq(i).find("a").attr("href", dest);
-    }
+    $slinks.each(function (){
+      $(this).find("a").attr("href", $(this).attr("data-src"));
+    });
+
   }
 
   /*User story creation*/
-  if($(".employee")[0]){
+  if($emps[0]){
     /*If there is a section on the employee, add all text to the html.*/
     if($("section.employee")[0]){
-      let storyCode = readFile($(".employee").attr("data-textsrc"));
+      let storyCode = readFile($emps.attr("data-textsrc"));
       let paragraphs = storyCode.split("\r\n\r\n");
 
       /*Add paragraphs to the html code*/
       for(let i=0; i < paragraphs.length; i++){
         if($.trim(paragraphs[i]).length > 0){
-          $(".employee").append("<p>" + paragraphs[i] + "</p>");
+          $emps.append("<p>" + paragraphs[i] + "</p>");
         }
       }
 
     }
     /*If there isn't a section, add only the first and last(signature) paragraphs.*/
     else{
-      for(let i=0; i < $(".employee").length; i++){
-        let storyCode = readFile($(".employee").eq(i).attr("data-textsrc"));
+      $emps.each(function (){
+        let storyCode = readFile($(this).attr("data-textsrc"));
         let paragraphs = storyCode.split("\r\n\r\n");
 
         /*Add paragraphs to the html code*/
-        $(".employee").eq(i).prepend("<p>" + paragraphs[0] + "</p>");
-        $(".employee").eq(i).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
-      }
-      $(".employee").find("p").addClass("excerpt");
+        $(this).prepend("<p>" + paragraphs[0] + "</p>");
+        $(this).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
+
+      });
+
+      $emps.find("p").addClass("excerpt");
     }
 
     /*Make the last paragraph into a signature*/
-    $(".employee").each(function() {
+    $emps.each(function() {
       $(this).children().last().removeClass("excerpt");
       $(this).children().last().addClass("sign");
     });
   }
 
   /*Home link creation*/
-  if($(".home")[0]){
-    $(".home").append(readFile("./homelink.html"));
+  if($hlink[0]){
+    $hlink.append(readFile("./homelink.html"));
   }
 });

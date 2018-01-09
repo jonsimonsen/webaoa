@@ -11,7 +11,7 @@ Bootstrap is being imported, but the design has not been done with bootstrap in 
 Around version 0.5, the project started using JavaScript and JQuery to prevent unnecessary code duplication and enable reading content from files. Note that a new function must probably be written for file reading before the site is published, since the current version isn't made with the online environment in mind.  
 
 # browser compatibility
--Chrome  (Versions prior to 0.55 work in Chrome. The current file reading function is not automatically allowed in Chrome. See the notes in the version history for details)
+-Chrome  (Versions prior to 0.55 work in Chrome. The current file reading function is not automatically allowed in Chrome. See the notes in the version history for details)  
 -Firefox (seems to give about the same result as Chrome)  
 -Early versions of Edge yields poor layout. Should presumably be fixable by updating Windows.  
 -Internet Explorer does not support the CSS syntax used, and there is no current plans to make the site compatible with IE.  
@@ -33,7 +33,7 @@ v0.15: Going to attempt changing the css to use grid.
 
 v0.2: Several possibilities. Planning to attempt to make additional pages and links.  
 -Could add menus as a next step.  
--Added navbar. No links provided yet (TODO).  
+-Added navbar. No links provided yet.  
 -Refactored banner to use flexbox (easier vertical alignment inside divs).  
 -Added some links (so far only internal). Some are styled as buttons.  
 -Using fixed position for the banner, and added a placeholder image under it.  
