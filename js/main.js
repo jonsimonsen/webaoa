@@ -93,14 +93,28 @@ $(document).ready( () => {
 
   /*User story creation*/
   if($(".employee")[0]){
-    let storyCode = readFile($(".employee").attr("data-textsrc"));
-    let paragraphs = storyCode.split("\r\n\r\n");
+    /*If there is a section on the employee, add all text to the html.*/
+    if($("section.employee")[0]){
+      let storyCode = readFile($(".employee").attr("data-textsrc"));
+      let paragraphs = storyCode.split("\r\n\r\n");
 
-    /*Add paragraphs to the html code*/
-    for(let i=0; i < paragraphs.length; i++){
-      if($.trim(paragraphs[i]).length > 0){
-        $(".employee").append("<p>" + paragraphs[i] + "</p>");
-        /*console.log(testz[i]);*/
+      /*Add paragraphs to the html code*/
+      for(let i=0; i < paragraphs.length; i++){
+        if($.trim(paragraphs[i]).length > 0){
+          $(".employee").append("<p>" + paragraphs[i] + "</p>");
+        }
+      }
+
+    }
+    /*If there isn't a section, add only the first and last(signature) paragraphs.*/
+    else{
+      for(let i=0; i < $(".employee").length; i++){
+        let storyCode = readFile($(".employee").eq(i).attr("data-textsrc"));
+        let paragraphs = storyCode.split("\r\n\r\n");
+
+        /*Add paragraphs to the html code*/
+        $(".employee").prepend("<p>" + paragraphs[0] + "</p>");
+        $(".employee").append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
       }
     }
 
