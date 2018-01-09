@@ -14,47 +14,7 @@ function readFile(file){
   return allText;
 }
 
-/*Function for parsing a text. Returns the index of the last character of the first paragraph. The separator is a double newline.*/
-function parsePara(text){
-  /*Use the following in conjunction with test.txt to examine ASCII codes.*/
-  /*for(let i = 0; i < text.length; i++){
-    console.log(text.charCodeAt(i));
-  }*/
-
-  let lines = text.split("\r\n\r\n");
-
-  for(let i = lines.length - 1; i >= 0; i--){
-    if($.trim(lines[i]).length === 0){
-
-    }
-  }
-
-/*  let para = "";
-  let paras = [];
-
-  for(let i = 0; i < lines.length; i++){
-    if(lines[i] === ""){
-      if(para !== ""){
-        paras.push(para);
-      }
-      para = "";
-    }
-    else{
-      para += lines[i] + "\n";
-    }
-  }
-
-  if(para !== ""){
-    paras.push(para);
-  }
-
-  paras.forEach(function(graph) {
-    console.log(graph);
-    console.log("-");
-  });*/
-}
-
-/*Generate html for storylinks for user stories*/
+/*Generate html for banners, footers and other page elements*/
 $(document).ready( () => {
 
   /*** Banner ***/
@@ -133,8 +93,8 @@ $(document).ready( () => {
 
   /*User story creation*/
   if($(".employee")[0]){
-    let storyCode = readFile("./Info/alice.txt");
-    let paragraphs = storycode.split("\r\n\r\n");
+    let storyCode = readFile($(".employee").attr("data-textsrc"));
+    let paragraphs = storyCode.split("\r\n\r\n");
 
     /*Add paragraphs to the html code*/
     for(let i=0; i < paragraphs.length; i++){
@@ -148,4 +108,8 @@ $(document).ready( () => {
     $(".employee").children().last().addClass("sign");
   }
 
+  /*Home link creation*/
+  if($(".home")[0]){
+    $(".home").append(readFile("./homelink.html"));
+  }
 });
