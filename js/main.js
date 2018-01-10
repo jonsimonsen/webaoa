@@ -15,6 +15,18 @@ function readFile(file){
   return allText;
 }
 
+/*Function for reading a file and returning an array of paragraphs using double newlines as separators.*/
+/*Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
+function readParas(file){
+  return readFile(file).split("\r\n\r\n");
+}
+
+/*Function for capitalizing a string (Make the first letter uppercase)*/
+/*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript*/
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 /*Generate html for banners, footers and other page elements*/
 $(document).ready( () => {
 
@@ -23,7 +35,6 @@ $(document).ready( () => {
   let $foot = $(".footer");
   let $emps = $(".employee");
   let $sgrid = $(".stories");
-  let $slinks = $(".storylink");
   let $hlink = $(".home");
 
   /*** Banner ***/
@@ -78,13 +89,13 @@ $(document).ready( () => {
   }
 
   /*Add contact info*/
-  const SEPS = ' <span class="sep">| </span><span class="newline"><br /></span>';
+  const SEPS = " " + readFile("./seps.html");
 
   $(".adr").append($foot.attr("data-adr") + SEPS);
   $(".padr").append($foot.attr("data-padr") + SEPS);
   $(".tlf").append($foot.attr("data-tel"));
 
-  /*** Story link creation ***/
+  /*** Story link creation. Might come back in later if the links are used in more places ***/
 
   /*Read storylink file and append it to the storylink divs*/
   /*if($slinks[0]){
@@ -101,8 +112,7 @@ $(document).ready( () => {
   if($emps[0]){
     /*If there is a section on the employee, add all text to the html.*/
     if($("section.employee")[0]){
-      let storyCode = readFile($emps.attr("data-textsrc"));
-      let paragraphs = storyCode.split("\r\n\r\n");
+      let paragraphs = readParas($emps.attr("data-textsrc"));
 
       /*Add paragraphs to the html code*/
       for(let i=0; i < paragraphs.length; i++){
@@ -110,6 +120,8 @@ $(document).ready( () => {
           $emps.append("<p>" + paragraphs[i] + "</p>");
         }
       }
+
+      $emps.children("p").last().addClass("sign");
 
     }
     /*If there isn't a section, add only the first and last(signature) paragraphs.*/
@@ -123,47 +135,30 @@ $(document).ready( () => {
         $emps.append(empCode);
 
         /*Read storylink file and append it to the storylink divs*/
+        let $slinks = $(".storylink");
+
         if($slinks[0]){
           let linkCode = readFile("./storylink.html");
           $slinks.append(linkCode);
-
-          $slinks.each(function (){
-            $(this).find("a").attr("href", $(this).attr("data-src"));
-          });
         }
 
+        /*Update the paragraph, link address and signature for each employee based on the text file and html attributes.*/
         let storyPath = $sgrid.attr("data-storypath");
         let ending = $sgrid.attr("data-filetype");
 
-        /**/
         $emps.each(function (){
-          let storyCode = readFile(storyPath + $(this).attr("data-username") + ending);
-          let paragraphs = storyCode.split("\r\n\r\n");
+          let userName = $(this).attr("data-username");
+          let paragraphs = readParas(storyPath + userName + ending);
 
-          /*Add paragraphs to the html code*/
-          $(this).prepend("<p>" + paragraphs[0] + "</p>");
-          $(this).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
+          /*Update paragraphs in the html code*/
+          $(this).children("p.excerpt").append(paragraphs[0]);
+          $(this).children("p.sign").append("-" + capitalizeFirstLetter(userName));
+
+          /*Update address of storylink*/
+          $(this).children(".storylink").children("a").attr("href", userName + ".html");
         });
       }
-
-      $emps.each(function (){
-        let storyCode = readFile($(this).attr("data-textsrc"));
-        let paragraphs = storyCode.split("\r\n\r\n");
-
-        /*Add paragraphs to the html code*/
-        $(this).prepend("<p>" + paragraphs[0] + "</p>");
-        $(this).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
-
-      });
-
-      $emps.find("p").addClass("excerpt");
     }
-
-    /*Make the last paragraph into a signature*/
-    $emps.each(function() {
-      $(this).children().last().removeClass("excerpt");
-      $(this).children().last().addClass("sign");
-    });
   }
 
   /*Home link creation*/
