@@ -96,6 +96,9 @@ v0.55: Expand the activity page, and possibly the job pages.
 -Now using JS to read user stories from text files.  
 
 v0.56: Clean up the JS file, and try to incorporate more JS in arbeid.html.  
--Under development...  
+-First part done and tested. Second part delayed to next version.
+
+v0.57: Additional cleanup of JS and layout
+-Under development...
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
