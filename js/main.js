@@ -21,9 +21,10 @@ $(document).ready( () => {
   /*** JQuery variables that are used multiple times below. ***/
   /* Should consider testing that there are not multiple footers or hlinks on a single page. */
   let $foot = $(".footer");
+  let $emps = $(".employee");
+  let $sgrid = $(".stories");
   let $slinks = $(".storylink");
   let $hlink = $(".home");
-  let $emps = $(".employee");
 
   /*** Banner ***/
 
@@ -86,7 +87,7 @@ $(document).ready( () => {
   /*** Story link creation ***/
 
   /*Read storylink file and append it to the storylink divs*/
-  if($slinks[0]){
+  /*if($slinks[0]){
     let linkCode = readFile("./storylink.html");
     $slinks.append(linkCode);
 
@@ -94,7 +95,7 @@ $(document).ready( () => {
       $(this).find("a").attr("href", $(this).attr("data-src"));
     });
 
-  }
+  }*/
 
   /*User story creation*/
   if($emps[0]){
@@ -113,6 +114,38 @@ $(document).ready( () => {
     }
     /*If there isn't a section, add only the first and last(signature) paragraphs.*/
     else{
+      if(!($sgrid[0])){
+        alert("Bug. Employee class exists outside its intended scope.")
+      }
+      else{
+        /*Append employee box code to the employee boxes*/
+        let empCode = readFile("./empboxes.html");
+        $emps.append(empCode);
+
+        /*Read storylink file and append it to the storylink divs*/
+        if($slinks[0]){
+          let linkCode = readFile("./storylink.html");
+          $slinks.append(linkCode);
+
+          $slinks.each(function (){
+            $(this).find("a").attr("href", $(this).attr("data-src"));
+          });
+        }
+
+        let storyPath = $sgrid.attr("data-storypath");
+        let ending = $sgrid.attr("data-filetype");
+
+        /**/
+        $emps.each(function (){
+          let storyCode = readFile(storyPath + $(this).attr("data-username") + ending);
+          let paragraphs = storyCode.split("\r\n\r\n");
+
+          /*Add paragraphs to the html code*/
+          $(this).prepend("<p>" + paragraphs[0] + "</p>");
+          $(this).append("<p>" + paragraphs[paragraphs.length - 1] + "</p>");
+        });
+      }
+
       $emps.each(function (){
         let storyCode = readFile($(this).attr("data-textsrc"));
         let paragraphs = storyCode.split("\r\n\r\n");
