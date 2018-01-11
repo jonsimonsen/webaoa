@@ -414,18 +414,18 @@ p.excerpt {   /*Using this generally with some potential modification might be d
 /*Styling employee pages*/
 
 /*Employee feedback initially should also have a storybox class*/
-.employee {
+.employees {
   margin-left: 20%;
   margin-right: 20%;
   padding: var(--big-pads);
 }
 
-.employee img{
+.employees img{
   width: 100%;
 }
 
 @media only screen and (max-width: 600px) {
-  .employee {
+  .employees {
     margin-left: 10%;
     margin-right: 10%;
   }

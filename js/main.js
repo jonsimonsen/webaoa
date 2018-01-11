@@ -1,3 +1,8 @@
+/*** Main JS file for the website of "Arbeid og Aktivitet, Tromsø" (by Jon Simonsen) ***/
+
+
+/*** Functions made by others ***/
+
 /*Function for reading a file (Should use a different one/load when going live)*/
 /*https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
 function readFile(file){
@@ -15,25 +20,63 @@ function readFile(file){
   return allText;
 }
 
-/*Function for reading a file and returning an array of paragraphs using double newlines as separators.*/
-/*Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
-function readParas(file){
-  return readFile(file).split("\r\n\r\n");
-}
-
 /*Function for capitalizing a string (Make the first letter uppercase)*/
 /*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript*/
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-/*Generate html for banners, footers and other page elements*/
+
+/*** Functions made by Jon Simonsen ***/
+
+/*Function for reading a file and returning an array of paragraphs using double newlines as separators.*/
+/*Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
+function readParas(file){
+  return readFile(file).split("\r\n\r\n");
+}
+
+/*Function for extracting userid from url. Returns null if the url has no attributes.
+Returns null and displays an alert if there's something wrong with the attribute.
+Attributes other than userid is not allowed. Could have more detailed error checks and messages.*/
+/*For more advanced url extraction, check out https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript*/
+function getUserId(){
+  let match = "userid=";
+  let url = window.location.href;
+  let start = url.indexOf("?") + 1;
+
+  if(start <= 0){
+    return null;
+  }
+  else if(start > url.length - (match.length + 1)){ /*+1 since indices start at 0 while lengths start at 1.*/
+    alert("Incorrect url. Wrongly named attribute or no value.");
+    return null;
+  }
+  else{
+    if(!(url.slice(start,(start + match.length)) === match)){
+      alert("Incorrect url. Wrongly named attribute.");
+      return null;
+    }
+    else{
+      let candidate = url.slice(start + match.length);
+      if(isNaN(candidate)){
+        alert("Incorrect url. Either the userid is not a number or the url contains garbage otherwise.");
+        return null;
+      }
+      else{
+        return candidate;
+      }
+    }
+  }
+}
+
+/***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
   /*** JQuery variables that are used multiple times below. ***/
   /* Should consider testing that there are not multiple footers or hlinks on a single page. */
   let $foot = $(".footer");
   let $emps = $(".employee");
+  let $empwindow = $(".employees");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
 
@@ -160,6 +203,45 @@ $(document).ready( () => {
       }
     }
   }
+
+  /*User page navigation (dynamic content)*/
+  if($empwindow[0]){
+    let users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
+
+    /*Find out what user to display based on url attribute*/
+    let current = getUserId();
+    if(current === null){
+      current = users.length - 1; /*Start at intro page*/
+    }
+    else if (current < -1 || current >= users.length) {
+      alert("userid attribute in url is outside the range of valid userids");
+      current = users.length - 1;
+    }
+    else{
+      current %= (users.length - 1);
+    }
+
+    /*Fix the links so they direct to the right user*/
+    $(".stealthy").eq(0).attr("href", "./employee.html?userid=" + (current - 1));
+    $(".stealthy").eq(1).attr("href", "./employee.html?userid=" + (current + 1));
+
+    /*Add all text to the html.*/
+    let storyPath = "./Info/";
+    let ending = ".txt";
+    console.log(storyPath + users[current] + ending);
+    let paragraphs = readParas(storyPath + users[current] + ending);
+
+    /*Add paragraphs to the html code*/
+    for(let i=0; i < paragraphs.length; i++){
+      if($.trim(paragraphs[i]).length > 0){
+        $empwindow.append("<p>" + paragraphs[i] + "</p>");
+      }
+    }
+
+    $empwindow.children("p").last().addClass("sign");
+
+  }
+
 
   /*Home link creation*/
   if($hlink[0]){
