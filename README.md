@@ -100,5 +100,6 @@ v0.56: Clean up the JS file, and try to incorporate more JS in arbeid.html.
 
 v0.57: Additional cleanup of JS and layout
 -Under development...
+-Fixed a bug that made links partly unclickable when they're behind elements that are overlayed on the link. The link overlays now have pointer-events: none  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  

@@ -94,26 +94,25 @@ body.base {
   background-color: var(--contrast-color);
 }
 
-.rightarrow {
-  margin-left: var(--pads);
+.arrow {
+  margin: var(--pads);
   position: absolute;
-  top: 6px; /*To align the arrow inside a link button*/
-  width: 32px;
-  height: 32px;
-  background-color: var(--contrast-color);  /*Actual color of arrow*/
-  clip-path: polygon(0% 75%, 0% 25%, 50% 25%, 50% 0%, 100% 50%, 50% 100%, 50% 75%);
-  z-index: 10;
-}
-
-.leftarrow {
-  margin-left: var(--pads);
-  position: absolute;
-  top: 6px; /*To align the arrow inside a link button*/
+  top: 3px;
+  left: 3px;
   width: 32px;
   height: 32px;
   background-color: var(--contrast-color);  /*Actual color of arrow*/
   clip-path: polygon(100% 75%, 100% 25%, 50% 25%, 50% 0%, 0% 50%, 50% 100%, 50% 75%);
   z-index: 10;
+  pointer-events: none;
+}
+
+.right {
+  clip-path: polygon(0% 75%, 0% 25%, 50% 25%, 50% 0%, 100% 50%, 50% 100%, 50% 75%);
+}
+
+.left {
+  clip-path: polygon(100% 75%, 100% 25%, 50% 25%, 50% 0%, 0% 50%, 50% 100%, 50% 75%);
 }
 
 /*Used above or below other content to change its position*/
@@ -532,31 +531,29 @@ p.excerpt {   /*Using this generally with some potential modification might be d
 
 .scroll-menu {
   display: flex;
-  width: 320px;
+  width: 200px;
   height: 64px;
   justify-content: space-around;
   align-items: center;
 }
 
-.scroll-menu div {
+.scroll-menu > div {
   margin: var(--pads);
-  /*height: 44px;*/
-  /*width: 44px;*/
-  /*bottom: 10px;*/
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /*position: relative;*/
-  float: left;
+  position: relative;
+  /*margin: auto var(--pads) auto var(--pads);*/
 }
 
-.scroll-menu .leftarrow {
+.scroll-menu a {
+  display: inline-block;
+}
+
+/*.scroll-menu .leftarrow {
   position: relative;
 }
 
 .scroll-menu .rightarrow {
   position: relative;
-}
+}*/
 
 a.stealthy {
   color: var(--theme-color);
