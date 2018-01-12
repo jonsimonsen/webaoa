@@ -58,16 +58,18 @@ function getUserId(){
     }
     else{
       let candidate = url.slice(start + match.length);
+
       if(isNaN(candidate)){
         alert("Incorrect url. Either the userid is not a number or the url contains garbage otherwise.");
         return null;
       }
       else{
-        return candidate;
+        return Number(candidate);
       }
     }
   }
 }
+
 
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
@@ -79,6 +81,16 @@ $(document).ready( () => {
   let $empwindow = $(".employees");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
+
+  /*** Global constants ***/
+
+  /*Paths and files for employees*/
+  let storyPath = "./Info/";
+  let imgPath = "./Temp/";
+  let textEnding = ".txt";
+  let imgEnding = ".jpg";
+
+
 
   /*** Banner ***/
 
@@ -110,9 +122,9 @@ $(document).ready( () => {
     }
   });
 
+
   /*** Footer ***/
 
-  /*Add footer*/
   if($foot[0]) {
     /*Read footer file and append it to the footer div.*/
     let footerCode = readFile("./footer.html");
@@ -129,14 +141,15 @@ $(document).ready( () => {
     else{
       $fblink.addClass("usynlig");
     }
+
+    /*Add contact info*/
+    const SEPS = " " + readFile("./seps.html");
+
+    $(".adr").append($foot.attr("data-adr") + SEPS);
+    $(".padr").append($foot.attr("data-padr") + SEPS);
+    $(".tlf").append($foot.attr("data-tel"));
   }
 
-  /*Add contact info*/
-  const SEPS = " " + readFile("./seps.html");
-
-  $(".adr").append($foot.attr("data-adr") + SEPS);
-  $(".padr").append($foot.attr("data-padr") + SEPS);
-  $(".tlf").append($foot.attr("data-tel"));
 
   /*** Story link creation. Might come back in later if the links are used in more places ***/
 
@@ -186,12 +199,12 @@ $(document).ready( () => {
         }
 
         /*Update the paragraph, link address and signature for each employee based on the text file and html attributes.*/
-        let storyPath = $sgrid.attr("data-storypath");
+        let historyPath = $sgrid.attr("data-storypath");
         let ending = $sgrid.attr("data-filetype");
 
         $emps.each(function (){
           let userName = $(this).attr("data-username");
-          let paragraphs = readParas(storyPath + userName + ending);
+          let paragraphs = readParas(historyPath + userName + ending);
 
           /*Update paragraphs in the html code*/
           $(this).children("p.excerpt").append(paragraphs[0]);
@@ -213,23 +226,34 @@ $(document).ready( () => {
     if(current === null){
       current = users.length - 1; /*Start at intro page*/
     }
-    else if (current < -1 || current >= users.length) {
+    else if (current < 0 || current >= users.length - 1) {
       alert("userid attribute in url is outside the range of valid userids");
       current = users.length - 1;
     }
-    else{
-      current %= (users.length - 1);
-    }
 
-    /*Fix the links so they direct to the right user*/
-    $(".stealthy").eq(0).attr("href", "./employee.html?userid=" + (current - 1));
-    $(".stealthy").eq(1).attr("href", "./employee.html?userid=" + (current + 1));
+    /*Fix the links so they direct to the right user. Since JS doesn't have a proper modulo operator,
+    this is a little more complex than it would otherwise have to be.*/
+    let next = current + 1;
+    let prev = current -1;
+
+    if(current === (users.length - 1) || current === (users.length - 2)) {
+      next = 0;
+    }
+    else if(current === 0){
+      prev = users.length - 2;
+    }
+    $(".stealthy").eq(0).attr("href", "./employee.html?userid=" + (prev));
+    $(".stealthy").eq(1).attr("href", "./employee.html?userid=" + (next));
+
+    /*Append employee window code to the employee window*/
+    let empWinCode = readFile("./empwindow.html");
+    $empwindow.append(empWinCode);
+
+    /*Add img to the html*/
+    $empwindow.children("img").attr("src", imgPath + users[current] + imgEnding);
 
     /*Add all text to the html.*/
-    let storyPath = "./Info/";
-    let ending = ".txt";
-    console.log(storyPath + users[current] + ending);
-    let paragraphs = readParas(storyPath + users[current] + ending);
+    let paragraphs = readParas(storyPath + users[current] + textEnding);
 
     /*Add paragraphs to the html code*/
     for(let i=0; i < paragraphs.length; i++){
@@ -238,10 +262,8 @@ $(document).ready( () => {
       }
     }
 
-    $empwindow.children("p").last().addClass("sign");
-
+    $empwindow.children("p.sign").append("-" + capitalizeFirstLetter(users[current]));
   }
-
 
   /*Home link creation*/
   if($hlink[0]){
