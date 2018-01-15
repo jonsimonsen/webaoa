@@ -1,8 +1,11 @@
-/*For now, this will just be a regular css-file.*/
+/***Layout file for the pages for "Arbeid og Aktivitet", Tromsoe kommune***/
+/***by Jon Simonsen***/
+/**For now, this will just be a regular css-file.**/
 
-/*CSS custom properties(variables). Source claims non-compatibility with IE and some other browsers.*/
+
+/***CSS custom properties(variables). Source claims non-compatibility with IE and some other browsers.***/
 body {
-  /*Thematic colors*/
+  /**Thematic colors**/
 
   /*For banner, buttons and some borders. Alt. 09F, 06F*/
   --theme-color: #09F;
@@ -14,23 +17,23 @@ body {
   --bgcolor: #999; /*Default background color. Alt. 999, CC9*/
   --sub-bgcolor: #CCC; /*Background color for subsections*/
 
-  /*Margins, borders, paddings*/
+  /**Margins, borders, paddings**/
   --pads: 4px;
   --big-pads: 8px;
 
-  /*Dimensional vars*/
+  /**Dimensional vars**/
   --logo-width: 160px;
   --imgtxt-offset: 200px; /*Since the height of the banner depends on the width of the logo, this needs to change if the logo size changes*/
 }
 
 
-/*General html objects*/
+/***General html objects***/
 * {
   margin: 0px;
   padding: 0px;
 }
 
-/*base is a generic class for page bodies to override bootstrap styles.*/
+/**base is a generic class for page bodies to override bootstrap styles.**/
 body.base {
   margin: var(--pads);
   margin-top: 120px;    /*Make room for wrapper*/
@@ -60,7 +63,7 @@ body.base {
   margin: var(--big-pads);
 }
 
-/*Styling links as buttons. Might want to adopt a more modern implementation later.*/
+/**Styling links as buttons. Might want to adopt a more modern implementation later.**/
 .base a {
   padding: var(--big-pads);
   border: 2px solid transparent;
@@ -85,15 +88,15 @@ body.base {
   border: 1px solid var(--theme-color);
 }
 
+/***General styles (used for different kinds of things)***/
 
-/*General styles (used for different kinds of things)*/
-
-/*Provides box styling for information/descriptions/histories and similar.*/
+/**Provides box styling for information/descriptions/histories and similar.**/
 .storybox {
   border: 2px solid var(--theme-color);
   background-color: var(--contrast-color);
 }
 
+/**Button overlay elements**/
 .arrow {
   margin: auto;
   position: absolute;
@@ -117,24 +120,24 @@ body.base {
   clip-path: polygon(100% 75%, 100% 25%, 50% 25%, 50% 0%, 0% 50%, 50% 100%, 50% 75%);
 }
 
-/*Used above or below other content to change its position*/
+/**Can be used above or below other content to change its position**/
 .usynlig {
   visibility: hidden;
 }
 
-/*General signature*/
+/**General signature**/
 p.sign {
   text-align: right;
   font-style: italic;
   font-size: 14px;
 }
 
-/*Styling of phone numbers*/
+/**Styling of phone numbers**/
 .tlf {
   font-weight: bold;
 }
 
-/*For causing line breaks at small screen widths.*/
+/**For causing line breaks at small screen widths.**/
 span.newline {
   display: none;
 }
@@ -146,13 +149,9 @@ span.newline {
 }
 
 
-/*home page styling/*
+/***Site-wide section styling***/
 
-/*banner/*
-/*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
-/*Will need to retest if the navbar (or other content) is altered.*/
-/*Might want to look into bootstrap for easier customization*/
-
+/**Banner**/
 .banner-wrapper {
   border: var(--pads) solid var(--bgcolor);
   position: fixed;
@@ -178,7 +177,7 @@ span.newline {
   display: flex;          /*Prevents extra bottom-padding for image link*/
 }
 
-/*navbar is part of the banner*/
+/**Navbar (part of the banner)**/
 .nav-top {
   margin-left: auto;
   margin-right: var(--pads);
@@ -216,6 +215,15 @@ span.newline {
     display: block;
   }
 }
+
+/***home page styling***/
+
+/**banner**/
+/*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/
+/*Will need to retest if the navbar (or other content) is altered.*/
+/*Might want to look into bootstrap for easier customization*/
+
+
 
 /*illustrasjon*/
 /*221117: Tested and seems ok at browser widths (450, 1360) in Chrome.*/

@@ -77,10 +77,10 @@ $(document).ready( () => {
   /*** JQuery variables that are used multiple times below. ***/
   /* Should consider testing that there are not multiple footers or hlinks on a single page. */
   let $foot = $(".footer");
-  /*let $emps = $(".employee");*/
   let $empwindow = $(".employees");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
+
 
   /*** Global constants ***/
 
@@ -164,68 +164,36 @@ $(document).ready( () => {
 
   }*/
 
-  /*User story creation*/
+
+  /***Employee story creation for home page***/
+
   if($sgrid[0]){
-    /*Populate the story grid with boxes for each employee story*/
     let empCode = readFile("./empboxes.html");
     let linkCode = readFile("./storylink.html");
 
+    /*Populate the story grid with boxes for each employee story*/
     for(let i = 0; i < users.length - 1; i++){
       $sgrid.append(empCode);
     }
 
+    /*Add storylinks to the boxes*/
     $sgrid.find(".storylink").append(linkCode);
 
     /*Update paragraphs and signature for each employee box*/
     for(let j = 0; j < users.length - 1; j++ ){
-      let $emps = $(".employee");
+      let $empbox = $(".employee").eq(j);
       let paragraphs = readParas(storyPath + users[j] + textEnding);
-      let $empbox = $emps.eq(j);
+
       $empbox.find("p.excerpt").append(paragraphs[0]);
       $empbox.find("p.sign").append("-" + capitalizeFirstLetter(users[j]));
 
       /*Update the address of the storylink*/
-      $empbox.find(".storylink").children("a").attr("href", "./employee.html?userid=" + j);
+      $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
     }
   }
 
-  /*if($emps[0]){
 
-    if(!($sgrid[0])){
-      alert("Bug. Employee class exists outside its intended scope.")
-    }
-    else{*/
-      /*Append employee box code to the employee boxes*/
-      /*let empCode = readFile("./empboxes.html");
-      $emps.append(empCode);*/
-
-      /*Read storylink file and append it to the storylink divs*/
-      /*let $slinks = $(".storylink");
-
-      if($slinks[0]){
-        let linkCode = readFile("./storylink.html");
-        $slinks.append(linkCode);
-      }*/
-
-      /*Update the paragraph, link address and signature for each employee based on the text file and html attributes.*/
-      /*let historyPath = $sgrid.attr("data-storypath");
-      let ending = $sgrid.attr("data-filetype");
-
-      $emps.each(function (){
-        let userName = $(this).attr("data-username");
-        let paragraphs = readParas(historyPath + userName + ending);*/
-
-        /*Update paragraphs in the html code*/
-        /*$(this).children("p.excerpt").append(paragraphs[0]);
-        $(this).children("p.sign").append("-" + capitalizeFirstLetter(userName));*/
-
-        /*Update address of storylink*/
-        /*$(this).children(".storylink").children("a").attr("href", userName + ".html");
-      });
-    }
-  }*/
-
-  /*User page navigation (dynamic content)*/
+  /***Employee story creation and navigation for employee page***/
   if($empwindow[0]){
 
     /*Find out what user to display based on url attribute*/
@@ -249,8 +217,8 @@ $(document).ready( () => {
     else if(current === 0){
       prev = users.length - 2;
     }
-    $(".stealthy").eq(0).attr("href", "./employee.html?userid=" + (prev));
-    $(".stealthy").eq(1).attr("href", "./employee.html?userid=" + (next));
+    $(".stealthy").eq(0).attr("href", "./ansatte.html?userid=" + (prev));
+    $(".stealthy").eq(1).attr("href", "./ansatte.html?userid=" + (next));
 
     /*Append employee window code to the employee window*/
     let empWinCode = readFile("./empwindow.html");
