@@ -95,7 +95,6 @@ body.base {
 }
 
 .arrow {
-  /*margin: var(--pads);*/
   margin: auto;
   position: absolute;
   top: 0px;
@@ -162,7 +161,6 @@ span.newline {
   right: 0;
   z-index: 99;   /*Make sure that the banner covers other content.*/
   background-color: var(--theme-color);
-  /*opacity: 0.95;*/
 }
 
 .banner {
@@ -531,14 +529,22 @@ p.excerpt {   /*Using this generally with some potential modification might be d
   }
 }
 
+body.empbase {
+  margin-top: 196px; /*Should be the same as base, but with height of the top wrapper added to it.*/
+}
+
 .top-wrapper {
+  border: var(--pads) solid var(--bgcolor);
   position: fixed;
-  width: 100%;
+  top: 120px;
+  left: 0;
+  right: 0;
+  background-color: var(--sub-bgcolor);
+  z-index: 5;
 }
 
 .scroll-wrapper {
   display: flex;
-  position: fixed;
   justify-content: center;
 }
 
@@ -553,20 +559,11 @@ p.excerpt {   /*Using this generally with some potential modification might be d
 .scroll-menu > div {
   margin: var(--pads);
   position: relative;
-  /*margin: auto var(--pads) auto var(--pads);*/
 }
 
 .scroll-menu a {
   display: inline-block;
 }
-
-/*.scroll-menu .leftarrow {
-  position: relative;
-}
-
-.scroll-menu .rightarrow {
-  position: relative;
-}*/
 
 a.stealthy {
   color: var(--theme-color);
@@ -575,11 +572,6 @@ a.stealthy {
 a.stealthy:hover {
   color: var(--select-color);
 }
-
-/*.scroll-wheel btn {
-  height: 44px;
-  width: 44px;
-}*/
 
 /*Classes that need to override other classes*/
 
