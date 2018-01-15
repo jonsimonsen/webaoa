@@ -109,8 +109,12 @@ v0.6: A new page for all employee stories replaces the old pages for each employ
 -The stories are saved in text files. The old html files for each employee has been deleted.  
 -The home page has been refactored to populate the stories section mostly using external html files and JS.  
 -Image alts for employees are now supposed to be supplied as the last paragraph in the employees's text file. Employee names are currently kept in an array in the JS file.  
--TODO: Add navbar links to the employee page.  
 
 v0.61: Cleanup of JS and layout. Add navbar link to the employee page.  
+-Added link to the employee page.  
+-Did quite a bit of cleanup in the css file. Mainly by grouping content in a more orderly fashion and renaming some stuff. Also cleaned up the html files a little.  
+
+v0.62: Undetermined agenda.  
+-Under development...  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  

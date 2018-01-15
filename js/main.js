@@ -77,7 +77,7 @@ $(document).ready( () => {
   /*** JQuery variables that are used multiple times below. ***/
   /* Should consider testing that there are not multiple footers or hlinks on a single page. */
   let $foot = $(".footer");
-  let $empwindow = $(".employees");
+  let $empwindow = $(".employee-wrapper");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
 
