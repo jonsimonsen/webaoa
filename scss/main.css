@@ -531,8 +531,14 @@ p.excerpt {   /*Using this generally with some potential modification might be d
   }
 }
 
+.top-wrapper {
+  position: fixed;
+  width: 100%;
+}
+
 .scroll-wrapper {
   display: flex;
+  position: fixed;
   justify-content: center;
 }
 
