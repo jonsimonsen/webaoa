@@ -77,7 +77,7 @@ $(document).ready( () => {
   /*** JQuery variables that are used multiple times below. ***/
   /* Should consider testing that there are not multiple footers or hlinks on a single page. */
   let $foot = $(".footer");
-  let $emps = $(".employee");
+  /*let $emps = $(".employee");*/
   let $empwindow = $(".employees");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
@@ -85,11 +85,11 @@ $(document).ready( () => {
   /*** Global constants ***/
 
   /*Paths and files for employees*/
-  let storyPath = "./Info/";
-  let imgPath = "./Temp/";
-  let textEnding = ".txt";
-  let imgEnding = ".jpg";
-
+  const storyPath = "./Info/";
+  const imgPath = "./Temp/";
+  const textEnding = ".txt";
+  const imgEnding = ".jpg";
+  const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 
 
   /*** Banner ***/
@@ -165,61 +165,68 @@ $(document).ready( () => {
   }*/
 
   /*User story creation*/
-  if($emps[0]){
-    /*If there is a section on the employee, add all text to the html.*/
-    if($("section.employee")[0]){
-      let paragraphs = readParas($emps.attr("data-textsrc"));
+  if($sgrid[0]){
+    /*Populate the story grid with boxes for each employee story*/
+    let empCode = readFile("./empboxes.html");
+    let linkCode = readFile("./storylink.html");
 
-      /*Add paragraphs to the html code*/
-      for(let i=0; i < paragraphs.length; i++){
-        if($.trim(paragraphs[i]).length > 0){
-          $emps.append("<p>" + paragraphs[i] + "</p>");
-        }
-      }
-
-      $emps.children("p").last().addClass("sign");
-
+    for(let i = 0; i < users.length - 1; i++){
+      $sgrid.append(empCode);
     }
-    /*If there isn't a section, add only the first and last(signature) paragraphs.*/
-    else{
-      if(!($sgrid[0])){
-        alert("Bug. Employee class exists outside its intended scope.")
-      }
-      else{
-        /*Append employee box code to the employee boxes*/
-        let empCode = readFile("./empboxes.html");
-        $emps.append(empCode);
 
-        /*Read storylink file and append it to the storylink divs*/
-        let $slinks = $(".storylink");
+    $sgrid.find(".storylink").append(linkCode);
 
-        if($slinks[0]){
-          let linkCode = readFile("./storylink.html");
-          $slinks.append(linkCode);
-        }
+    /*Update paragraphs and signature for each employee box*/
+    for(let j = 0; j < users.length - 1; j++ ){
+      let $emps = $(".employee");
+      let paragraphs = readParas(storyPath + users[j] + textEnding);
+      let $empbox = $emps.eq(j);
+      $empbox.find("p.excerpt").append(paragraphs[0]);
+      $empbox.find("p.sign").append("-" + capitalizeFirstLetter(users[j]));
 
-        /*Update the paragraph, link address and signature for each employee based on the text file and html attributes.*/
-        let historyPath = $sgrid.attr("data-storypath");
-        let ending = $sgrid.attr("data-filetype");
-
-        $emps.each(function (){
-          let userName = $(this).attr("data-username");
-          let paragraphs = readParas(historyPath + userName + ending);
-
-          /*Update paragraphs in the html code*/
-          $(this).children("p.excerpt").append(paragraphs[0]);
-          $(this).children("p.sign").append("-" + capitalizeFirstLetter(userName));
-
-          /*Update address of storylink*/
-          $(this).children(".storylink").children("a").attr("href", userName + ".html");
-        });
-      }
+      /*Update the address of the storylink*/
+      $empbox.find(".storylink").children("a").attr("href", "./employee.html?userid=" + j);
     }
   }
 
+  /*if($emps[0]){
+
+    if(!($sgrid[0])){
+      alert("Bug. Employee class exists outside its intended scope.")
+    }
+    else{*/
+      /*Append employee box code to the employee boxes*/
+      /*let empCode = readFile("./empboxes.html");
+      $emps.append(empCode);*/
+
+      /*Read storylink file and append it to the storylink divs*/
+      /*let $slinks = $(".storylink");
+
+      if($slinks[0]){
+        let linkCode = readFile("./storylink.html");
+        $slinks.append(linkCode);
+      }*/
+
+      /*Update the paragraph, link address and signature for each employee based on the text file and html attributes.*/
+      /*let historyPath = $sgrid.attr("data-storypath");
+      let ending = $sgrid.attr("data-filetype");
+
+      $emps.each(function (){
+        let userName = $(this).attr("data-username");
+        let paragraphs = readParas(historyPath + userName + ending);*/
+
+        /*Update paragraphs in the html code*/
+        /*$(this).children("p.excerpt").append(paragraphs[0]);
+        $(this).children("p.sign").append("-" + capitalizeFirstLetter(userName));*/
+
+        /*Update address of storylink*/
+        /*$(this).children(".storylink").children("a").attr("href", userName + ".html");
+      });
+    }
+  }*/
+
   /*User page navigation (dynamic content)*/
   if($empwindow[0]){
-    let users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 
     /*Find out what user to display based on url attribute*/
     let current = getUserId();
@@ -249,19 +256,20 @@ $(document).ready( () => {
     let empWinCode = readFile("./empwindow.html");
     $empwindow.append(empWinCode);
 
-    /*Add img to the html*/
-    $empwindow.children("img").attr("src", imgPath + users[current] + imgEnding);
-
-    /*Add all text to the html.*/
     let paragraphs = readParas(storyPath + users[current] + textEnding);
 
+    /*Add img to the html*/
+    $empwindow.children("img").attr("src", imgPath + users[current] + imgEnding);
+    $empwindow.children("img").attr("alt", paragraphs[paragraphs.length - 1]);
+
     /*Add paragraphs to the html code*/
-    for(let i=0; i < paragraphs.length; i++){
+    for(let i=0; i < paragraphs.length - 1; i++){
       if($.trim(paragraphs[i]).length > 0){
-        $empwindow.append("<p>" + paragraphs[i] + "</p>");
+        $("<p>" + paragraphs[i] + "</p>").insertBefore($empwindow.children("p.sign"));
       }
     }
 
+    /*Add signature*/
     $empwindow.children("p.sign").append("-" + capitalizeFirstLetter(users[current]));
   }
 

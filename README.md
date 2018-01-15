@@ -99,7 +99,16 @@ v0.56: Clean up the JS file, and try to incorporate more JS in arbeid.html.
 -First part done and tested. Second part delayed to next version.
 
 v0.57: Additional cleanup of JS and layout
--Under development...
 -Fixed a bug that made links partly unclickable when they're behind elements that are overlayed on the link. The link overlays now have pointer-events: none  
+-Version 0.57 will not be published separately, instead version 0.6 will be the next one since it contains a major change in the page structure.  
+
+v0.6: A new page for all employee stories replaces the old pages for each employee  
+-Made buttons for navigating between users. They're currently fixed directly below the banner.  
+-Made content that introduces visitors to the employee story page.  It will be available when using a direct link and by clicking the intro button.  
+-Intro and all stories are available in a window on the employee page. The navigation is based on reloading the page with the userid attribute added to the url.  
+-The stories are saved in text files. The old html files for each employee has been deleted.  
+-The home page has been refactored to populate the stories section mostly using external html files and JS.  
+-Image alts for employees are now supposed to be supplied as the last paragraph in the employees's text file. Employee names are currently kept in an array in the JS file.  
+-TODO: Add navbar links to the employee page.  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
