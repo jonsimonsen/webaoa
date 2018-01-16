@@ -70,7 +70,6 @@ function getUserId(){
   }
 }
 
-
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
@@ -80,6 +79,24 @@ $(document).ready( () => {
   let $empwindow = $(".employee-wrapper");
   let $sgrid = $(".stories");
   let $hlink = $(".home");
+  let $baseBody = $(".base");
+
+
+  /*** Browser compatibility testing (custom properties). Also tests the policy that all bodies have the base class. ***/
+  /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
+  /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
+  if($baseBody[0]){
+    $baseBody.prepend('<div class="test"></div>');
+    let realCol = $baseBody.children().first().css("background-color");
+    let browserCol = $baseBody.css("background-color");
+    if(browserCol !== realCol){
+      alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
+    }
+    $baseBody.children().first().remove();
+  }
+  else{
+    alert("This page does not have the expected body class.");
+  }
 
 
   /*** Global constants ***/

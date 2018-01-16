@@ -114,7 +114,9 @@ v0.61: Cleanup of JS and layout. Add navbar link to the employee page.
 -Added link to the employee page.  
 -Did quite a bit of cleanup in the css file. Mainly by grouping content in a more orderly fashion and renaming some stuff. Also cleaned up the html files a little.  
 
-v0.62: Undetermined agenda.  
+v0.62: Do some fixing of browser compatibility issues.  
 -Under development...  
+-Gives an alert if the browser does not support custom properties. The code that does could probably be made shorter and with less potential of breaking the layout.  
+-TODO: Consider to test if the browser accepts synchronous XMLHttpRequests. Since this should not still be present when going live, it might not be highly prioritized.  
 
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  

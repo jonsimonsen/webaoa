@@ -27,6 +27,12 @@ body {
 }
 
 
+/***Test element (mainly for testing if the browser supports custom properties)***/
+.test {
+  background-color: #999; /*Must match the value of --bgcolor for the test to work*/
+}
+
+
 /***General html objects***/
 * {
   margin: 0px;
