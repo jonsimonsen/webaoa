@@ -14,15 +14,27 @@ function readFile(file){
       if(rawFile.status === 200 || rawFile.status == 0) {
         allText = rawFile.responseText;
       }
+      else{
+        console.log("Unexpected file status.");
+      }
+    }
+    else{
+      console.log("Unexpected file state.");
     }
   }
-  rawFile.send(null);
+  try{
+    rawFile.send(null);
+  }
+  catch (error){
+    console.log("XMLHttpRequest error.");
+    return null;
+  }
   return allText;
 }
 
 /*Function for capitalizing a string (Make the first letter uppercase)*/
 /*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript*/
-function capitalizeFirstLetter(string) {
+function capitalizeFirstLetter(string){
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
@@ -70,6 +82,11 @@ function getUserId(){
   }
 }
 
+/*Function for use when a JQuery selection that is expected to contain at most one element actually contains several. Logs an appropriate message to the console.*/
+function logDuplicates(string){
+  console.log("Error. Multiple " + string + " in html file.");
+}
+
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
@@ -80,6 +97,24 @@ $(document).ready( () => {
   let $sgrid = $(".stories");
   let $hlink = $(".home");
   let $baseBody = $(".base");
+
+  /*Testing that there are not multiple members of selections that expects at most one. Only logs to console.
+  If multiples are allowed later, code must be rewritten and variables should be renamed.*/
+  if($foot[1]){
+    logDuplicates("footers");
+  }
+  if($empwindow[1]){
+    logDuplicates("employee windows");
+  }
+  if($sgrid[1]){
+    logDuplicates("story grids");
+  }
+  if($hlink[1]){
+    logDuplicates("home links");
+  }
+  if($baseBody[1]){
+    logDuplicates("elements of the base class (only supposed to be used for the body)");
+  }
 
 
   /*** Browser compatibility testing (custom properties). Also tests the policy that all bodies have the base class. ***/
@@ -99,7 +134,7 @@ $(document).ready( () => {
   }
 
 
-  /*** Global constants ***/
+  /*** Global constants/variables ***/
 
   /*Paths and files for employees*/
   const storyPath = "./Info/";
@@ -108,41 +143,57 @@ $(document).ready( () => {
   const imgEnding = ".jpg";
   const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 
+  /*Environments and flow controlling vars*/
+  const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
+  let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
+
 
   /*** Banner ***/
 
   /*Read banner file and append it to its wrapper div.*/
   let bannerCode = readFile("./banner.html");
-  $(".banner-wrapper").append(bannerCode);
 
-  $(".nav-top").children().each(function (){
-    let target = $(this).attr("href");
-
-    /*Give self-pointing links class unlink (not clickable).*/
-    if(typeof target !== typeof undefined && target !== false){
-      if(window.location.pathname.endsWith(target.slice(1))){
-        $(this).addClass("unlink");
-      }
+  if(bannerCode === null){
+    readSuccess = false;
+    if(online === true){
+      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
     }
-    /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
-    else {
-      let dest = "#";
-
-      if($foot[0]){
-        dest += $foot.attr("id");
-      }
-      else{
-        $(this).addClass("unlink");
-      }
-
-      $(this).attr("href", dest);
+    else{
+      alert("Failed to load page banner. This is likely due to browser restrictions on reading local files.");
     }
-  });
+  }
+  else{
+    $(".banner-wrapper").append(bannerCode);
+
+    $(".nav-top").children().each(function (){
+      let target = $(this).attr("href");
+
+      /*Give self-pointing links class unlink (not clickable).*/
+      if(typeof target !== typeof undefined && target !== false){
+        if(window.location.pathname.endsWith(target.slice(1))){
+          $(this).addClass("unlink");
+        }
+      }
+      /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
+      else {
+        let dest = "#";
+
+        if($foot[0]){
+          dest += $foot.attr("id");
+        }
+        else{
+          $(this).addClass("unlink");
+        }
+
+        $(this).attr("href", dest);
+      }
+    });
+  }
 
 
   /*** Footer ***/
 
-  if($foot[0]) {
+  if(readSuccess === true && $foot[0]) {
     /*Read footer file and append it to the footer div.*/
     let footerCode = readFile("./footer.html");
     $foot.append(footerCode);
@@ -184,7 +235,7 @@ $(document).ready( () => {
 
   /***Employee story creation for home page***/
 
-  if($sgrid[0]){
+  if(readSuccess === true && $sgrid[0]){
     let empCode = readFile("./empboxes.html");
     let linkCode = readFile("./storylink.html");
 
@@ -211,7 +262,7 @@ $(document).ready( () => {
 
 
   /***Employee story creation and navigation for employee page***/
-  if($empwindow[0]){
+  if(readSuccess === true && $empwindow[0]){
 
     /*Find out what user to display based on url attribute*/
     let current = getUserId();
@@ -259,7 +310,7 @@ $(document).ready( () => {
   }
 
   /*Home link creation*/
-  if($hlink[0]){
+  if(readSuccess === true && $hlink[0]){
     $hlink.append(readFile("./homelink.html"));
   }
 });

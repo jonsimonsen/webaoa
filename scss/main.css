@@ -29,7 +29,7 @@ body {
 
 /***Test element (mainly for testing if the browser supports custom properties)***/
 .test {
-  background-color: #999; /*Must match the value of --bgcolor for the test to work*/
+  background-color: #999; /*Must match the value of --bgcolor for the test to work. Additionally, the test seems to never fail if the value is "default" #FFF(white). It would need to be rewritten in that case.*/
 }
 
 
