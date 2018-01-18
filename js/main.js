@@ -90,29 +90,33 @@ function logDuplicates(string){
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
-  /*** JQuery variables that are used multiple times below. ***/
-  let $foot = $(".footer");
-  let $empwindow = $(".employee-wrapper");
-  let $sgrid = $(".stories");
-  let $hlink = $(".home");
-  let $baseBody = $(".base");
+  /*** JQuery constants that are used multiple times below. ***/
+  const $baseBody = $(".base");
+  const $sgrid = $(".stories");
+  const $empwindow = $(".employee-wrapper");
+  const $jobwindow = $(".job-wrapper");
+  const $hlink = $(".home");
+  const $foot = $(".footer");
 
   /*Testing that there are not multiple members of selections that expects at most one. Only logs to console.
   If multiples are allowed later, code must be rewritten and variables should be renamed.*/
-  if($foot[1]){
-    logDuplicates("footers");
-  }
-  if($empwindow[1]){
-    logDuplicates("employee windows");
+  if($baseBody[1]){
+    logDuplicates("elements of the base class (only supposed to be used for the body)");
   }
   if($sgrid[1]){
     logDuplicates("story grids");
   }
+  if($empwindow[1]){
+    logDuplicates("employee windows");
+  }
+  if($jobwindow[1]){
+    logDuplicates("job windows");
+  }
   if($hlink[1]){
     logDuplicates("home links");
   }
-  if($baseBody[1]){
-    logDuplicates("elements of the base class (only supposed to be used for the body)");
+  if($foot[1]){
+    logDuplicates("footers");
   }
 
 
@@ -135,12 +139,13 @@ $(document).ready( () => {
 
   /*** Global constants/variables ***/
 
-  /*Paths and files for employees*/
+  /*Paths and files for employees and workplaces*/
   const storyPath = "./Info/";
   const imgPath = "./Temp/";
   const textEnding = ".txt";
   const imgEnding = ".jpg";
   const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
+  const workPlaces = ["DREIS", "DagsJobben", "Default"];
 
   /*Environments and flow controlling vars*/
   const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
@@ -187,34 +192,6 @@ $(document).ready( () => {
         $(this).attr("href", dest);
       }
     });
-  }
-
-
-  /*** Footer ***/
-
-  if(readSuccess === true && $foot[0]) {
-    /*Read footer file and append it to the footer div.*/
-    let footerCode = readFile("./footer.html");
-    $foot.append(footerCode);
-
-    /*Add social media links (initially Facebook)*/
-    let fadr = $foot.attr("data-fb");
-    let $fblink = $(".fb-link");
-
-    if ((typeof fadr !== typeof undefined) && fadr !== false) {
-      $fblink.attr("href", fadr);
-      $fblink.attr("alt", $foot.attr("data-avd") + " på Facebook");
-    }
-    else{
-      $fblink.addClass("usynlig");
-    }
-
-    /*Add contact info*/
-    const SEPS = " " + readFile("./seps.html");
-
-    $(".adr").append($foot.attr("data-adr") + SEPS);
-    $(".padr").append($foot.attr("data-padr") + SEPS);
-    $(".tlf").append($foot.attr("data-tel"));
   }
 
 
@@ -308,8 +285,81 @@ $(document).ready( () => {
     $empwindow.children("p.sign").append("-" + capitalizeFirstLetter(users[current]));
   }
 
-  /*Home link creation*/
+
+  /***Workplace creation***/
+  if(readSuccess === true && $jobwindow[0]){
+    let jobWinCode = readFile("./jobwindow.html");
+    $jobwindow.append(jobWinCode);
+
+    let paragraphs = readParas(storyPath + workPlaces[workPlaces.length - 1] + textEnding);
+
+    $(".info").append("<h2>" + paragraphs[0] + "</h2>");
+
+    for(let i=1; i < paragraphs.length - 1; i++){
+      $(".info").append("<p>" + paragraphs[i] + "</p>");
+    }
+  }
+
+  /***Event handling for workplaces***/
+  const $wbuttons = $(".scroll-menu").find("a");
+
+  for(let j=0; j < $wbuttons.length; j++){
+    $wbuttons.eq(j).on("click", () => {
+      /*Make the clicked button the only active one*/
+      $wbuttons.removeClass("active");
+      $wbuttons.eq(j).addClass("active");
+
+      /*Read workplace content from file*/
+      let paragraphs = readParas(storyPath + workPlaces[j] + textEnding);
+
+      /*Remove old info text and add new*/
+      $(".info").empty();
+      $(".info").append("<h2>" + paragraphs[0] + "</h2>");
+
+      for(let k=1; k < paragraphs.length - 1; k++){
+        $(".info").append("<p>" + paragraphs[k] + "</p>");
+      }
+    });
+  }
+  /*$wbuttons.each(function (){
+    $(this).on("click", () => {
+      $wbuttons.removeClass("active");
+      $(this).addClass("active");
+    });
+  });*/
+
+  /***Home link creation***/
   if(readSuccess === true && $hlink[0]){
     $hlink.append(readFile("./homelink.html"));
   }
+
+
+
+  /*** Footer ***/
+
+  if(readSuccess === true && $foot[0]) {
+    /*Read footer file and append it to the footer div.*/
+    let footerCode = readFile("./footer.html");
+    $foot.append(footerCode);
+
+    /*Add social media links (initially Facebook)*/
+    let fadr = $foot.attr("data-fb");
+    let $fblink = $(".fb-link");
+
+    if ((typeof fadr !== typeof undefined) && fadr !== false) {
+      $fblink.attr("href", fadr);
+      $fblink.attr("alt", $foot.attr("data-avd") + " på Facebook");
+    }
+    else{
+      $fblink.addClass("usynlig");
+    }
+
+    /*Add contact info*/
+    const SEPS = " " + readFile("./seps.html");
+
+    $(".adr").append($foot.attr("data-adr") + SEPS);
+    $(".padr").append($foot.attr("data-padr") + SEPS);
+    $(".tlf").append($foot.attr("data-tel"));
+  }
+
 });
