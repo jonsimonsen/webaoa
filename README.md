@@ -120,8 +120,9 @@ v0.62: Do some fixing of browser compatibility issues.
 -Do a console log if the current html page contains multiples of certain elements that shouldn't occur more than one time.  
 
 v0.63: Planning to look more closely into combining DREIS and DagsJobben into a single page (with JS to select the content).  
--Under development...
--Use the experiences from combining employees into a single page to attempt a similar approach here.
+-Under development...  
+-Use the experiences from combining employees into a single page to attempt a similar approach here.  
+-Make a separate folder for html files that are not standalone files.  
 
 TODO: Consider removing the home link completely or replacing it with a different link.  
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
