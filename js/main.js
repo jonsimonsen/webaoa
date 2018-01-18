@@ -82,48 +82,59 @@ function getUserId(){
   }
 }
 
-/*Function for use when a JQuery selection that is expected to contain at most one element actually contains several. Logs an appropriate message to the console.*/
-function logDuplicates(string){
-  console.log("Error. Multiple " + string + " in html file.");
+/*Function for use when a JQuery selection contains the wrong number of elements. If multiples is true, it was expected to contain less than two elements but contained several.
+Otherwise, it was empty when expecting at least one element. Logs an appropriate message to the console using the string collection to refer to the elements.*/
+function logUniquenessError(collection, multiples = true){
+  let quantity = "Multiple "
+  if(!multiples){
+    quantity = "No "
+  }
+  console.log("Error. " + quantity + collection + " in html file.");
+}
+
+/*Function for returning a JQuery selection using the given string if that selection contains less than two objects.
+Otherwise, it logs an error message (using the description to describe the selection as a collection) to the console
+and returns a selection containing the first object of the initial selection.
+If required is true, it also logs an error message if the selection is empty.*/
+function singleSelect(selectionString, description, required = false){
+  let $selection = $(selectionString);
+  if($selection[1]){
+    logUniquenessError(description);   /*Log error message.*/
+    $selection = $selection.eq(0);
+  }
+  else if(required && !selection[0]){
+    logUniquenessError(description, false);
+  }
+  return $selection
 }
 
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
-  /*** JQuery constants that are used multiple times below. ***/
-  const $baseBody = $(".base");
-  const $sgrid = $(".stories");
-  const $empwindow = $(".employee-wrapper");
-  const $jobwindow = $(".job-wrapper");
-  const $hlink = $(".home");
-  const $foot = $(".footer");
+  /***Environments and flow controlling vars***/
+  const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
+  let running = true; /*Should stop applying JS if this becomes false.*/
+  let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
 
-  /*Testing that there are not multiple members of selections that expects at most one. Only logs to console.
-  If multiples are allowed later, code must be rewritten and variables should be renamed.*/
-  if($baseBody[1]){
-    logDuplicates("elements of the base class (only supposed to be used for the body)");
-  }
-  if($sgrid[1]){
-    logDuplicates("story grids");
-  }
-  if($empwindow[1]){
-    logDuplicates("employee windows");
-  }
-  if($jobwindow[1]){
-    logDuplicates("job windows");
-  }
-  if($hlink[1]){
-    logDuplicates("home links");
-  }
-  if($foot[1]){
-    logDuplicates("footers");
-  }
+
+
+  /*** JQuery constants and variables that are used multiple times below. ***/
+  /**consts that are supposed to contain one element**/
+  const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
+  const $storyGrid = singleSelect(".stories", "story grids");
+  const $empwindow = singleSelect(".employee-wrapper", "employee windows");
+  const $jobwindow = singleSelect(".job-wrapper", "job windows");
+  const $homeLink = singleSelect(".home", "home links");
+  const $foot = singleSelect(".footer", "footers");
+
+  /**vars**/
+  let $bannerNav = $();   /*Must be properly initialized in the banner creation*/
 
 
   /*** Browser compatibility testing (custom properties). Also tests the policy that all bodies have the base class. ***/
   /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
   /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
-  if($baseBody[0]){
+  if($("body.base")[0]){
     $baseBody.prepend('<div class="test"></div>');
     let realCol = $baseBody.children().first().css("background-color");
     let browserCol = $baseBody.css("background-color");
@@ -133,7 +144,8 @@ $(document).ready( () => {
     $baseBody.children().first().remove();
   }
   else{
-    alert("This page does not have the expected body class.");
+    alert("This page does not have the expected body class.");   /*A dev should check if the console indicates that a non-body element has the base class*/
+    readSuccess = false;   /*Since this doesn't actually have something to do with file reading, a different variable */
   }
 
 
@@ -147,17 +159,13 @@ $(document).ready( () => {
   const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
   const workPlaces = ["DREIS", "DagsJobben", "Default"];
 
-  /*Environments and flow controlling vars*/
-  const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
-  let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
-
 
   /*** Banner ***/
 
   /*Read banner file and append it to its wrapper div.*/
   let bannerCode = readFile("./banner.html");
 
-  if(bannerCode === null){
+  if(bannerCode === null || readSuccess !== true){
     readSuccess = false;
     if(online === true){
       alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
@@ -168,6 +176,7 @@ $(document).ready( () => {
   }
   else{
     $(".banner-wrapper").append(bannerCode);
+    $bnav = singleSelect(".nav-top", "top level navbars");
 
     $(".nav-top").children().each(function (){
       let target = $(this).attr("href");
@@ -194,6 +203,8 @@ $(document).ready( () => {
     });
   }
 
+  readSuccess = false;
+
 
   /*** Story link creation. Might come back in later if the links are used in more places ***/
 
@@ -211,7 +222,7 @@ $(document).ready( () => {
 
   /***Employee story creation for home page***/
 
-  if(readSuccess === true && $sgrid[0]){
+  if(readSuccess === true && $storyGrid[0]){
     let empCode = readFile("./empboxes.html");
     let linkCode = readFile("./storylink.html");
 
@@ -329,7 +340,7 @@ $(document).ready( () => {
   });*/
 
   /***Home link creation***/
-  if(readSuccess === true && $hlink[0]){
+  if(readSuccess === true && $homeLink[0]){
     $hlink.append(readFile("./homelink.html"));
   }
 
@@ -337,18 +348,18 @@ $(document).ready( () => {
 
   /*** Footer ***/
 
-  if(readSuccess === true && $foot[0]) {
+  if(readSuccess === true && $(".footer")[0]) {
     /*Read footer file and append it to the footer div.*/
     let footerCode = readFile("./footer.html");
-    $foot.append(footerCode);
+    $(".footer").append(footerCode);
 
     /*Add social media links (initially Facebook)*/
-    let fadr = $foot.attr("data-fb");
+    let fadr = $(".footer").attr("data-fb");
     let $fblink = $(".fb-link");
 
     if ((typeof fadr !== typeof undefined) && fadr !== false) {
       $fblink.attr("href", fadr);
-      $fblink.attr("alt", $foot.attr("data-avd") + " på Facebook");
+      $fblink.attr("alt", $(".footer").attr("data-avd") + " på Facebook");
     }
     else{
       $fblink.addClass("usynlig");
@@ -357,9 +368,9 @@ $(document).ready( () => {
     /*Add contact info*/
     const SEPS = " " + readFile("./seps.html");
 
-    $(".adr").append($foot.attr("data-adr") + SEPS);
-    $(".padr").append($foot.attr("data-padr") + SEPS);
-    $(".tlf").append($foot.attr("data-tel"));
+    $(".adr").append($(".footer").attr("data-adr") + SEPS);
+    $(".padr").append($(".footer").attr("data-padr") + SEPS);
+    $(".tlf").append($(".footer").attr("data-tel"));
   }
 
 });
