@@ -113,10 +113,26 @@ $(document).ready( () => {
 
   /***Environments and flow controlling vars***/
   const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
+  const testing = true; /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
   let running = true; /*Should stop applying JS if this becomes false.*/
   let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
 
 
+
+  /***Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts***/
+  if(testing === true){
+    /*Arrays will contain the selector string, a debugging description of the element and a bool that is true if the element is required*/
+    const baseBody = ["body.base", "bodies of the base class", true];
+    const baseClass = [".base", "elements of the base class (only supposed to be used for the body)", true];
+    const bannerSection = [".banner-wrapper", "wrappers for banner code", true];
+    const illSection = [".illustration", "illustration section"];
+    const infoSection = [".info", "info section"];
+    const optSection = [".options", "option section"];    /*190118: Note that it's relatively likely that this section is deprecated soon.*/
+    const storySection = [".stories", "story section"];   /*190118: Might want to rename the class/description to story-wrapper, excerpt or something similar.*/
+    const footerSection = [".footer", "wrappers for footer code"];    /*190118: It is possible that footers will soon be exclusively made by DOM-manipulation. In that case, a pure existence test should be used instead.*/
+    const topWrapper = [".top-wrapper", "top wrappers for navigating through dynamic content"];
+    /*Consider if activities should actually be used or merged with services*/
+  }
 
   /*** JQuery constants and variables that are used multiple times below. ***/
   /**consts that are supposed to contain one element**/

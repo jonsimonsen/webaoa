@@ -4,3 +4,5 @@ TODOS:
 -Consider looking more closely at fonts.
 -Consider looking more closely at scss.
 -possibly making a dynamic div that can alternate between DREIS and DagsJobben.
+
+-Refactor JS/Jquery (look into keeping utility functions and test functions in separate files).
