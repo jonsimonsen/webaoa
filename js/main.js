@@ -4,7 +4,7 @@
 /*** Functions made by others ***/
 
 /*Function for reading a file (Should use a different one/load when going live)*/
-/*https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
+/*Based on https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
 function readFile(file){
   let rawFile = new XMLHttpRequest();
   let allText = "";
@@ -22,6 +22,7 @@ function readFile(file){
       console.log("Unexpected file state.");
     }
   }
+
   try{
     rawFile.send(null);
   }
@@ -41,8 +42,8 @@ function capitalizeFirstLetter(string){
 
 /*** Functions made by Jon Simonsen ***/
 
-/*Function for reading a file and returning an array of paragraphs using double newlines as separators.*/
-/*Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
+/*Function for reading a file and returning an array of paragraphs using double newlines as separators.
+Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
 function readParas(file){
   return readFile(file).split("\r\n\r\n");
 }
@@ -56,6 +57,7 @@ function getUserId(){
   let url = window.location.href;
   let start = url.indexOf("?") + 1;
 
+  /*Test that the string contains the separator and that it occurs early enough that there is room for the attribute name and value.*/
   if(start <= 0){
     return null;
   }
@@ -63,33 +65,64 @@ function getUserId(){
     alert("Incorrect url. Wrongly named attribute or no value.");
     return null;
   }
-  else{
-    if(!(url.slice(start,(start + match.length)) === match)){
-      alert("Incorrect url. Wrongly named attribute.");
-      return null;
-    }
-    else{
-      let candidate = url.slice(start + match.length);
 
-      if(isNaN(candidate)){
-        alert("Incorrect url. Either the userid is not a number or the url contains garbage otherwise.");
-        return null;
-      }
-      else{
-        return Number(candidate);
-      }
-    }
+  /*Test that the expected attribute string occurs directly after the separator.*/
+  if(!(url.slice(start,(start + match.length)) === match)){
+    alert("Incorrect url. Wrongly named attribute.");
+    return null;
+  }
+
+  let candidate = url.slice(start + match.length);
+
+  /*Test that the value of the attribute is a number. If so, return it.*/
+
+  if(isNaN(candidate)){
+    alert("Incorrect url. Either the userid is not a number or the url contains garbage otherwise.");
+    return null;
+  }
+  else{
+    return Number(candidate);
   }
 }
 
 /*Function for use when a JQuery selection contains the wrong number of elements. If multiples is true, it was expected to contain less than two elements but contained several.
 Otherwise, it was empty when expecting at least one element. Logs an appropriate message to the console using the string collection to refer to the elements.*/
-function logUniquenessError(collection, multiples = true){
+function makeUniquenessError(collection, multiples = true){
+  let description = "";
+  let argErrorPrefix = "makeUniquenessError function ";
   let quantity = "Multiple "
   if(!multiples){
     quantity = "No "
   }
-  console.log("Error. " + quantity + collection + " in html file.");
+
+  /*Test validity of arguments*/
+  if(Array.isArray(collection)){
+    if(collection.length !== 2){
+      return argErrorPrefix + "expects the array argument to contain exactly two items (when an array argument is given)";
+    }
+    if(typeof(collection[0]) !== "string" || typeof(collection[1]) !== "string"){
+      return argErrorPrefix + "expects both items in the array argument to be of type string.";
+    }
+  }
+  else if(typeof(collection) !== string) {
+    return argErrorPrefix + "expects an array or a string as first argument.";
+  }
+
+  if(typeof(multiples) !== boolean){
+    return argErrorPrefix + "expects a bool as second argument if more than one is given."
+  }
+  else if(multiples === false and typeof(collection) === string){
+    return argErrorPrefix + "doesn't accept false as second argument when the first argument is a string."
+  }
+
+  if(typeof(collection) === "string"){
+    description = "elements of class " + collection;
+  }
+  else{
+    description = collection[0] + "elements of class " + collection[1];
+  }
+
+  return quantity + description + " in html file.");
 }
 
 /*Function for returning a JQuery selection using the given string if that selection contains less than two objects.
@@ -108,6 +141,65 @@ function singleSelect(selectionString, description, required = false){
   return $selection
 }
 
+/*Test that there are not multiple occurrences of a certain element. The argument */
+function testUniqueness(elemArray){
+  const allowedTags = ["body", "section"];
+  let required = "false";
+
+  /**Test validity of argument**/
+  if(!(Array.isArray(elemArray))){
+    return "Expected an array argument.";
+  }
+
+  if(elemArray.length < 2 || elemArray.length > 3){
+    return "The array argument is supposed to contain 2 or 3 elements.";
+  }
+
+  if(!allowedTags.includes(elemArray[0])){
+    return "The first element in the array argument must be one of a limited number of strings. Read the function for allowed values.";
+  }
+
+  if(typeof(elemArray[1]) === "string"){
+    if(!elemArray[1].startsWith(".")){
+      return "The second element of the array argument must correspond to a class (start with a dot).";
+    }
+  }
+  else{
+    return "The second element of the array argument must be a string.";
+  }
+
+  /*Process argument as well as testing*/
+  if (elemArray.length === 3){
+    if(typeof(elemArray[2]) === "boolean"){
+      required = elemArray[2];
+    }
+    else{
+      return "The third element of the array argument is expected to be a boolean.";
+    }
+  }
+
+  /**Do additional processing**/
+  /*Test the uniqueness of the object with tag determined by the first element in the array argument and class determined by the second.
+  Also test that there are not multiple elements of that class.*/
+  $targetSel = $(elemArray[0] + elemArray[1]);
+  $classSel = $(elemArray[1]);
+
+  if($targetSel[1]){
+    return logUniquenessError(elemArray.slice(0, 1));
+  }
+  else if($targetSel[0]){
+    if(classSel[1]){
+      return logUniquenessError(elemArray[1]);
+    }
+  }
+  else if(required){
+    return logUniquenessError(elemArray.slice(0, 1), false);
+  }
+
+  /*If no errors were detected, return an empty string*/
+  return "";
+}
+
 /***Generate html for banners, footers and other page elements***/
 $(document).ready( () => {
 
@@ -121,16 +213,32 @@ $(document).ready( () => {
 
   /***Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts***/
   if(testing === true){
+    const base = [".base", "body", true];
+    const banWrap = [".banner-wrapper", "section", true];
+    const mainWrap = [".content-wrapper", "section"];
+    const topWrap = [".top-wrapper", "section"];
+    const servWrap = [".service-wrapper", "section"];
+    const empWrap = [".employee-wrapper", "section"];
+    const testObjects = [base, banWrap, mainWrap, topWrap, servWrap, empWrap];
+
+    testObjects.forEach(function(item) {
+      errorMsg = testUniqueness(item);
+      if(errorMsg){
+        console.log("Error in testUniqueness. " + errorMsg);
+        running = false;
+      }
+    });
+
     /*Arrays will contain the selector string, a debugging description of the element and a bool that is true if the element is required*/
-    const baseBody = ["body.base", "bodies of the base class", true];
+    /*const baseBody = ["body.base", "bodies of the base class", true];
     const baseClass = [".base", "elements of the base class (only supposed to be used for the body)", true];
     const bannerSection = [".banner-wrapper", "wrappers for banner code", true];
     const illSection = [".illustration", "illustration section"];
     const infoSection = [".info", "info section"];
-    const optSection = [".options", "option section"];    /*190118: Note that it's relatively likely that this section is deprecated soon.*/
-    const storySection = [".stories", "story section"];   /*190118: Might want to rename the class/description to story-wrapper, excerpt or something similar.*/
-    const footerSection = [".footer", "wrappers for footer code"];    /*190118: It is possible that footers will soon be exclusively made by DOM-manipulation. In that case, a pure existence test should be used instead.*/
-    const topWrapper = [".top-wrapper", "top wrappers for navigating through dynamic content"];
+    const optSection = [".options", "option section"];*/    /*190118: Note that it's relatively likely that this section is deprecated soon.*/
+    /*const storySection = [".stories", "story section"];*/   /*190118: Might want to rename the class/description to story-wrapper, excerpt or something similar.*/
+    /*const footerSection = [".footer", "wrappers for footer code"];*/    /*190118: It is possible that footers will soon be exclusively made by DOM-manipulation. In that case, a pure existence test should be used instead.*/
+    /*const topWrapper = [".top-wrapper", "top wrappers for navigating through dynamic content"];*/
     /*Consider if activities should actually be used or merged with services*/
   }
 
