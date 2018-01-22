@@ -85,8 +85,11 @@ function getUserId(){
   }
 }
 
-/*Function for use when a JQuery selection contains the wrong number of elements. If multiples is true, it was expected to contain less than two elements but contained several.
-Otherwise, it was empty when expecting at least one element. Logs an appropriate message to the console using the string collection to refer to the elements.*/
+/*Function for use when a JQuery selection contains the wrong number of elements.
+collection can be an array containing two strings. The first should correspond to the html tag of the element. The second should be the class name.
+Otherwise, collection should be a string containing the class name. If this is the case, the function assumes that there exists an element of this class that has a tag it is not supposed to have.
+multiples says if the uniqueness was violated by having too many elements (true) or too few (false). This argument doesn't matter if the first one was a string.
+Returns a string containing a message specifying how the uniqueness has been violated. If the function arguments are not as expected, the returned string specifies this instead.*/
 function makeUniquenessError(collection, multiples = true){
   let description = "";
   let argErrorPrefix = "makeUniquenessError function ";
@@ -104,47 +107,35 @@ function makeUniquenessError(collection, multiples = true){
       return argErrorPrefix + "expects both items in the array argument to be of type string.";
     }
   }
-  else if(typeof(collection) !== string) {
+  else if(typeof(collection) !== "string") {
     return argErrorPrefix + "expects an array or a string as first argument.";
   }
 
-  if(typeof(multiples) !== boolean){
-    return argErrorPrefix + "expects a bool as second argument if more than one is given."
+  if(typeof(multiples) !== "boolean"){
+    return argErrorPrefix + "expects a bool as second argument if more than one is given.";
   }
-  else if(multiples === false and typeof(collection) === string){
-    return argErrorPrefix + "doesn't accept false as second argument when the first argument is a string."
+  else if(multiples === false && typeof(collection) === "string"){
+    return argErrorPrefix + "doesn't accept false as second argument when the first argument is a string.";
   }
 
   if(typeof(collection) === "string"){
-    description = "elements of class " + collection;
+    return "At least one unexpected element of class " + collection + " in html file. The class can only be used for a specific html tag.";
   }
   else{
-    description = collection[0] + "elements of class " + collection[1];
+    return quantity + collection[0] + " elements of class " + collection[1] + " in html file.";
   }
-
-  return quantity + description + " in html file.");
 }
 
-/*Function for returning a JQuery selection using the given string if that selection contains less than two objects.
-Otherwise, it logs an error message (using the description to describe the selection as a collection) to the console
-and returns a selection containing the first object of the initial selection.
-If required is true, it also logs an error message if the selection is empty.*/
-function singleSelect(selectionString, description, required = false){
-  let $selection = $(selectionString);
-  if($selection[1]){
-    logUniquenessError(description);   /*Log error message.*/
-    $selection = $selection.eq(0);
-  }
-  else if(required && !selection[0]){
-    logUniquenessError(description, false);
-  }
-  return $selection
-}
-
-/*Test that there are not multiple occurrences of a certain element. The argument */
+/*Function for testing that there are not multiple occurrences of a certain element in the html document the function is called from. If the element is required, it also tests for existence.
+The test assumes that there are no other elements (tags) with the same class as the one being tested. If this is violated, an error explaining this should be returned.
+The argument is an array that is expected to consist of two strings and optionally a boolean as its last element.
+The first string corresponds to a html tag, and must match on of the strings in the allowedTags array in this function.
+The second string should be a class name with a dot in front of it (".classname").
+The boolean tells if the element is required in the html document.
+Returns an empty string if the element satisfies the uniqueness test. Otherwise returns a string containing an error message.*/
 function testUniqueness(elemArray){
-  const allowedTags = ["body", "section"];
-  let required = "false";
+  const allowedTags = ["body", "section", "nav"];
+  let required = false;
 
   /**Test validity of argument**/
   if(!(Array.isArray(elemArray))){
@@ -185,19 +176,43 @@ function testUniqueness(elemArray){
   $classSel = $(elemArray[1]);
 
   if($targetSel[1]){
-    return logUniquenessError(elemArray.slice(0, 1));
+    return makeUniquenessError(elemArray.slice(0, 2));
   }
   else if($targetSel[0]){
-    if(classSel[1]){
-      return logUniquenessError(elemArray[1]);
+    if($classSel[1]){
+      return makeUniquenessError(elemArray[1]);
     }
   }
+  else if($classSel[0]){
+    return makeUniquenessError(elemArray[1]);
+  }
   else if(required){
-    return logUniquenessError(elemArray.slice(0, 1), false);
+    return makeUniquenessError(elemArray.slice(0, 2), false);
   }
 
   /*If no errors were detected, return an empty string*/
   return "";
+}
+
+/*Tests if the elements in the argument array satisfy uniqueness criteria.
+setArray should be an array of (sub-)arrays to allow testing multiple elements in one go. It should contain the subarrays to be processed.
+See inside this function to inspect how the subarrays are supposed to be built.
+For every subarray, the function should log to the console an error message if the subarray doesn't satisfy the uniqueness criteria.
+If any error message was logged, the function should return false. Otherwise, it should return true.*/
+function showUniqueness(setArray){
+  let errorMsg = "";
+  let success = true;
+
+  /*For each element in the set, test its uniqueness and log any error messages to the console.*/
+  setArray.forEach(function(item){
+    errorMsg = testUniqueness(item);    /*Inspect this function to see an explanation of how the subarrays (items) are supposed to look.*/
+    if(errorMsg){
+      console.log("Error in testUniqueness. " + errorMsg);
+      success = false;
+    }
+  });
+
+  return success;
 }
 
 /***Generate html for banners, footers and other page elements***/
@@ -212,22 +227,17 @@ $(document).ready( () => {
 
 
   /***Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts***/
-  if(testing === true){
-    const base = [".base", "body", true];
-    const banWrap = [".banner-wrapper", "section", true];
-    const mainWrap = [".content-wrapper", "section"];
-    const topWrap = [".top-wrapper", "section"];
-    const servWrap = [".service-wrapper", "section"];
-    const empWrap = [".employee-wrapper", "section"];
-    const testObjects = [base, banWrap, mainWrap, topWrap, servWrap, empWrap];
+  if(testing){
+    const base = ["body", ".base", true];
+    const banWrap = ["section", ".banner-wrapper", true];
+    const mainWrap = ["section", ".content-wrapper"];
+    const topWrap = ["section", ".top-wrapper"];
+    const servWrap = ["section", ".service-wrapper"];
+    const empWrap = ["section", ".employee-wrapper"];
 
-    testObjects.forEach(function(item) {
-      errorMsg = testUniqueness(item);
-      if(errorMsg){
-        console.log("Error in testUniqueness. " + errorMsg);
-        running = false;
-      }
-    });
+    if(!(showUniqueness([base, banWrap, mainWrap, topWrap, servWrap, empWrap]))){
+      return;
+    }
 
     /*Arrays will contain the selector string, a debugging description of the element and a bool that is true if the element is required*/
     /*const baseBody = ["body.base", "bodies of the base class", true];
@@ -242,40 +252,40 @@ $(document).ready( () => {
     /*Consider if activities should actually be used or merged with services*/
   }
 
+
   /*** JQuery constants and variables that are used multiple times below. ***/
   /**consts that are supposed to contain one element**/
-  const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
+  const $baseBody = $("body.base");
+  const $banWrap = $("section.banner-wrapper");
+  const $mainWrap = $("section.content-wrapper");
+  const $topWrap = $("section.top-wrapper");
+  const $servWrap = $("section.service-wrapper");
+  const $empWrap = $("section.employee-wrapper");
+  /*const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
   const $storyGrid = singleSelect(".stories", "story grids");
   const $empwindow = singleSelect(".employee-wrapper", "employee windows");
   const $jobwindow = singleSelect(".job-wrapper", "job windows");
   const $homeLink = singleSelect(".home", "home links");
-  const $foot = singleSelect(".footer", "footers");
-
-  /**vars**/
-  let $bannerNav = $();   /*Must be properly initialized in the banner creation*/
+  const $foot = singleSelect(".footer", "footers");*/
 
 
-  /*** Browser compatibility testing (custom properties). Also tests the policy that all bodies have the base class. ***/
+
+  /*** Browser compatibility testing (custom properties). ***/
   /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
   /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
-  if($("body.base")[0]){
-    $baseBody.prepend('<div class="test"></div>');
-    let realCol = $baseBody.children().first().css("background-color");
-    let browserCol = $baseBody.css("background-color");
-    if(browserCol !== realCol){
-      alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
-    }
-    $baseBody.children().first().remove();
+  $baseBody.prepend('<div class="test"></div>');
+  let realCol = $baseBody.children().first().css("background-color");
+  let browserCol = $baseBody.css("background-color");
+  if(browserCol !== realCol){
+    alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
   }
-  else{
-    alert("This page does not have the expected body class.");   /*A dev should check if the console indicates that a non-body element has the base class*/
-    readSuccess = false;   /*Since this doesn't actually have something to do with file reading, a different variable */
-  }
+  $baseBody.children().first().remove();
 
 
   /*** Global constants/variables ***/
 
-  /*Paths and files for employees and workplaces*/
+  /*Paths and files for html partials, employees and workplaces*/
+  const partPath = "./html/";
   const storyPath = "./Info/";
   const imgPath = "./Temp/";
   const textEnding = ".txt";
@@ -287,11 +297,11 @@ $(document).ready( () => {
   /*** Banner ***/
 
   /*Read banner file and append it to its wrapper div.*/
-  let bannerCode = readFile("./banner.html");
+  let bannerCode = readFile(partPath + "banner.html");
 
-  if(bannerCode === null || readSuccess !== true){
+  if(bannerCode === null){
     readSuccess = false;
-    if(online === true){
+    if(online){
       alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
     }
     else{
@@ -299,21 +309,30 @@ $(document).ready( () => {
     }
   }
   else{
-    $(".banner-wrapper").append(bannerCode);
-    $bnav = singleSelect(".nav-top", "top level navbars");
+    $banWrap.append(bannerCode);
 
-    $(".nav-top").children().each(function (){
+    if(testing){
+      if(!(showUniqueness([["nav", ".nav-top", true]]))){
+        return;
+      }
+    }
+
+    let $bnav = $("nav.nav-top");
+
+    $bnav.children().each(function (){
       let target = $(this).attr("href");
 
       /*Give self-pointing links class unlink (not clickable).*/
-      if(typeof target !== typeof undefined && target !== false){
+      if(typeof target !== typeof undefined){
         if(window.location.pathname.endsWith(target.slice(1))){
           $(this).addClass("unlink");
         }
       }
       /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
-      else {
-        let dest = "#";
+      else if(testing){
+        console.log("Check that the nav-top in banner.html does not contain links without the href attribute.");
+        return;
+        /*let dest = "#";
 
         if($foot[0]){
           dest += $foot.attr("id");
@@ -322,11 +341,12 @@ $(document).ready( () => {
           $(this).addClass("unlink");
         }
 
-        $(this).attr("href", dest);
+        $(this).attr("href", dest);*/
       }
     });
   }
 
+  return;
   readSuccess = false;
 
 
