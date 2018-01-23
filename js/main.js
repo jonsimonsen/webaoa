@@ -203,6 +203,12 @@ function showUniqueness(setArray){
   let errorMsg = "";
   let success = true;
 
+  /*Test validity of argument*/
+  if(!(Array.isArray(setArray))){
+    console.log("Error in showUniqueness. Expected an array argument.");
+    return false;
+  }
+
   /*For each element in the set, test its uniqueness and log any error messages to the console.*/
   setArray.forEach(function(item){
     errorMsg = testUniqueness(item);    /*Inspect this function to see an explanation of how the subarrays (items) are supposed to look.*/
@@ -213,6 +219,27 @@ function showUniqueness(setArray){
   });
 
   return success;
+}
+
+function isAbsent(className){
+  /*Test validity of argument*/
+  if(typeof(className) !== "string"){
+    console.log("isAbsent error. Argument must be a string.");
+    return false;
+  }
+
+  if(className[0] !== "."){
+    console.log("isAbsent error. Argument must correspond to a class (start with a dot).");
+    return false;
+  }
+
+  if($(className).length){
+    console.log("Error. There exists elements of class " + className + ".");
+    return false;
+  }
+  else{
+    return true;
+  }
 }
 
 /***Generate html for banners, footers and other page elements***/
@@ -236,6 +263,7 @@ $(document).ready( () => {
     const empWrap = ["section", ".employee-wrapper"];
 
     if(!(showUniqueness([base, banWrap, mainWrap, topWrap, servWrap, empWrap]))){
+      console.log("Occurred before any DOM-manipulation");
       return;
     }
 
@@ -257,10 +285,12 @@ $(document).ready( () => {
   /**consts that are supposed to contain one element**/
   const $baseBody = $("body.base");
   const $banWrap = $("section.banner-wrapper");
-  const $mainWrap = $("section.content-wrapper");
   const $topWrap = $("section.top-wrapper");
+
+  /*const $mainWrap = $("section.content-wrapper");
   const $servWrap = $("section.service-wrapper");
-  const $empWrap = $("section.employee-wrapper");
+  const $empWrap = $("section.employee-wrapper");*/
+
   /*const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
   const $storyGrid = singleSelect(".stories", "story grids");
   const $empwindow = singleSelect(".employee-wrapper", "employee windows");
@@ -294,12 +324,13 @@ $(document).ready( () => {
   const workPlaces = ["DREIS", "DagsJobben", "Default"];
 
 
-  /*** Banner ***/
+  /*** Create banner ***/
 
-  /*Read banner file and append it to its wrapper div.*/
+  /*Read banner file.*/
   let bannerCode = readFile(partPath + "banner.html");
 
   if(bannerCode === null){
+    /*If the file reading failed, give an error message alert and disable further file reading.*/
     readSuccess = false;
     if(online){
       alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
@@ -309,10 +340,21 @@ $(document).ready( () => {
     }
   }
   else{
+    /*Test that the initial DOM doesn't contain the class for the banner navbar.*/
+    if(testing){
+      if(!(isAbsent(".nav-top"))){
+        console.log("Occurred before adding banner code.");
+        return;
+      }
+    }
+
+    /*Add banner code.*/
     $banWrap.append(bannerCode);
 
+    /*Test that the banner code adds the banner nav bar.*/
     if(testing){
       if(!(showUniqueness([["nav", ".nav-top", true]]))){
+        console.log("Occurred after adding banner code.");
         return;
       }
     }
@@ -328,9 +370,10 @@ $(document).ready( () => {
           $(this).addClass("unlink");
         }
       }
-      /*Give classes with a footer a contact link. Otherwise, make an unclickable link.*/
+      /*-Give classes with a footer a contact link. Otherwise, make an unclickable link.-*/
       else if(testing){
         console.log("Check that the nav-top in banner.html does not contain links without the href attribute.");
+        console.log("Occurred while processing banner code.")
         return;
         /*let dest = "#";
 
@@ -346,9 +389,85 @@ $(document).ready( () => {
     });
   }
 
-  return;
-  readSuccess = false;
+  /*** Create top wrapper (for navigating through dynamic content) ***/
+  if($topWrap.length){
+    /*Read top-wrapper file*/
+    let topCode = readFile(partPath + "tops.html");
 
+    if(topCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      if(online){
+        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      }
+      else{
+        alert("Failed to load main content. Unknown cause.");
+      }
+    }
+    else{
+      /*Test that the DOM doesn't yet contain the scroll-menu wrapper*/
+      if(testing){
+        if(!(isAbsent(".scroll-menu"))){
+          console.log("Occurred before adding top-wrapper code.")
+        }
+      }
+
+      /*Add top-wrapper code*/
+      $topWrap.append(topCode);
+    }
+  }
+
+  return;
+
+  /*** Create content (base content consists of an img section, an info section and a footer). ***/
+  if($mainWrap.length){
+    /*Read content file*/
+    let mainCode = readFile(partPath + "content.html");
+
+    if(mainCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      if(online){
+        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      }
+      else{
+        alert("Failed to load main content. Unknown cause.");
+      }
+    }
+    else{
+      /*Test that the DOM doesn't yet contain the elements that are supposed to be in the content code.*/
+      if(testing){
+        let success = true;
+        sections = [".illustration", ".info", ".footer"];
+        sections.forEach(function(item) {
+          if(!(isAbsent(item))){
+            console.log("Occurred before adding content code.");
+            success = false;
+          }
+        });
+        if(!success){
+          return;
+        }
+      }
+
+      /*Add content to the content wrapper*/
+      $mainWrap.append(mainCode);
+
+      if(testing){
+        const illWrap = ["section", ".illustration", true];
+        const infoWrap = ["section", ".info", true];
+        const foot = ["section", ".footer", true];
+
+        if(!(showUniqueness([illWrap, infoWrap, foot]))){
+          console.log("Occurred after adding content code.");
+          return;
+        }
+      }
+
+      /*Read page-specific content file*/
+
+    }
+  }
 
   /*** Story link creation. Might come back in later if the links are used in more places ***/
 

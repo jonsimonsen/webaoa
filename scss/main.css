@@ -272,12 +272,12 @@ span.newline {
 /*150118: Tested and seems ok at browser widths (320, 1360) in Chrome.*/
 /*Will need to retest if the image (or other content) is altered.*/
 
-.illustrasjon {
+.illustration {
   display: flex;
   align-items: center;
 }
 
-.illustrasjon img {
+.illustration img {
   width: 100%;    /*Attempted to do this with block display, but that doesn't work on replaced elements (images).*/
   min-height: 160px;  /*To align content if the image doesn't load correctly*/
   background-color: var(--theme-color);
