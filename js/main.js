@@ -1,5 +1,27 @@
-/*** Main JS file for the website of "Arbeid og Aktivitet, Tromsø" (by Jon Simonsen) ***/
+/*** Main JS file for the website of "Arbeid og Aktivitet, Tromsø" (by Jon Simonsen). ***/
 
+/** Since importing seems to be a new feature in JS, all used functions will be included in this file.
+Three star comments start a new section. Two star comments are for subsections or important information.
+More trivial comments use one star.**/
+
+/*Sections (230118):
+-Global constants
+-Functions by others
+-Functions by me
+-html generation (when document is ready)*/
+
+
+/*** Global consts ***/
+const BUNDLED = 0;    /*For an array of arrays or strings*/
+const ABSENT = 1;     /*For a string corresponding to a class name*/
+const PRESENT = 2;
+const INPUTTYPES = [BUNDLED, ABSENT, PRESENT];
+
+/**Errors**/
+const ERR_ARGERR = "argumentError error: ";
+const ERR_ABSERR = "isAbsent error: ";
+const ERR_PRESERR = "isPresent error: ";
+const ERR_UNOERR = "showUniqueness error: ";
 
 /*** Functions made by others ***/
 
@@ -200,12 +222,11 @@ See inside this function to inspect how the subarrays are supposed to be built.
 For every subarray, the function should log to the console an error message if the subarray doesn't satisfy the uniqueness criteria.
 If any error message was logged, the function should return false. Otherwise, it should return true.*/
 function showUniqueness(setArray){
-  let errorMsg = "";
-  let success = true;
+  let isSpecial = true;
+  let errorMsg = argumentError(setArray, BUNDLED); /*Test argument*/
 
-  /*Test validity of argument*/
-  if(!(Array.isArray(setArray))){
-    console.log("Error in showUniqueness. Expected an array argument.");
+  if(errorMsg){
+    console.log(ERR_UNOERR + errorMsg);
     return false;
   }
 
@@ -221,39 +242,127 @@ function showUniqueness(setArray){
   return success;
 }
 
-function isAbsent(className){
-  /*Test validity of argument*/
-  if(typeof(className) !== "string"){
-    console.log("isAbsent error. Argument must be a string.");
+/*Function for testing if all elements in the selectorArray are present in the html document.
+Also tests that only the tag type in the selectorArray has the class from the selectorArray.
+selectorArray
+*/
+function isPresent(selectorArray){
+  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
+  let errorMsg = argumentError(, BUNDLED);    /*Test argument*/
+
+  if(errorMsg){
+    console.log(ERR_PRESERR + errorMsg);
     return false;
   }
 
-  if(className[0] !== "."){
-    console.log("isAbsent error. Argument must correspond to a class (start with a dot).");
-    return false;
-  }
-
-  if($(className).length){
-    console.log("Error. There exists elements of class " + className + ".");
-    return false;
-  }
-  else{
-    return true;
-  }
+  /*Test the elements of ...*/
+  .forEach(function(...) {
+    errorMsg = argumentError(..., PRESENT);
+    if(errorMsg){
+      exists = false;
+      console.log(ERR_PRESERR + errorMsg);
+    }
+    else{
+      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
+    }
+  });
 }
 
-/***Generate html for banners, footers and other page elements***/
+/*Function for testing if all classes in the classArray are absent from the html document.
+classArray should be an array of strings where all strings are class names starting with a dot.
+Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isAbsent(classArray){
+  let isMissing = true;   /*Assume that argument is correct and its elements are absent until otherwise has been determined.*/
+  let errorMsg = argumentError(classArray, BUNDLED);   /*Test argument*/
+
+  if(errorMsg){
+    console.log(ERR_ABSERR + errorMsg);
+    return false;
+  }
+
+  /*Test the elements of classArray*/
+  classArray.forEach(function(className) {
+    errorMsg = argumentError(className, ABSENT);
+    if(errorMsg){
+      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
+      console.log(errorMsg);
+    }
+    else{
+      /*Test if the className is actually absent from the document*/
+      if($(classname).length){
+        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
+        isMissing = false;
+      }
+    }
+  });
+
+  return isMissing;
+}
+
+/*Function for testing inputElem according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
+Use BUNDLED for testing if the argument is a non-empty array (it is implied that the array contains one or more elements that will be sent to argumentError later).
+inputElem should be the array or string to be tested.
+inputType determines how to test inputElem.
+Returns an empty string if no error was found. Otherwise, returns an error message.
+Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself). The exception is if inputType is BUNDLED.*/
+function argumentError(inputElem, inputType){
+  /*If the type is bundled, check that inputElem is an array*/
+  if(inputType === BUNDLED){
+    if(!(Array.isArray(inputElem))){
+      return "BUNDLE test failed. The input is expected to be an array.";
+    }
+    else if(!(inputElem[0])){
+      return "Bundle test failed. The input array is expected to contain at least one element.";
+    }
+    else{
+      return "";
+    }
+  }
+
+  /*Test that the arguments to this function has the expected types*/
+  /*if(typeof(inputElem) !== "string" && !(Array.isArray(inputElem))){
+    return ERR_ARGERR + "Its first argument must be a string or an array.";
+  }*/
+  else if(!(INPUTTYPES.includes(inputType))){
+    return ERR_ARGERR + "Its second argument must be equal to an element in the global const Array INPUTTYPES.";
+  }
+
+  /*Process the inputElem element (the arguments that the function checks)*/
+  if(inputType === ABSENT){
+    if(typeof(inputElem !== "string")){
+        return ERR_ABSERR + '"' + inputElem + '" is not a string.';
+    }
+    else if(inputElem[0] !== "."){
+      return ERR_ABSERR + '"' + inputElem + '" does not start with a dot.';
+    }
+  }
+
+  return "";    /*No error detected*/
+
+}
+
+/*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
-  /***Environments and flow controlling vars***/
+  /**Environments and flow controlling vars**/
   const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
   const testing = true; /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
   let running = true; /*Should stop applying JS if this becomes false.*/
   let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
+  let progress = "any DOM-manipulation";   /*Update this to keep track of where errors occur*/
+  let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
 
 
+  /**Paths and files for html partials, employees and workplaces**/
+  const partPath = "./html/";
+  const storyPath = "./Info/";
+  const imgPath = "./Temp/";
+  const textEnding = ".txt";
+  const imgEnding = ".jpg";
+  const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
+  const workPlaces = ["DREIS", "DagsJobben", "Default"];
 
-  /***Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts***/
+  /**Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts**/
   if(testing){
     const base = ["body", ".base", true];
     const banWrap = ["section", ".banner-wrapper", true];
@@ -281,8 +390,7 @@ $(document).ready( () => {
   }
 
 
-  /*** JQuery constants and variables that are used multiple times below. ***/
-  /**consts that are supposed to contain one element**/
+  /**JQuery constants and variables that are used multiple times below.**/
   const $baseBody = $("body.base");
   const $banWrap = $("section.banner-wrapper");
   const $topWrap = $("section.top-wrapper");
@@ -300,7 +408,7 @@ $(document).ready( () => {
 
 
 
-  /*** Browser compatibility testing (custom properties). ***/
+  /***Browser compatibility testing (custom properties).***/
   /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
   /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
   $baseBody.prepend('<div class="test"></div>');
@@ -312,16 +420,6 @@ $(document).ready( () => {
   $baseBody.children().first().remove();
 
 
-  /*** Global constants/variables ***/
-
-  /*Paths and files for html partials, employees and workplaces*/
-  const partPath = "./html/";
-  const storyPath = "./Info/";
-  const imgPath = "./Temp/";
-  const textEnding = ".txt";
-  const imgEnding = ".jpg";
-  const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
-  const workPlaces = ["DREIS", "DagsJobben", "Default"];
 
 
   /*** Create banner ***/
