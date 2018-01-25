@@ -1,6 +1,6 @@
 /*** Main JS file for the website of "Arbeid og Aktivitet, Tromsø" (by Jon Simonsen). ***/
 
-/** Since importing seems to be a new feature in JS, all used functions will be included in this file.
+/** Since importing seems to be a new feature in JS (perhaps not well supported yet), all used functions will be included in this file.
 Three star comments start a new section. Two star comments are for subsections or important information.
 More trivial comments use one star.**/
 
@@ -12,10 +12,12 @@ More trivial comments use one star.**/
 
 
 /*** Global consts ***/
-const BUNDLED = 0;    /*For an array of arrays or strings*/
-const ABSENT = 1;     /*For a string corresponding to a class name*/
-const PRESENT = 2;
-const INPUTTYPES = [BUNDLED, ABSENT, PRESENT];
+const NO_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES*/
+const BUNDLED = 0;      /*For an array (presumably of arrays or strings).*/
+const CLASS = 1;        /*For a string corresponding to a class name.*/
+const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
+const INPUTTYPES = [BUNDLED, CLASS, COMPOSITE];
+const TAGTYPES = ["body", "section"];
 
 /**Errors**/
 const ERR_ARGERR = "argumentError error: ";
@@ -246,9 +248,9 @@ function showUniqueness(setArray){
 Also tests that only the tag type in the selectorArray has the class from the selectorArray.
 selectorArray
 */
-function isPresent(selectorArray){
+function isPresentx(selectorArray){
   let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
-  let errorMsg = argumentError(, BUNDLED);    /*Test argument*/
+  let errorMsg = argumentError(BUNDLED, selectorArray);    /*Test argument*/
 
   if(errorMsg){
     console.log(ERR_PRESERR + errorMsg);
@@ -256,8 +258,8 @@ function isPresent(selectorArray){
   }
 
   /*Test the elements of ...*/
-  .forEach(function(...) {
-    errorMsg = argumentError(..., PRESENT);
+  selectorArray.forEach(function(elem) {
+    errorMsg = argumentError(elem, PRESENT);
     if(errorMsg){
       exists = false;
       console.log(ERR_PRESERR + errorMsg);
@@ -271,7 +273,7 @@ function isPresent(selectorArray){
 /*Function for testing if all classes in the classArray are absent from the html document.
 classArray should be an array of strings where all strings are class names starting with a dot.
 Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
-function isAbsent(classArray){
+function isAbsentx(classArray){
   let isMissing = true;   /*Assume that argument is correct and its elements are absent until otherwise has been determined.*/
   let errorMsg = argumentError(classArray, BUNDLED);   /*Test argument*/
 
@@ -305,7 +307,7 @@ inputElem should be the array or string to be tested.
 inputType determines how to test inputElem.
 Returns an empty string if no error was found. Otherwise, returns an error message.
 Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself). The exception is if inputType is BUNDLED.*/
-function argumentError(inputElem, inputType){
+function argumentErrorx(inputElem, inputType){
   /*If the type is bundled, check that inputElem is an array*/
   if(inputType === BUNDLED){
     if(!(Array.isArray(inputElem))){
@@ -341,6 +343,126 @@ function argumentError(inputElem, inputType){
 
 }
 
+/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
+Use BUNDLED for testing if inputOne is a non-empty array (it is implied that the array contains one or more elements that will be sent to argumentError later).
+inputOne is expected be a string corresponding to a classname (starting with a dot) or (in the case of BUNDLED) a non-empty Array.
+inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
+Returns an empty string if no error was found. Otherwise, returns an error message.
+Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself). The exception is if inputType is BUNDLED.*/
+function argumentError(inputType, inputOne, inputTwo = ""){
+
+  /*If the type is bundled, check that inputElem is an array*/
+  if(inputType === BUNDLED){
+    if(!(Array.isArray(inputOne))){
+      return "BUNDLE test failed. The argument is expected to be an array.";
+    }
+    else if(!(inputOne[0])){
+      return "BUNDLE test failed. The array argument is expected to contain at least one element.";
+    }
+    else if(inputTwo){
+      return "Do not pass more than two arguments to argumentError when the first is BUNDLED."
+    }
+    else{
+      return "";
+    }
+  }
+
+  /*Test that the inputType has an expected value*/
+  if(!(INPUTTYPES.includes(inputType))){
+    return ERR_ARGERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
+  }
+
+  /*Test that inputTwo has an expected value for the given inputType*/
+  if(inputType === CLASS){
+    if(inputTwo){
+      return "Unnecessary argument passed to argumentError function.";
+    }
+  }
+  else if(inputType === COMPOSITE){
+    if(!(TAGTYPES.includes(inputTwo))){
+      return '"' + inputTwo + '" is not in the list of allowed tags (TAGTYPES).'
+    }
+  }
+  else{
+    return ERR_ARGERR + "The function needs to be updated to process all possible inputTypes correctly."
+  }
+
+  /*Test that inputOne is a string containing a class name.*/
+  if(typeof(inputOne) !== "string"){
+    /*Since JS would remove brackets when converting, a JSON method is used.*/
+    /*https://stackoverflow.com/questions/22746353/javascript-convert-array-to-string-while-preserving-brackets*/
+    return '"' + JSON.stringify(inputOne) + '" (without the quotes) is not a string.';
+  }
+  else if(inputOne[0] !== "."){
+    return '"' + inputOne + '" does not start with a dot.';
+  }
+
+  return "";    /*No error detected*/
+
+}
+
+/*Function for testing if all classes in the classArray are absent from the html document.
+classArray should be an array of strings where all strings are class names starting with a dot.
+Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isAbsent(classArray){
+  let isMissing = true;                                 /*Assume that the argument is correct and its elements are absent until otherwise has been determined.*/
+  let errorMsg = argumentError(BUNDLED, classArray);    /*Test the classArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_ABSERR + errorMsg);
+    return false;
+  }
+
+  /*Test the elements of classArray*/
+  classArray.forEach(function(className) {
+    errorMsg = argumentError(CLASS, className);
+    if(errorMsg){
+      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
+      console.log(ERR_ABSERR + errorMsg);
+    }
+    else{
+      /*Test if the className is actually absent from the document*/
+      if($(className).length){
+        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
+        isMissing = false;
+      }
+    }
+  });
+
+  return isMissing;
+}
+
+/*Function for testing if all elements in the selectorArray are present in the html document.
+Also tests that only the tag type in the selectorArray has the class from the selectorArray.
+selectorArray should be an array of arrays of strings.
+Each string array should contains a tag first and then a class name (starting with a dot).
+The tags should be one of the tags in TAGTYPES.
+Returns true if all elements corresponding to tags and classes from the inner arrays are present.
+It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isPresent(selectorArray){
+  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
+  let errorMsg = argumentError(BUNDLED, selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_PRESERR + errorMsg);
+    return false;
+  }
+
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    errorMsg = argumentError(PRESENT, subArray);
+    if(errorMsg){
+      exists = false;
+      console.log(ERR_PRESERR + errorMsg);
+    }
+    else{
+      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
+    }
+  });
+
+  return exists;
+}
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
@@ -361,6 +483,83 @@ $(document).ready( () => {
   const imgEnding = ".jpg";
   const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
   const workPlaces = ["DREIS", "DagsJobben", "Default"];
+
+  /**Testing the test framework**/
+  if(testing){
+    if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
+      let output = "";
+
+      /*Testing argumentError()*/
+      console.log("When giving argumentError a bundle that isn't an array:");
+      output = argumentError(BUNDLED, 123);
+      console.log(output);
+      console.log("");
+      console.log("When giving argumentError a bundle that is an empty array:");
+      output = argumentError(BUNDLED, []);
+      console.log(output);
+      console.log("");
+      console.log("When giving argumentError a bundle with a total of three elements:");
+      output = argumentError(BUNDLED, ["test"], "test");
+      console.log(output);
+      console.log("");
+
+      console.log("When giving argumentError an invalid inputType:");
+      output = argumentError(NO_INPUT);
+      console.log(output);
+      console.log("");
+      console.log("When giving argumentError a class inputType with a total of three elements:");
+      output = argumentError(CLASS, "test", "test");
+      console.log(output);
+      console.log("");
+
+      /*Testing isAbsent()*/
+      console.log("When giving isAbsent incorrect type of argument:");
+      output = isAbsent(".test-zero");
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isAbsent an empty array:");
+      output = isAbsent([]);
+      console.log("Yields: " + output);
+      console.log("");
+
+      console.log("When giving isAbsent an array with incorrect type of subelement:");
+      output = isAbsent([123]);
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isAbsent an array with an array subelement (incorrect):");
+      output = isAbsent([[".test-zero"]]);
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isAbsent an array with incorrectly named string:");
+      output = isAbsent(["test-zero"]);
+      console.log("Yields: " + output);
+      console.log("");
+
+      console.log("When giving isAbsent an absent element:");
+      output = isAbsent([".test-zero"]);
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isAbsent a unique element:");
+      output = isAbsent([".test-one"]);
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isAbsent a non-unique element:");
+      output = isAbsent([".test-two"]);
+      console.log("Yields: " + output);
+      console.log("");
+
+      /*Testing isPresent()*/
+      console.log("When giving isPresent incorrect type of argument:");
+      output = isPresent(".test-zero");
+      console.log("Yields: " + output);
+      console.log("");
+      console.log("When giving isPresent an empty array:");
+      output = isPresent([]);
+      console.log("Yields: " + output);
+      console.log("");
+
+    }
+  }
 
   /**Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts**/
   if(testing){
