@@ -17,6 +17,9 @@ const CLASS = 1;        /*For a string corresponding to a class name.*/
 const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
 const INPUTTYPES = [CLASS, COMPOSITE];
 const TAGTYPES = ["body", "section"];
+const TESTMAIN = "The function argument";
+const TESTSUBPRE = "Subelement ";
+const TESTSUBPOST = " of the function argument";
 
 /**Errors**/
 const ERR_ARGERR = "argumentError() error: ";
@@ -343,22 +346,38 @@ function argumentErrorx(inputElem, inputType){
 
 }
 
-/*Function for testing that the argument is an array. Also test that it contains at least minElems items.
-Returns a description of the error. If no error, it returns an empty string.*/
-function bundleTest(inputArray, arrayText = "The function argument", minElems = 1){
-  /*Test that the callee has not messed up the arguments*/
+/*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
+arrayText is used for describing the element (assumed array) that is being tested.
+Look at the function or returned error message for its value range.
+Returns a description of the error. If no error, it returns an empty string.
+If any of the arguments to the function does not have the expected type or is outside the value range,
+the error message will inform about this.*/
+function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
+  /*Test that the callee has given a valid arrayText.*/
   if(typeof(arrayText) !== "string"){
     return "bundleTest() expects a string as its second argument.";
   }
-  else if(typeof(minElems) !== "number"){
-    return "bundleTest() expects a number as its third argument.";
+  else if(arrayText !== TESTMAIN){
+    let splitText = arrayText.split(/\d+/);    /*split string on digits*/
+    if(splitText.length !== 2 || splitText[0] !== TESTSUBPRE || splitText[1] !== TESTSUBPOST){
+      return "bundleTest() expects its second argument to be either TESTMAIN or TESTSUBPRE followed by a number followed by TESTSUBPOST.";
+    }
   }
-  else if(arguments.length > 3){
+
+  /*Test other arguments that the callee might send.*/
+  if(typeof(minElems) !== "number" || (!(Number.isInteger(minElems))) || minElems < 1){
+    return "bundleTest() expects a positive integer as its third argument."
+  }
+  if(arguments.length > 3){
     return "Do not pass more than three arguments to bundleTest().";
   }
 
-  /*Do the actual test by making sure that the first argument satisfies the criteria.*/
+  /*Test that the default value of minElems is used when the default value of arrayText is used*/
+  if(arrayText === TESTMAIN && minElems !== 1){
+    return "bundleTest() expects its third argument to equal 1 when the second argument equals TESTMAIN.";
+  }
 
+  /*Do the actual test by making sure that the first argument satisfies the criteria.*/
   if(!(Array.isArray(inputArray))){
     return arrayText + " is expected to be an array.";
   }
@@ -485,7 +504,14 @@ function isPresent(selectorArray){
   return exists;
 }
 
-function test_bundleTest(description, argArray, failExpected = true){
+/*Function that runs bundleTest() and acts as a helper for test_bundleTest().
+Description is supposed to describe what kind of incorrect or correct input to bundleTest() that is given.
+argArray is an array containing every argument to be passed to bundleTest().
+failExpected tells if the callee made a test that is expected to fail.
+The function logs the description followed by the value returned from bundleTest().
+It logs a pass if bundleTest() was expected to find an error and did or was not expected to find one and didn't.
+Otherwise it logs a fail. Then it logs a newline to separate the test from the next one.*/
+function run_bundleTest(description, argArray, failExpected = true){
   /*Log the description*/
   console.log(description);
 
@@ -503,6 +529,50 @@ function test_bundleTest(description, argArray, failExpected = true){
 
   /*Make a newline to separate from the next test or other console messages*/
   console.log("");
+}
+
+/*Function for testing the bundleTest() function.
+Uses the help function run_bundleTest() to run a number of tests.
+Covers most kinds of input that are supposed to cause error messages along with some that aren't.
+*/
+function test_bundleTest(){
+  const bTestPre = "When giving bundleTest() ";
+  const mString = "The function argument";
+  const aString = "Subelement 123 of the function argument";
+  const tArray = ["test"];
+
+  /*Testing bundleTest()*/
+  console.log("---Testing bundleTest expecting error messages.---");
+  /*Second arg*/
+  run_bundleTest(bTestPre + "a non-string as its second argument:", [tArray, tArray]);
+  run_bundleTest(bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [tArray, "Subelement of the function argument"]);
+  run_bundleTest(bTestPre + "a string that starts with a numeric value:", [tArray, "1" + aString]);
+  run_bundleTest(bTestPre + "a string that ends with a numeric value:", [tArray, aString + "1"]);
+  run_bundleTest(bTestPre + "a string containing more than one numeric value:", [tArray, "Subelement 123 of the function456 argument"]);
+  run_bundleTest(bTestPre + "a string that doesn't start with TESTSUBPRE", [tArray, "Subelement123 of the function argument"]);
+  run_bundleTest(bTestPre + "a string that doesn't end with TESTSUBPOST", [tArray, "Subelement 123of the function argument"]);
+  /*Third arg*/
+  run_bundleTest(bTestPre + "a non-number as its third argument:", [tArray, aString, "1"]);
+  run_bundleTest(bTestPre + "an array of numbers as its third argument:", [tArray, aString, [1]]);
+  run_bundleTest(bTestPre + "a float as its third argument:", [tArray, aString, 3.14]);
+  run_bundleTest(bTestPre + "zero as its third argument:", [tArray, aString, 0]);
+  run_bundleTest(bTestPre + "a negative number as its third argument:", [tArray, aString, -1]);
+  /*Combinations*/
+  run_bundleTest(bTestPre + "more than three arguments:", [tArray, aString, 1, ""]);
+  run_bundleTest(bTestPre + "TESTMAIN combined with more than 1 minElems", [tArray, mString, 2]);
+  /*First arg*/
+  run_bundleTest(bTestPre + "a non-array as its first argument:", ["test"]);
+  run_bundleTest(bTestPre + "an empty array as its first argument:", [[]]);
+  run_bundleTest(bTestPre + "an array with fewer than minElems elements as its first argument:", [tArray, aString, 2]);
+
+  /*Arg combos that are supposed to be valid (returning an empty string)*/
+  console.log("---Testing bundleTest() expecting no error message.---");
+  run_bundleTest(bTestPre + "a string that equals TESTMAIN", [tArray, mString], false);
+  run_bundleTest(bTestPre + "a string that fits the regex matching:", [tArray, aString], false);
+  run_bundleTest(bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], false);
+  run_bundleTest(bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], false);
+
+  return;
 }
 
 /*** Generate additional html for the current site ***/
@@ -529,51 +599,10 @@ $(document).ready( () => {
   /**Testing the test framework**/
   if(testing){
     if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
+      test_bundleTest();
+
       let output = "";
 
-      /*Testing bundleTest()*/
-      console.log("---Testing bundleTest expecting error messages.---");
-      test_bundleTest("When giving bundleTest")
-
-
-      test_bundleTest("When giving bundleTest a non-array argument:", ["test"]);
-      test_bundleTest("When giving bundleTest a non-number as its second argument:", [["test"], "test"]);
-      test_bundleTest("When giving bundleTest an array (wrong type) as its second argument:", [["test"], [2]]);
-      test_bundleTest("When giving bundleTest too many arguments:", [["test"], 1, "test"]);
-      test_bundleTest("When giving bundleTest an empty array:", [[]]);
-      test_bundleTest("When giving bundleTest a non-empty array and 2:", [["test"], 2]);
-      /*console.log("When giving bundleTest a non-array argument:");
-      output = bundleTest("test");
-      console.log(output);
-      console.log("");
-      console.log("When giving bundleTest a non-number as its second argument:");
-      output = bundleTest(["test"], "test");
-      console.log(output);
-      console.log("");
-      console.log("When giving bundleTest an array (wrong type) as its second argument:");
-      output = bundleTest(["test"], [2]);
-      console.log(output);
-      console.log("");
-      console.log("When giving bundleTest too many arguments:");
-      output = bundleTest(["test"], 1, "test");
-      console.log(output);
-      console.log("");
-      console.log("When giving bundleTest an empty array:");
-      output = bundleTest([]);
-      console.log(output);
-      console.log("");
-      console.log("When giving bundleTest a non-empty array and 2:");
-      output = bundleTest(["test"], 2);
-      console.log(output);
-      console.log("");*/
-
-      console.log("---Testing bundleError expecting no error message.---")
-      console.log("When giving bundleTest an empty array and 0:");
-      output = bundleTest([], 0);
-      console.log(output);
-      console.log("When giving bundleTest a non-empty array:");
-      output = bundleTest(["test"]);
-      console.log(output);
 
       /*Testing argumentError()*/
       /*console.log("When giving argumentError a bundle that isn't an array:");
@@ -599,7 +628,7 @@ $(document).ready( () => {
       console.log("");*/
 
       /*Testing isAbsent()*/
-      console.log("When giving isAbsent incorrect type of argument:");
+      console.log("XXXWhen giving isAbsent incorrect type of argument:");
       output = isAbsent(".test-zero");
       console.log("Yields: " + output);
       console.log("");
