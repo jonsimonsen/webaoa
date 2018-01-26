@@ -437,37 +437,6 @@ function argumentError(inputType, inputOne, inputTwo = ""){
   return "";    /*No error detected*/
 }
 
-/*Function for testing if all classes in the classArray are absent from the html document.
-classArray should be an array of strings where all strings are class names starting with a dot.
-Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
-function isAbsent(classArray){
-  let isMissing = true;                       /*Assume that the argument is correct and its elements are absent until otherwise has been determined.*/
-  let errorMsg = bundleTest(classArray);     /*Test the classArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_ABSERR + errorMsg);
-    return false;
-  }
-
-  /*Test the elements of classArray*/
-  classArray.forEach(function(className) {
-    errorMsg = argumentError(CLASS, className);
-    if(errorMsg){
-      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
-      console.log(ERR_ABSERR + errorMsg);
-    }
-    else{
-      /*Test if the className is actually absent from the document*/
-      if($(className).length){
-        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
-        isMissing = false;
-      }
-    }
-  });
-
-  return isMissing;
-}
-
 /*Function for testing if all elements in the selectorArray are present in the html document.
 Also tests that only the tag type in the selectorArray has the class from the selectorArray.
 selectorArray should be an array of arrays of strings.
@@ -575,6 +544,75 @@ function test_bundleTest(){
   return;
 }
 
+/*Function for testing if all classes in the classArray are absent from the html document.
+classArray should be an array of strings where all strings are class names starting with a dot.
+Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isAbsent(classArray){
+  let isMissing = true;                       /*Assume that the argument is correct and its elements are absent until otherwise has been determined.*/
+  let errorMsg = bundleTest(classArray);     /*Test the classArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_ABSERR + errorMsg);
+    return false;
+  }
+
+  /*Test the elements of classArray*/
+  classArray.forEach(function(className) {
+    errorMsg = argumentError(CLASS, className);
+    if(errorMsg){
+      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
+      console.log(ERR_ABSERR + errorMsg);
+    }
+    else{
+      /*Test if the className is actually absent from the document*/
+      if($(className).length){
+        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
+        isMissing = false;
+      }
+    }
+  });
+
+  return isMissing;
+}
+
+function run_isAbsent(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isAbsent.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function test_isAbsent(){
+  const aTestPre = "When giving isAbsent() ";
+
+  /*Testing isAbsent()*/
+  console.log("---Testing isAbsent() expecting error messages from bundleTest().---");
+  run_isAbsent(aTestPre + "a non-array argument:", ["test"]);
+  run_isAbsent(aTestPre + "an empty array:", [[]]);
+  run_isAbsent(aTestPre + "an array with non-string subelement:", [[123]]);
+  run_isAbsent(aTestPre + "an array with an array subelement:", [[["test"]]]);
+  run_isAbsent(aTestPre + "an array with an incorrectly named string:", [["test"]]);
+
+  console.log("---Testing isAbsent() with different classes.---");
+  run_isAbsent(aTestPre + "an absent element:", [[".test-zero"]], false);
+  run_isAbsent(aTestPre + "a unique element:", [[".test-one"]]);
+  run_isAbsent(aTestPre + "a non-unique element", [[".test-two"]]);
+
+}
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
@@ -600,6 +638,7 @@ $(document).ready( () => {
   if(testing){
     if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
       test_bundleTest();
+      test_isAbsent();
 
       let output = "";
 
@@ -628,7 +667,7 @@ $(document).ready( () => {
       console.log("");*/
 
       /*Testing isAbsent()*/
-      console.log("XXXWhen giving isAbsent incorrect type of argument:");
+      /*console.log("XXXWhen giving isAbsent incorrect type of argument:");
       output = isAbsent(".test-zero");
       console.log("Yields: " + output);
       console.log("");
@@ -661,7 +700,7 @@ $(document).ready( () => {
       console.log("When giving isAbsent a non-unique element:");
       output = isAbsent([".test-two"]);
       console.log("Yields: " + output);
-      console.log("");
+      console.log("");*/
 
       /*Testing isPresent()*/
       console.log("When giving isPresent incorrect type of argument:");
