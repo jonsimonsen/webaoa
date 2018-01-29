@@ -250,105 +250,6 @@ function showUniqueness(setArray){
   return success;
 }
 
-/*Function for testing if all elements in the selectorArray are present in the html document.
-Also tests that only the tag type in the selectorArray has the class from the selectorArray.
-selectorArray
-*/
-function isPresentx(selectorArray){
-  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
-  let errorMsg = argumentError(BUNDLED, selectorArray);    /*Test argument*/
-
-  if(errorMsg){
-    console.log(ERR_PRESERR + errorMsg);
-    return false;
-  }
-
-  /*Test the elements of ...*/
-  selectorArray.forEach(function(elem) {
-    errorMsg = argumentError(elem, PRESENT);
-    if(errorMsg){
-      exists = false;
-      console.log(ERR_PRESERR + errorMsg);
-    }
-    else{
-      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
-    }
-  });
-}
-
-/*Function for testing if all classes in the classArray are absent from the html document.
-classArray should be an array of strings where all strings are class names starting with a dot.
-Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
-function isAbsentx(classArray){
-  let isMissing = true;   /*Assume that argument is correct and its elements are absent until otherwise has been determined.*/
-  let errorMsg = argumentError(classArray, BUNDLED);   /*Test argument*/
-
-  if(errorMsg){
-    console.log(ERR_ABSERR + errorMsg);
-    return false;
-  }
-
-  /*Test the elements of classArray*/
-  classArray.forEach(function(className) {
-    errorMsg = argumentError(className, ABSENT);
-    if(errorMsg){
-      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
-      console.log(errorMsg);
-    }
-    else{
-      /*Test if the className is actually absent from the document*/
-      if($(classname).length){
-        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
-        isMissing = false;
-      }
-    }
-  });
-
-  return isMissing;
-}
-
-/*Function for testing inputElem according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
-Use BUNDLED for testing if the argument is a non-empty array (it is implied that the array contains one or more elements that will be sent to argumentError later).
-inputElem should be the array or string to be tested.
-inputType determines how to test inputElem.
-Returns an empty string if no error was found. Otherwise, returns an error message.
-Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself). The exception is if inputType is BUNDLED.*/
-function argumentErrorx(inputElem, inputType){
-  /*If the type is bundled, check that inputElem is an array*/
-  if(inputType === BUNDLED){
-    if(!(Array.isArray(inputElem))){
-      return "BUNDLE test failed. The input is expected to be an array.";
-    }
-    else if(!(inputElem[0])){
-      return "Bundle test failed. The input array is expected to contain at least one element.";
-    }
-    else{
-      return "";
-    }
-  }
-
-  /*Test that the arguments to this function has the expected types*/
-  /*if(typeof(inputElem) !== "string" && !(Array.isArray(inputElem))){
-    return ERR_ARGERR + "Its first argument must be a string or an array.";
-  }*/
-  else if(!(INPUTTYPES.includes(inputType))){
-    return ERR_ARGERR + "Its second argument must be equal to an element in the global const Array INPUTTYPES.";
-  }
-
-  /*Process the inputElem element (the arguments that the function checks)*/
-  if(inputType === ABSENT){
-    if(typeof(inputElem !== "string")){
-        return ERR_ABSERR + '"' + inputElem + '" is not a string.';
-    }
-    else if(inputElem[0] !== "."){
-      return ERR_ABSERR + '"' + inputElem + '" does not start with a dot.';
-    }
-  }
-
-  return "";    /*No error detected*/
-
-}
-
 /*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
 inputOne is expected be a string corresponding to a classname (starting with a dot).
 inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
@@ -359,6 +260,11 @@ function selectorTest(inputType, inputOne, inputTwo = ""){
   /*Test that the inputType has an expected value*/
   if(!(INPUTTYPES.includes(inputType))){
     return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
+  }
+
+  /*Test that the callee doesn't give too many arguments*/
+  if(arguments.length > 3){
+    return "Do not pass more than three arguments to selectorTest()."
   }
 
   /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
@@ -394,42 +300,6 @@ function selectorTest(inputType, inputOne, inputTwo = ""){
   }
 
   return "";    /*No error detected*/
-}
-
-/*Function for testing if all elements in the selectorArray are present in the html document.
-Also tests that only the tag type in the selectorArray has the class from the selectorArray.
-selectorArray should be an array of arrays of strings.
-Each string array should contains a tag first and then a class name (starting with a dot).
-The tags should be one of the tags in TAGTYPES.
-Returns true if all elements corresponding to tags and classes from the inner arrays are present.
-It returns false otherwise. It also returns false if there is something wrong with the argument.*/
-function isPresenty(selectorArray){
-  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_PRESERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      exists = false;
-      console.log(ERR_PRESERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = argumentError(COMPOSITE, subArray[1], subArray[0]);
-      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
-    }
-    counter++;
-  });
-
-  return exists;
 }
 
 /*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
@@ -1006,6 +876,88 @@ function test_isNonPlural(){
   run_isNonPlural(npTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
 }
 
+function run_selectorTest(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = selectorTest.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && output) || (!failExpected && !output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function test_selectorTest(){
+  const sTestPre = "When giving selectorTest() ";
+  const tString = "test";
+
+  /*Testing selectorTest()*/
+  console.log("---Testing selectorTest() expecting error messages.---");
+  run_selectorTest(sTestPre + "a negative (non-allowed) inputType:", [NO_INPUT, tString]);
+  run_selectorTest(sTestPre + "more than three arguments:", [CLASS, tString, tString, tString]);
+  run_selectorTest(sTestPre + "three arguments with the first being CLASS:", [CLASS, tString, tString]);
+  run_selectorTest(sTestPre + "two arguments with the first being COMPOSITE:", [COMPOSITE, tString]);
+  run_selectorTest(sTestPre + "a third argument that is not in the TAGTYPES list:", [COMPOSITE, tString, "h6"]);
+  run_selectorTest(sTestPre + "a second element that is not a string:", [CLASS, 123]);
+  run_selectorTest(sTestPre + "a second element that is an array:", [CLASS, [tString]]);
+  run_selectorTest(sTestPre + "a second element that does not start with a dot:", [CLASS, tString]);
+
+  /*Arg combos that are supposed to be valid (returning an empty string)*/
+  console.log("---Testing selectorTest() expecting no error message.---");
+  run_selectorTest(sTestPre + "CLASS followed by a classname:", [CLASS, ".test"], false);
+  run_selectorTest(sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", "section"], false);
+
+  return;
+}
+
+function runAllTests(){
+  /*Test the argument validation tests*/
+  test_bundleTest();
+  test_selectorTest();
+
+  /*Test the occurence tests*/
+  test_isAbsent();
+  test_isPresent();
+  test_isUnique();
+  test_isTagSpecific();
+  test_isNonPlural();
+}
+
+function logProgress(post, progress){
+  /*Test arguments*/
+  if(arguments.length !== 2){
+    console.log("logProgress() takes exactly two arguments.");
+    return;
+  }
+  if(typeof(progress) !== "string"){
+    console.log("logProgress() takes a string as its second argument.");
+    return;
+  }
+  if(typeof(post) !== "boolean"){
+    console.log("logProgress() takes a boolean as its first argument. The second argument:" + progress);
+    return;
+  }
+
+  if(post){
+    console.log("-Before ");
+  }
+  else{
+    console.log("-After ");
+  }
+
+  console.log(progress);
+  return;
+}
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
@@ -1030,63 +982,38 @@ $(document).ready( () => {
   /**Testing the test framework**/
   if(testing){
     if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
-      test_bundleTest();
-      test_isAbsent();
-      test_isPresent();
-      test_isUnique();
-      test_isTagSpecific();
-      test_isNonPlural();
-
-      /*Testing argumentError()*/
-      /*console.log("When giving argumentError a bundle that isn't an array:");
-      output = argumentError(BUNDLED, 123);
-      console.log(output);
-      console.log("");
-      console.log("When giving argumentError a bundle that is an empty array:");
-      output = argumentError(BUNDLED, []);
-      console.log(output);
-      console.log("");
-      console.log("When giving argumentError a bundle with a total of three elements:");
-      output = argumentError(BUNDLED, ["test"], "test");
-      console.log(output);
-      console.log("");
-
-      console.log("When giving argumentError an invalid inputType:");
-      output = argumentError(NO_INPUT);
-      console.log(output);
-      console.log("");
-      console.log("When giving argumentError a class inputType with a total of three elements:");
-      output = argumentError(CLASS, "test", "test");
-      console.log(output);
-      console.log("");*/
-
+      runAllTests();
     }
   }
 
   /**Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts**/
   if(testing){
+    /*Uniques*/
     const base = ["body", ".base", true];
     const banWrap = ["section", ".banner-wrapper", true];
+
+    if(!(isUnique([base, banwrap]))){
+      logProgress(before, progress);
+      return;
+    }
+
+
+    /*Non-plurals*/
     const mainWrap = ["section", ".content-wrapper"];
     const topWrap = ["section", ".top-wrapper"];
     const servWrap = ["section", ".service-wrapper"];
     const empWrap = ["section", ".employee-wrapper"];
 
-    if(!(showUniqueness([base, banWrap, mainWrap, topWrap, servWrap, empWrap]))){
-      console.log("Occurred before any DOM-manipulation");
+    if(!(isNonPlural([mainWrap, topWrap, servWrap, empWrap]))){
+      logProgress(before, progress);
       return;
     }
 
-    /*Arrays will contain the selector string, a debugging description of the element and a bool that is true if the element is required*/
-    /*const baseBody = ["body.base", "bodies of the base class", true];
-    const baseClass = [".base", "elements of the base class (only supposed to be used for the body)", true];
-    const bannerSection = [".banner-wrapper", "wrappers for banner code", true];
-    const illSection = [".illustration", "illustration section"];
+    /*const illSection = [".illustration", "illustration section"];
     const infoSection = [".info", "info section"];
     const optSection = [".options", "option section"];*/    /*190118: Note that it's relatively likely that this section is deprecated soon.*/
     /*const storySection = [".stories", "story section"];*/   /*190118: Might want to rename the class/description to story-wrapper, excerpt or something similar.*/
     /*const footerSection = [".footer", "wrappers for footer code"];*/    /*190118: It is possible that footers will soon be exclusively made by DOM-manipulation. In that case, a pure existence test should be used instead.*/
-    /*const topWrapper = [".top-wrapper", "top wrappers for navigating through dynamic content"];*/
     /*Consider if activities should actually be used or merged with services*/
   }
 
