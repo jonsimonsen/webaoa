@@ -12,28 +12,28 @@ More trivial comments use one star.**/
 
 
 /*** Global consts ***/
-const NO_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES*/
+const NO_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
 const CLASS = 1;        /*For a string corresponding to a class name.*/
 const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
-const INPUTTYPES = [CLASS, COMPOSITE];
-const TAGTYPES = ["body", "section"];
+const INPUTTYPES = [CLASS, COMPOSITE];        /*Allowed values of inputType.*/
+const TAGTYPES = ["body", "section"];         /*Allowed tags when testing occurrence.*/
 const TESTMAIN = "The function argument";
 const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
 
 /**Errors**/
-const ERR_ABSERR = "isAbsent() error: ";
 const ERR_BUNDERR = "bundleTest() error: ";
-const ERR_NPLURERR = "isNonPlural() error: ";
-const ERR_PRESERR = "isPresent() error: ";
 const ERR_SELERR = "selectorTest() error: ";
-const ERR_TAGERR = "isTagSpecific() error: ";
+const ERR_ABSERR = "isAbsent() error: ";
+const ERR_PRESERR = "isPresent() error: ";
 const ERR_UNOERR = "isUnique() error: ";
-const ERR_TEMPUNOERR = "showUniqueness error: ";
+const ERR_NPLURERR = "isNonPlural() error: ";
+const ERR_TAGERR = "isTagSpecific() error: ";
 
 /*** Functions made by others ***/
 
 /*Function for reading a file (Should use a different one/load when going live)*/
+
 /*Based on https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
 function readFile(file){
   let rawFile = new XMLHttpRequest();
@@ -64,7 +64,9 @@ function readFile(file){
 }
 
 /*Function for capitalizing a string (Make the first letter uppercase)*/
-/*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript*/
+
+/*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
+*/
 function capitalizeFirstLetter(string){
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -73,15 +75,20 @@ function capitalizeFirstLetter(string){
 /*** Functions made by Jon Simonsen ***/
 
 /*Function for reading a file and returning an array of paragraphs using double newlines as separators.
-Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n"*/
+Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
+*/
 function readParas(file){
   return readFile(file).split("\r\n\r\n");
 }
 
 /*Function for extracting userid from url. Returns null if the url has no attributes.
 Returns null and displays an alert if there's something wrong with the attribute.
-Attributes other than userid is not allowed. Could have more detailed error checks and messages.*/
-/*For more advanced url extraction, check out https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript*/
+Otherwise, the value of the attribute (as a number) is returned.
+Attributes other than userid is not allowed. Could have more detailed error checks and messages.
+*/
+
+/*For more advanced url extraction, check out https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+*/
 function getUserId(){
   let match = "userid=";
   let url = window.location.href;
@@ -115,193 +122,6 @@ function getUserId(){
   }
 }
 
-/*Function for use when a JQuery selection contains the wrong number of elements.
-collection can be an array containing two strings. The first should correspond to the html tag of the element. The second should be the class name.
-Otherwise, collection should be a string containing the class name. If this is the case, the function assumes that there exists an element of this class that has a tag it is not supposed to have.
-multiples says if the uniqueness was violated by having too many elements (true) or too few (false). This argument doesn't matter if the first one was a string.
-Returns a string containing a message specifying how the uniqueness has been violated. If the function arguments are not as expected, the returned string specifies this instead.*/
-function makeUniquenessError(collection, multiples = true){
-  let description = "";
-  let argErrorPrefix = "makeUniquenessError function ";
-  let quantity = "Multiple ";
-  if(!multiples){
-    quantity = "No ";
-  }
-
-  /*Test validity of arguments*/
-  if(Array.isArray(collection)){
-    if(collection.length !== 2){
-      return argErrorPrefix + "expects the array argument to contain exactly two items (when an array argument is given)";
-    }
-    if(typeof(collection[0]) !== "string" || typeof(collection[1]) !== "string"){
-      return argErrorPrefix + "expects both items in the array argument to be of type string.";
-    }
-  }
-  else if(typeof(collection) !== "string") {
-    return argErrorPrefix + "expects an array or a string as first argument.";
-  }
-
-  if(typeof(multiples) !== "boolean"){
-    return argErrorPrefix + "expects a bool as second argument if more than one is given.";
-  }
-  else if(multiples === false && typeof(collection) === "string"){
-    return argErrorPrefix + "doesn't accept false as second argument when the first argument is a string.";
-  }
-
-  if(typeof(collection) === "string"){
-    return "At least one unexpected element of class " + collection + " in html file. The class can only be used for a specific html tag.";
-  }
-  else{
-    return quantity + collection[0] + " elements of class " + collection[1] + " in html file.";
-  }
-}
-
-/*Function for testing that there are not multiple occurrences of a certain element in the html document the function is called from. If the element is required, it also tests for existence.
-The test assumes that there are no other elements (tags) with the same class as the one being tested. If this is violated, an error explaining this should be returned.
-The argument is an array that is expected to consist of two strings and optionally a boolean as its last element.
-The first string corresponds to a html tag, and must match on of the strings in the allowedTags array in this function.
-The second string should be a class name with a dot in front of it (".classname").
-The boolean tells if the element is required in the html document.
-Returns an empty string if the element satisfies the uniqueness test. Otherwise returns a string containing an error message.*/
-function testUniqueness(elemArray){
-  const allowedTags = ["body", "section", "nav"];
-  let required = false;
-
-  /**Test validity of argument**/
-  if(!(Array.isArray(elemArray))){
-    return "Expected an array argument.";
-  }
-
-  if(elemArray.length < 2 || elemArray.length > 3){
-    return "The array argument is supposed to contain 2 or 3 elements.";
-  }
-
-  if(!allowedTags.includes(elemArray[0])){
-    return "The first element in the array argument must be one of a limited number of strings. Read the function for allowed values.";
-  }
-
-  if(typeof(elemArray[1]) === "string"){
-    if(!elemArray[1].startsWith(".")){
-      return "The second element of the array argument must correspond to a class (start with a dot).";
-    }
-  }
-  else{
-    return "The second element of the array argument must be a string.";
-  }
-
-  /*Process argument as well as testing*/
-  if (elemArray.length === 3){
-    if(typeof(elemArray[2]) === "boolean"){
-      required = elemArray[2];
-    }
-    else{
-      return "The third element of the array argument is expected to be a boolean.";
-    }
-  }
-
-  /**Do additional processing**/
-  /*Test the uniqueness of the object with tag determined by the first element in the array argument and class determined by the second.
-  Also test that there are not multiple elements of that class.*/
-  $targetSel = $(elemArray[0] + elemArray[1]);
-  $classSel = $(elemArray[1]);
-
-  if($targetSel[1]){
-    return makeUniquenessError(elemArray.slice(0, 2));
-  }
-  else if($targetSel[0]){
-    if($classSel[1]){
-      return makeUniquenessError(elemArray[1]);
-    }
-  }
-  else if($classSel[0]){
-    return makeUniquenessError(elemArray[1]);
-  }
-  else if(required){
-    return makeUniquenessError(elemArray.slice(0, 2), false);
-  }
-
-  /*If no errors were detected, return an empty string*/
-  return "";
-}
-
-/*Tests if the elements in the argument array satisfy uniqueness criteria.
-setArray should be an array of (sub-)arrays to allow testing multiple elements in one go. It should contain the subarrays to be processed.
-See inside this function to inspect how the subarrays are supposed to be built.
-For every subarray, the function should log to the console an error message if the subarray doesn't satisfy the uniqueness criteria.
-If any error message was logged, the function should return false. Otherwise, it should return true.*/
-function showUniqueness(setArray){
-  let isSpecial = true;
-  let errorMsg = argumentError(setArray, BUNDLED); /*Test argument*/
-
-  if(errorMsg){
-    console.log(ERR_UNOERR + errorMsg);
-    return false;
-  }
-
-  /*For each element in the set, test its uniqueness and log any error messages to the console.*/
-  setArray.forEach(function(item){
-    errorMsg = testUniqueness(item);    /*Inspect this function to see an explanation of how the subarrays (items) are supposed to look.*/
-    if(errorMsg){
-      console.log("Error in testUniqueness. " + errorMsg);
-      success = false;
-    }
-  });
-
-  return success;
-}
-
-/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
-inputOne is expected be a string corresponding to a classname (starting with a dot).
-inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
-Returns an empty string if no error was found. Otherwise, returns an error message.
-Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself).*/
-function selectorTest(inputType, inputOne, inputTwo = ""){
-
-  /*Test that the inputType has an expected value*/
-  if(!(INPUTTYPES.includes(inputType))){
-    return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
-  }
-
-  /*Test that the callee doesn't give too many arguments*/
-  if(arguments.length > 3){
-    return "Do not pass more than three arguments to selectorTest()."
-  }
-
-  /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
-  if(inputType === CLASS){
-    if(inputTwo){
-      return "Unnecessary argument passed to selectorTest() for inputType CLASS.";
-    }
-  }
-  else if(inputType === COMPOSITE){
-    /*If no inputTwo is given, the array that is supposed to contain elements are tested*/
-    if(!inputTwo){
-      return "selectorTest() requires three arguments when inputType is COMPOSITE.";
-    }
-    else{
-      if(!(TAGTYPES.includes(inputTwo))){
-        return '"' + JSON.stringify(inputTwo) + '" is not in the list of allowed tags (TAGTYPES).';
-      }
-    }
-  }
-  else{
-    /*This should not be possible unless this function is wrong (possibly due to not updating).*/
-    return ERR_SELERR + "The function needs to be updated to process all possible inputTypes correctly.";
-  }
-
-  /*Test that inputOne is a string containing a class name.*/
-  if(typeof(inputOne) !== "string"){
-    /*Since JS would remove brackets when converting, a JSON method is used.*/
-    /*https://stackoverflow.com/questions/22746353/javascript-convert-array-to-string-while-preserving-brackets*/
-    return '"' + JSON.stringify(inputOne) + '" (without the quotes) is not a string.';
-  }
-  else if(inputOne[0] !== "."){
-    return '"' + inputOne + '" does not start with a dot.';
-  }
-
-  return "";    /*No error detected*/
-}
-
 /*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
 arrayText is used for describing the element (assumed array) that is being tested.
 Look at the function or returned error message for its value range.
@@ -309,28 +129,37 @@ Returns a description of the error. If no error, it returns an empty string.
 If any of the arguments to the function does not have the expected type or is outside the value range,
 the error message will inform about this.*/
 function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
+  let fname = "bundleTest()";
+
   /*Test that the callee has given a valid arrayText.*/
   if(typeof(arrayText) !== "string"){
-    return "bundleTest() expects a string as its second argument.";
+    return fname + " expects a string as its second argument.";
   }
   else if(arrayText !== TESTMAIN){
     let splitText = arrayText.split(/\d+/);    /*split string on digits*/
-    if(splitText.length !== 2 || splitText[0] !== TESTSUBPRE || splitText[1] !== TESTSUBPOST){
-      return "bundleTest() expects its second argument to be either TESTMAIN or TESTSUBPRE followed by a number followed by TESTSUBPOST.";
+    /*Test that the split produces the desired result (two elements from the global consts).*/
+    if(splitText.length !== 2){
+      return fname + " expects its second (string) argument to contain exactly one numeric part (unless it equals TESTMAIN).";
+    }
+    else if(splitText[0] !== TESTSUBPRE){
+      return fname + " expects its second (string) argument to start with TESTSUBPRE (unless it equals TESTMAIN).";
+    }
+    else if(splitText[1] !== TESTSUBPOST){
+      return fname + " expects its second (string) argument to end with TESTSUBPOST (unless it equals TESTMAIN).";
     }
   }
 
   /*Test other arguments that the callee might send.*/
   if(typeof(minElems) !== "number" || (!(Number.isInteger(minElems))) || minElems < 1){
-    return "bundleTest() expects a positive integer as its third argument."
+    return fname + " expects a positive integer as its third argument."
   }
   if(arguments.length > 3){
-    return "Do not pass more than three arguments to bundleTest().";
+    return "Do not pass more than three arguments to " + fname + ".";
   }
 
   /*Test that the default value of minElems is used when the default value of arrayText is used*/
   if(arrayText === TESTMAIN && minElems !== 1){
-    return "bundleTest() expects its third argument to equal 1 when the second argument equals TESTMAIN.";
+    return fname + " expects its third argument to equal 1 when the second argument equals TESTMAIN.";
   }
 
   /*Do the actual test by making sure that the first argument satisfies the criteria.*/
@@ -351,7 +180,8 @@ argArray is an array containing every argument to be passed to bundleTest().
 failExpected tells if the callee made a test that is expected to fail.
 The function logs the description followed by the value returned from bundleTest().
 It logs a pass if bundleTest() was expected to find an error and did or was not expected to find one and didn't.
-Otherwise it logs a fail. Then it logs a newline to separate the test from the next one.*/
+Otherwise it logs a fail. Then it logs a newline to separate the test from the next one.
+*/
 function run_bundleTest(description, argArray, failExpected = true){
   /*Log the description*/
   console.log(description);
@@ -414,6 +244,58 @@ function test_bundleTest(){
   run_bundleTest(bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], false);
 
   return;
+}
+
+/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
+inputOne is expected be a string corresponding to a classname (starting with a dot).
+inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
+Returns an empty string if no error was found. Otherwise, returns an error message.
+Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself).*/
+function selectorTest(inputType, inputOne, inputTwo = ""){
+
+  /*Test that the inputType has an expected value*/
+  if(!(INPUTTYPES.includes(inputType))){
+    return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
+  }
+
+  /*Test that the callee doesn't give too many arguments*/
+  if(arguments.length > 3){
+    return "Do not pass more than three arguments to selectorTest()."
+  }
+
+  /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
+  if(inputType === CLASS){
+    if(inputTwo){
+      return "Unnecessary argument passed to selectorTest() for inputType CLASS.";
+    }
+  }
+  else if(inputType === COMPOSITE){
+    /*If no inputTwo is given, the array that is supposed to contain elements are tested*/
+    if(!inputTwo){
+      return "selectorTest() requires three arguments when inputType is COMPOSITE.";
+    }
+    else{
+      if(!(TAGTYPES.includes(inputTwo))){
+        return '"' + JSON.stringify(inputTwo) + '" is not in the list of allowed tags (TAGTYPES).';
+      }
+    }
+  }
+  else{
+    /*This should not be possible unless this function is wrong (possibly due to not updating).*/
+    return ERR_SELERR + "The function needs to be updated to process all possible inputTypes correctly.";
+  }
+
+  /*Test that inputOne is a string containing a class name.*/
+  if(typeof(inputOne) !== "string"){
+    /*Since JS would remove brackets when converting, a JSON method is used.*/
+    /*https://stackoverflow.com/questions/22746353/javascript-convert-array-to-string-while-preserving-brackets*/
+    return '"' + JSON.stringify(inputOne) + '" (without the quotes) is not a string.';
+  }
+  else if(inputOne[0] !== "."){
+    return '"' + inputOne + '" does not start with a dot.';
+  }
+
+  return "";    /*No error detected*/
 }
 
 /*Function for testing if all classes in the classArray are absent from the html document.
@@ -947,14 +829,17 @@ function logProgress(post, progress){
     return;
   }
 
+  /*Construct progress message*/
+  let timing = "";
+
   if(post){
-    console.log("-Before ");
+    timing = "-Before ";
   }
   else{
-    console.log("-After ");
+    timing = "-After ";
   }
 
-  console.log(progress);
+  console.log(timing + progress);
   return;
 }
 
@@ -992,7 +877,7 @@ $(document).ready( () => {
     const base = ["body", ".base", true];
     const banWrap = ["section", ".banner-wrapper", true];
 
-    if(!(isUnique([base, banwrap]))){
+    if(!(isUnique([base, banWrap]))){
       logProgress(before, progress);
       return;
     }
