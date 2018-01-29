@@ -22,11 +22,13 @@ const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
 
 /**Errors**/
-const ERR_ARGERR = "argumentError() error: ";
 const ERR_ABSERR = "isAbsent() error: ";
 const ERR_BUNDERR = "bundleTest() error: "
 const ERR_PRESERR = "isPresent() error: ";
-const ERR_UNOERR = "showUniqueness error: ";
+const ERR_SELERR = "selectorTest() error: ";
+const ERR_TAGERR = "isTagSpecific() error: ";
+const ERR_UNOERR = "isUnique() error: "
+const ERR_TEMPUNOERR = "showUniqueness error: ";
 
 /*** Functions made by others ***/
 
@@ -346,6 +348,89 @@ function argumentErrorx(inputElem, inputType){
 
 }
 
+/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
+inputOne is expected be a string corresponding to a classname (starting with a dot).
+inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
+Returns an empty string if no error was found. Otherwise, returns an error message.
+Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself).*/
+function selectorTest(inputType, inputOne, inputTwo = ""){
+
+  /*Test that the inputType has an expected value*/
+  if(!(INPUTTYPES.includes(inputType))){
+    return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
+  }
+
+  /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
+  if(inputType === CLASS){
+    if(inputTwo){
+      return "Unnecessary argument passed to selectorTest() for inputType CLASS.";
+    }
+  }
+  else if(inputType === COMPOSITE){
+    /*If no inputTwo is given, the array that is supposed to contain elements are tested*/
+    if(!inputTwo){
+      return "selectorTest() requires three arguments when inputType is COMPOSITE.";
+    }
+    else{
+      if(!(TAGTYPES.includes(inputTwo))){
+        return '"' + JSON.stringify(inputTwo) + '" is not in the list of allowed tags (TAGTYPES).';
+      }
+    }
+  }
+  else{
+    /*This should not be possible unless this function is wrong (possibly due to not updating).*/
+    return ERR_SELERR + "The function needs to be updated to process all possible inputTypes correctly.";
+  }
+
+  /*Test that inputOne is a string containing a class name.*/
+  if(typeof(inputOne) !== "string"){
+    /*Since JS would remove brackets when converting, a JSON method is used.*/
+    /*https://stackoverflow.com/questions/22746353/javascript-convert-array-to-string-while-preserving-brackets*/
+    return '"' + JSON.stringify(inputOne) + '" (without the quotes) is not a string.';
+  }
+  else if(inputOne[0] !== "."){
+    return '"' + inputOne + '" does not start with a dot.';
+  }
+
+  return "";    /*No error detected*/
+}
+
+/*Function for testing if all elements in the selectorArray are present in the html document.
+Also tests that only the tag type in the selectorArray has the class from the selectorArray.
+selectorArray should be an array of arrays of strings.
+Each string array should contains a tag first and then a class name (starting with a dot).
+The tags should be one of the tags in TAGTYPES.
+Returns true if all elements corresponding to tags and classes from the inner arrays are present.
+It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isPresenty(selectorArray){
+  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_PRESERR + errorMsg);
+    return false;
+  }
+
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      exists = false;
+      console.log(ERR_PRESERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = argumentError(COMPOSITE, subArray[1], subArray[0]);
+      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
+    }
+    counter++;
+  });
+
+  return exists;
+}
+
 /*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
 arrayText is used for describing the element (assumed array) that is being tested.
 Look at the function or returned error message for its value range.
@@ -387,90 +472,6 @@ function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
   else{
     return "";
   }
-}
-
-/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
-Use BUNDLED for testing if inputOne is a non-empty array (it is implied that the array contains one or more elements that will be sent to argumentError later).
-inputOne is expected be a string corresponding to a classname (starting with a dot) or (in the case of BUNDLED) a non-empty Array.
-inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
-Returns an empty string if no error was found. Otherwise, returns an error message.
-Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself). The exception is if inputType is BUNDLED.*/
-function argumentError(inputType, inputOne, inputTwo = ""){
-
-  /*Test that the inputType has an expected value*/
-  if(!(INPUTTYPES.includes(inputType))){
-    return ERR_ARGERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
-  }
-
-  /*Test that inputTwo has an expected value for the given inputType*/
-  if(inputType === CLASS){
-    if(inputTwo){
-      return "Unnecessary argument passed to argumentError function for inputType CLASS.";
-    }
-  }
-  else if(inputType === COMPOSITE){
-    /*If no inputTwo is given, the array that is supposed to contain elements are tested*/
-    if(!inputTwo){
-      return "The argumentError function requires three arguments when inputType is COMPOSITE.";
-    }
-    else{
-      if(!(TAGTYPES.includes(inputTwo))){
-        return '"' + JSON.stringify(inputTwo) + '" is not in the list of allowed tags (TAGTYPES).';
-      }
-    }
-  }
-  else{
-    /*This should not be possible unless this function is wrong (possibly due to not updating).*/
-    return ERR_ARGERR + "The function needs to be updated to process all possible inputTypes correctly.";
-  }
-
-  /*Test that inputOne is a string containing a class name.*/
-  if(typeof(inputOne) !== "string"){
-    /*Since JS would remove brackets when converting, a JSON method is used.*/
-    /*https://stackoverflow.com/questions/22746353/javascript-convert-array-to-string-while-preserving-brackets*/
-    return '"' + JSON.stringify(inputOne) + '" (without the quotes) is not a string.';
-  }
-  else if(inputOne[0] !== "."){
-    return '"' + inputOne + '" does not start with a dot.';
-  }
-
-  return "";    /*No error detected*/
-}
-
-/*Function for testing if all elements in the selectorArray are present in the html document.
-Also tests that only the tag type in the selectorArray has the class from the selectorArray.
-selectorArray should be an array of arrays of strings.
-Each string array should contains a tag first and then a class name (starting with a dot).
-The tags should be one of the tags in TAGTYPES.
-Returns true if all elements corresponding to tags and classes from the inner arrays are present.
-It returns false otherwise. It also returns false if there is something wrong with the argument.*/
-function isPresent(selectorArray){
-  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_PRESERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      exists = false;
-      console.log(ERR_PRESERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = argumentError(COMPOSITE, subArray[1], subArray[0]);
-      /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
-    }
-    counter++;
-  });
-
-  return exists;
 }
 
 /*Function that runs bundleTest() and acts as a helper for test_bundleTest().
@@ -558,7 +559,7 @@ function isAbsent(classArray){
 
   /*Test the elements of classArray*/
   classArray.forEach(function(className) {
-    errorMsg = argumentError(CLASS, className);
+    errorMsg = selectorTest(CLASS, className);
     if(errorMsg){
       isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
       console.log(ERR_ABSERR + errorMsg);
@@ -599,10 +600,10 @@ function test_isAbsent(){
   const aTestPre = "When giving isAbsent() ";
 
   /*Testing isAbsent()*/
-  console.log("---Testing isAbsent() expecting error messages from bundleTest().---");
+  console.log("---Testing isAbsent() expecting error messages from bundleTest() or selectorTest().---");
   run_isAbsent(aTestPre + "a non-array argument:", ["test"]);
   run_isAbsent(aTestPre + "an empty array:", [[]]);
-  run_isAbsent(aTestPre + "an array with non-string subelement:", [[123]]);
+  run_isAbsent(aTestPre + "an array with a non-string subelement:", [[123]]);
   run_isAbsent(aTestPre + "an array with an array subelement:", [[["test"]]]);
   run_isAbsent(aTestPre + "an array with an incorrectly named string:", [["test"]]);
 
@@ -611,6 +612,262 @@ function test_isAbsent(){
   run_isAbsent(aTestPre + "a unique element:", [[".test-one"]]);
   run_isAbsent(aTestPre + "a non-unique element", [[".test-two"]]);
 
+  console.log("---Testing isAbsent() with several elements.---");
+  run_isAbsent(aTestPre + "several absent elements:", [[".test-zero", ".test-missing"]], false);
+  run_isAbsent(aTestPre + "a combo of absent and present elements:", [[".test-two", ".test-missing", ".test-zero", ".test-one"]]);
+  run_isAbsent(aTestPre + "several present elements:", [[".test-one", ".test-two"]]);
+}
+
+/*Function for testing if all elements in the selectorArray are present in the html document.
+Also tests that only the tag type in the selectorArray has the class from the selectorArray.
+selectorArray should be an array of arrays of strings.
+Each string array should contains a tag first and then a class name (starting with a dot).
+The tags should be one of the tags in TAGTYPES.
+Returns true if all elements corresponding to tags and classes from the inner arrays are present.
+It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+function isPresent(selectorArray){
+  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_PRESERR + errorMsg);
+    return false;
+  }
+
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      exists = false;
+      console.log(ERR_PRESERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
+
+      if(errorMsg){
+        exists = false;
+        console.log(ERR_PRESERR + errorMsg);
+      }
+      else{
+        /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
+        let $selection = $(subArray[0] + subArray[1]);
+        if($selection.length === 0){
+          exists = false;
+          console.log(ERR_PRESERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
+        }
+        else{
+          let classCount = $(subArray[1]).length;
+          if(classCount < $selection.length){
+            exists = false;
+            console.log(ERR_PRESERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+          }
+          else if(classCount > $selection.length){
+            exists = false;
+            console.log(ERR_PRESERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+          }
+        }
+      }
+    }
+    counter++;
+  });
+
+  return exists;
+}
+
+function run_isPresent(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isPresent.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function test_isPresent(){
+  const pTestPre = "When giving isPresent() ";
+
+  /*Testing isPresent()*/
+  console.log("---Testing isPresent() expecting error messages from bundleTest() or selectorTest().---");
+  run_isPresent(pTestPre + "a non-array argument:", ["test"]);
+  run_isPresent(pTestPre + "an empty array:", [[]]);
+  run_isPresent(pTestPre + "an array with a non-array subelement:", [["test"]]);
+  run_isPresent(pTestPre + "an array with an empty array as a subelement:", [[[]]]);
+  run_isPresent(pTestPre + "an array with an array of one element as a subelement:", [[["test"]]]);
+  run_isPresent(pTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [[["h6", "test"]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is not a string as a subelement:", [[["section", 123]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is an array as a subelement:", [[["section", ["test"]]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [[["section", "test"]]]);
+
+  console.log("---Testing isPresent() with different classes.---");
+  run_isPresent(pTestPre + "an absent element:", [[["section", ".test-zero"]]]);
+  run_isPresent(pTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isPresent(pTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
+  run_isPresent(pTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isPresent() with several elements.---");
+  run_isPresent(pTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
+  run_isPresent(pTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isPresent(pTestPre + "several present elements:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
+  run_isPresent(pTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["body", ".test-body"], ["section", ".test-zero"]]]); /*The console might log two of these on the same line as repeats.*/
+
+  /*Could consider testing for combinations of bundle-test fails and different kinds of present/absent elements.*/
+}
+
+function isUnique(selectorArray){
+  let existsOnce = true;    /*Assume that argument is correct and its elements are unique until otherwise has been determined.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_UNOERR + errorMsg);
+    return false;
+  }
+
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      existsOnce = false;
+      console.log(ERR_UNOERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
+
+      if(errorMsg){
+        existsOnce = false;
+        console.log(ERR_UNOERR + errorMsg);
+      }
+      else{
+        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
+        let $selection = $(subArray[0] + subArray[1]);
+        if($selection.length === 0){
+          existsOnce = false;
+          console.log(ERR_UNOERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
+        }
+        else if($selection.length > 1){
+          existsOnce = false;
+          console.log(ERR_UNOERR + 'Selector "' + subArray[0] + subArray[1] + '" is not unique in the document.');
+        }
+        else{
+          let classCount = $(subArray[1]).length;
+          if(classCount === 0){
+            existsOnce = false;
+            console.log(ERR_UNOERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+          }
+          else if(classCount > 1){
+            existsOnce = false;
+            console.log(ERR_UNOERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+          }
+        }
+      }
+    }
+    counter++;
+  });
+
+  return existsOnce;
+}
+
+function run_isUnique(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isUnique.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isUnique(){
+  const uTestPre = "When giving isUnique() ";
+
+  /*Testing isUnique()*/
+  console.log("---Testing isUnique() with different classes.---");
+  run_isUnique(uTestPre + "an absent element:", [[["section", ".test-zero"]]]);
+  run_isUnique(uTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isUnique(uTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
+  run_isUnique(uTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isUnique() with several elements.---");
+  run_isUnique(uTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
+  run_isUnique(uTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isUnique(uTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]]);
+  run_isUnique(uTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isUnique(uTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
+}
+
+function isTagSpecific(){
+  let isSpecific = true;    /*Assume that argument is correct and none of its elements shares their class with other tags.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_TAGERR + errorMsg);
+    return false;
+  }
+
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      isSpecific = false;
+      console.log(ERR_TAGERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
+
+      if(errorMsg){
+        isSpecific = false;
+        console.log(ERR_TAGERR + errorMsg);
+      }
+      else{
+        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
+        let $tagCount = ($(subArray[0] + subArray[1])).length;
+        let classCount = $subArray[1].length;
+
+        if(classCount < tagCount){
+          isSpecific = false;
+          console.log(ERR_TAGERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+        }
+        else if(classCount > tagCount){
+          isSpecific = false;
+          console.log(ERR_TAGERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+        }
+      }
+    }
+    counter++;
+  });
+
+  return isSpecific;
 }
 
 /*** Generate additional html for the current site ***/
@@ -639,6 +896,8 @@ $(document).ready( () => {
     if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
       test_bundleTest();
       test_isAbsent();
+      test_isPresent();
+      test_isUnique();
 
       let output = "";
 
@@ -664,65 +923,6 @@ $(document).ready( () => {
       console.log("When giving argumentError a class inputType with a total of three elements:");
       output = argumentError(CLASS, "test", "test");
       console.log(output);
-      console.log("");*/
-
-      /*Testing isAbsent()*/
-      /*console.log("XXXWhen giving isAbsent incorrect type of argument:");
-      output = isAbsent(".test-zero");
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent an empty array:");
-      output = isAbsent([]);
-      console.log("Yields: " + output);
-      console.log("");
-
-      console.log("When giving isAbsent an array with incorrect type of subelement:");
-      output = isAbsent([123]);
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent an array with an array subelement (incorrect):");
-      output = isAbsent([[".test-zero"]]);
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent an array with incorrectly named string:");
-      output = isAbsent(["test-zero"]);
-      console.log("Yields: " + output);
-      console.log("");
-
-      console.log("When giving isAbsent an absent element:");
-      output = isAbsent([".test-zero"]);
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent a unique element:");
-      output = isAbsent([".test-one"]);
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent a non-unique element:");
-      output = isAbsent([".test-two"]);
-      console.log("Yields: " + output);
-      console.log("");*/
-
-      /*Testing isPresent()*/
-      console.log("When giving isPresent incorrect type of argument:");
-      output = isPresent(".test-zero");
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isPresent an empty array:");
-      output = isPresent([]);
-      console.log("Yields: " + output);
-      console.log("");
-
-      console.log("When giving isPresent an array with incorrect type of subelement:");
-      output = isPresent(["test"]);
-      console.log("Yields: " + output);
-      console.log("");
-      /*console.log("When giving isAbsent an array with an array subelement (incorrect):");
-      output = isAbsent([[".test-zero"]]);
-      console.log("Yields: " + output);
-      console.log("");
-      console.log("When giving isAbsent an array with incorrectly named string:");
-      output = isAbsent(["test-zero"]);
-      console.log("Yields: " + output);
       console.log("");*/
 
     }

@@ -7,16 +7,21 @@
     <meta charset="UTF-8">
   </head>
 
-  <body class="base">
-    <!--Class that is missing from the document (uncommented to show how it would look if it was present)-->
+  <body class="base test-body">
+    <!--Classes that are missing from the document (uncommented to show how it would look if it was present)-->
     <!--section class="test-zero"--><!--/section-->
+    <!--section class="test-missing"--><!--/section-->
 
-    <!--Class that occurs once in the test document-->
+    <!--Classes that occurs once in the test document-->
     <section class="test-one"></section>
+    <section class="test-unique"></section>
 
     <!--Class that occurs more than once-->
     <section class="test-two"><!--1st--></section>
     <section class="test-two"><!--2nd--></section>
+
+    <!--Class that occurs in a different kind of tag-->
+    <section class="test-body"><!--Same class as the body--></section>
 
     <!-- JQuery and JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"
