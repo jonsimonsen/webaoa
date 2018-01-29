@@ -23,11 +23,12 @@ const TESTSUBPOST = " of the function argument";
 
 /**Errors**/
 const ERR_ABSERR = "isAbsent() error: ";
-const ERR_BUNDERR = "bundleTest() error: "
+const ERR_BUNDERR = "bundleTest() error: ";
+const ERR_NPLURERR = "isNonPlural() error: ";
 const ERR_PRESERR = "isPresent() error: ";
 const ERR_SELERR = "selectorTest() error: ";
 const ERR_TAGERR = "isTagSpecific() error: ";
-const ERR_UNOERR = "isUnique() error: "
+const ERR_UNOERR = "isUnique() error: ";
 const ERR_TEMPUNOERR = "showUniqueness error: ";
 
 /*** Functions made by others ***/
@@ -122,9 +123,9 @@ Returns a string containing a message specifying how the uniqueness has been vio
 function makeUniquenessError(collection, multiples = true){
   let description = "";
   let argErrorPrefix = "makeUniquenessError function ";
-  let quantity = "Multiple "
+  let quantity = "Multiple ";
   if(!multiples){
-    quantity = "No "
+    quantity = "No ";
   }
 
   /*Test validity of arguments*/
@@ -823,7 +824,7 @@ function test_isUnique(){
   run_isUnique(uTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
 }
 
-function isTagSpecific(){
+function isTagSpecific(selectorArray){
   let isSpecific = true;    /*Assume that argument is correct and none of its elements shares their class with other tags.*/
   let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
 
@@ -851,8 +852,8 @@ function isTagSpecific(){
       }
       else{
         /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
-        let $tagCount = ($(subArray[0] + subArray[1])).length;
-        let classCount = $subArray[1].length;
+        let tagCount = ($(subArray[0] + subArray[1])).length;
+        let classCount = ($(subArray[1])).length;
 
         if(classCount < tagCount){
           isSpecific = false;
@@ -868,6 +869,141 @@ function isTagSpecific(){
   });
 
   return isSpecific;
+}
+
+function run_isTagSpecific(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isTagSpecific.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isTagSpecific(){
+  const tTestPre = "When giving isTagSpecific() ";
+
+  /*Testing isTagSpecific()*/
+  console.log("---Testing isTagSpecific() with different classes.---");
+  run_isTagSpecific(tTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
+  run_isTagSpecific(tTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isTagSpecific(tTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
+  run_isTagSpecific(tTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isTagSpecific() with several elements.---");
+  run_isTagSpecific(tTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
+  run_isTagSpecific(tTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]], false);
+  run_isTagSpecific(tTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
+  run_isTagSpecific(tTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isTagSpecific(tTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
+}
+
+/*A search for antonyms of plural didn't produce a useful description of a set of zero or one items,
+so using non-plural.*/
+function isNonPlural(selectorArray){
+  let isNotPlural = true;    /*Assume that argument is correct and its elements does not occur more than once until otherwise has been determined.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
+
+  if(errorMsg){
+    console.log(ERR_NPLURERR + errorMsg);
+    return false;
+  }
+
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      isNotPlural = false;
+      console.log(ERR_NPLURERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
+
+      if(errorMsg){
+        isNotPlural = false;
+        console.log(ERR_NPLURERR + errorMsg);
+      }
+      else{
+        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
+        let $selection = $(subArray[0] + subArray[1]);
+
+        if($selection.length > 1){
+          isNotPlural = false;
+          console.log(ERR_NPLURERR + 'Selector "' + subArray[0] + subArray[1] + '" occurs multiple times in the document.');
+        }
+        else{
+          let classCount = $(subArray[1]).length;
+          if(classCount < $selection.length){
+            isNotPlural = false;
+            console.log(ERR_NPLURERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+          }
+          else if(classCount > $selection.length){
+            isNotPlural = false;
+            console.log(ERR_NPLURERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+          }
+        }
+      }
+    }
+    counter++;
+  });
+
+  return isNotPlural;
+}
+
+function run_isNonPlural(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isNonPlural.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isNonPlural(){
+  const npTestPre = "When giving isNonPlural() ";
+
+  /*Testing isUnique()*/
+  console.log("---Testing isNonPlural() with different classes.---");
+  run_isNonPlural(npTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
+  run_isNonPlural(npTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isNonPlural(npTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
+  run_isNonPlural(npTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isNonPlural() with several elements.---");
+  run_isNonPlural(npTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
+  run_isNonPlural(npTestPre + "a combo of absent and present (including plural) elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isNonPlural(npTestPre + "several present elements, one being plural:", [[["section", ".test-one"], ["section", ".test-two"]]]);
+  run_isNonPlural(npTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isNonPlural(npTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
 }
 
 /*** Generate additional html for the current site ***/
@@ -898,9 +1034,8 @@ $(document).ready( () => {
       test_isAbsent();
       test_isPresent();
       test_isUnique();
-
-      let output = "";
-
+      test_isTagSpecific();
+      test_isNonPlural();
 
       /*Testing argumentError()*/
       /*console.log("When giving argumentError a bundle that isn't an array:");
