@@ -43,6 +43,15 @@ const ERR_UNOERR = UTEST + ERR_POST;
 const ERR_NPLURERR = NPTEST + ERR_POST;
 const ERR_TAGERR = TTEST + ERR_POST;
 const ERR_RUNTESTERR = "runTest" + ERR_POST;
+const ERR_VALIDERR = "isValid" + ERR_POST;
+
+/**Constraints. The class only occurs on the given tag type for all of them.**/
+const ABSENT = 1;
+const PRESENT = 2;
+const UNIQUE = 3;       /*Exactly one*/
+const NON_PLURAL = 4;   /*At most one*/
+const FREE = 5;         /*No additional constraints*/
+const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 
 /*** Functions made by others ***/
 
@@ -552,6 +561,89 @@ function isTagSpecific(selectorArray){
   return isSpecific;
 }
 
+function isValid(constraint, selectorArray){
+  /*Test that constraint is included in CONSTRAINTS*/
+  if(!(CONSTRAINTS.includes(constraint))){
+    console.log(ERR_VALIDERR + "Its first argument must be equal to an element in CONSTRAINTS.");
+  }
+
+  /*Test that selectorArray is a non-empty array*/
+  let errorMsg = isBundled(selectorArray);
+
+  if(errorMsg){
+    console.log(ERR_VALIDERR + errorMsg);
+    return false;
+  }
+
+  let validity = true;    /*Assume that the argument is of the correct type and otherwise valid until otherwise has been determined.*/
+  let counter = 0;        /*Used for the index of subelements of selectorArray*/
+
+  selectorArray.forEach(function(subElem) {
+    if(constraint === ABSENT){
+      errorMsg = isSelector(CLASS, subElem);
+      if(errorMsg){
+        validity = false;    /*Since a correct classname cannot be determined, validity has an unknown value and is assumed to be false.*/
+        console.log(ERR_VALIDERR + "- With constraint ABSENT - " + errorMsg);
+      }
+      else{
+        /*Test if the className exists in the document*/
+        if($(className).length){
+          validity = false;
+          console.log(ERR_VALIDERR + "There exists elements of class " + className + ".");
+        }
+
+      }
+    }
+    else{
+      /*Test that subElem is an array with at least two elements.*/
+      errorMsg = isBundled(subElem, "Subelement " + counter + " of the function argument", 2);
+
+      if(errorMsg){
+        validity = false;
+        console.log(ERR_VALIDERR + errorMsg);
+      }
+      else{
+        /*The subarray is fine. Test its elements.*/
+        errorMsg = isSelector(COMPOSITE, subElem[1], subElem[0]);
+
+        if(errorMsg){
+          validity = false;
+          console.log(ERR_VALIDERR + errorMsg);
+        }
+        else{
+          let tagCount = ($(subElem[0] + subElem[1])).length;   /*Matches tag and class*/
+          let classCount = ($(subElem[1])).length;              /*Matches the class*/
+
+          if(classCount < tagCount){
+            validity = false;
+            console.log(ERR_VALIDERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+          }
+          else if(classCount > tagCount){
+            validity = false;
+            console.log(ERR_VALIDERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+          }
+          else{
+            /*Test presence of subElem*/
+            if((constraint === PRESENT || constraint === UNIQUE) && tagCount === 0){
+              validity = false;
+              console.log(ERR_VALIDERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
+            }
+            /*Test uniqueness of subElem*/
+            if((constraint === UNIQUE || constraint === NON_PLURAL) && tagCount > 1){
+              validity = false;
+              console.log(ERR_VALIDERR + 'Selector "' + subArray[0] + subArray[1] + '" is not unique in the document.');
+            }
+
+          }
+        }
+      }
+      counter++;
+    }
+  });
+
+  return validity;
+}
+
 /*Function that acts as a helper for the functions that test the functions in ALLTESTS.
 fName is a string corresponding to a function in ALLTESTS.
 Description should describe the kind of input to fName() that is given (focused on its flaws if any).
@@ -637,8 +729,6 @@ function test_bundleTest(){
   runTest(BTEST, bTestPre + "a string that fits the regex matching:", [tArray, aString], true);
   runTest(BTEST, bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], true);
   runTest(BTEST, bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], true);
-
-  return;
 }
 
 /*Function for testing the selectorTest() function.
@@ -664,8 +754,6 @@ function test_selectorTest(){
   console.log("---Testing selectorTest() expecting no error message.---");
   runTest(STEST, sTestPre + "CLASS followed by a classname:", [CLASS, ".test"], true);
   runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", "section"], true);
-
-  return;
 }
 
 /*Function for testing the isAbsent() function.
