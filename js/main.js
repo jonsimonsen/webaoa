@@ -798,7 +798,8 @@ function test_isTagSpecific(){
   runTest(TTEST, tTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
 }
 
-/*Function for running all test functions containing test cases for argument validation and element occurence (JQuery selections).*/
+/*Function for running all test functions containing test cases for argument validation and element occurence (JQuery selections).
+Returns nothing.*/
 function runAllTests(){
   /*Test the argument validation tests*/
   test_bundleTest();
@@ -810,6 +811,11 @@ function runAllTests(){
   test_isUnique();
   test_isNonPlural();
   test_isTagSpecific();
+
+  /*Indicate that all tests have been run.
+  Could consider logging number of failed tests too.*/
+  console.log("---All tests are finished---\n\n");
+  return;
 }
 
 /*** Generate additional html for the current site ***/

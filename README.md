@@ -123,6 +123,8 @@ v0.63: Planning to look more closely into combining DREIS and DagsJobben into a 
 -Under development...  
 -Use the experiences from combining employees into a single page to attempt a similar approach here.  
 -Make a separate folder for html files that are not standalone files.  
+-Added a substantial amount of tests using the global variable named testing to determine if these are run or not.  
+-Some of the tests have a large amount of duplicated code. Especially isPresent, isUnique, isNonPlural and isTagSpecific can be refactored quite a bit.  
 
 TODO: Consider removing the home link completely or replacing it with a different link.  
 TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
