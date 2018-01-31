@@ -21,14 +21,27 @@ const TESTMAIN = "The function argument";
 const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
 
+/**Names of functions used for testing**/
+const BTEST = "bundleTest";
+const STEST = "selectorTest";
+const ATEST = "isAbsent";
+const PTEST = "isPresent";
+const UTEST = "isUnique";
+const NPTEST = "isNonPlural";
+const TTEST = "isTagSpecific";
+const MSGTESTS = [BTEST, STEST];    /*Test functions that return error messages.*/
+const ALLTESTS = [BTEST, STEST, ATEST, PTEST, UTEST, NPTEST, TTEST];
+
 /**Errors**/
-const ERR_BUNDERR = "bundleTest() error: ";
-const ERR_SELERR = "selectorTest() error: ";
-const ERR_ABSERR = "isAbsent() error: ";
-const ERR_PRESERR = "isPresent() error: ";
-const ERR_UNOERR = "isUnique() error: ";
-const ERR_NPLURERR = "isNonPlural() error: ";
-const ERR_TAGERR = "isTagSpecific() error: ";
+const ERR_POST = "() error: "
+const ERR_BUNDERR = BTEST + ERR_POST;
+const ERR_SELERR = STEST + ERR_POST;
+const ERR_ABSERR = ATEST + ERR_POST;
+const ERR_PRESERR = PTEST + ERR_POST;
+const ERR_UNOERR = UTEST + ERR_POST;
+const ERR_NPLURERR = NPTEST + ERR_POST;
+const ERR_TAGERR = TTEST + ERR_POST;
+const ERR_RUNTESTERR = "runTest" + ERR_POST;
 
 /*** Functions made by others ***/
 
@@ -122,6 +135,40 @@ function getUserId(){
   }
 }
 
+/*Function for logging the DOM-manipulation progress to the console.
+post should be a boolean telling if the message is logged before(true) or after(false) the step.
+progress should be a string saying what step was just finished or is just starting.
+Returns nothing.*/
+function logProgress(post, progress){
+  let errPre = "logProgress() takes "
+  /*Test arguments*/
+  if(arguments.length !== 2){
+    console.log(errPre + "exactly two arguments.");
+    return;
+  }
+  if(typeof(post) !== "boolean"){
+    console.log(errPre + "a boolean as its first argument.");
+    return;
+  }
+  if(typeof(progress) !== "string"){
+    console.log(errPre + "a string as its second argument.");
+    return;
+  }
+
+  /*Construct progress message*/
+  let timing = "";
+
+  if(post){
+    timing = "-Before ";
+  }
+  else{
+    timing = "-After ";
+  }
+
+  console.log(timing + progress);
+  return;
+}
+
 /*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
 arrayText is used for describing the element (assumed array) that is being tested.
 Look at the function or returned error message for its value range.
@@ -129,7 +176,7 @@ Returns a description of the error. If no error, it returns an empty string.
 If any of the arguments to the function does not have the expected type or is outside the value range,
 the error message will inform about this.*/
 function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
-  let fname = "bundleTest()";
+  let fname = BTEST + "()";
 
   /*Test that the callee has given a valid arrayText.*/
   if(typeof(arrayText) !== "string"){
@@ -174,85 +221,11 @@ function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
   }
 }
 
-/*Function that runs bundleTest() and acts as a helper for test_bundleTest().
-Description is supposed to describe what kind of incorrect or correct input to bundleTest() that is given.
-argArray is an array containing every argument to be passed to bundleTest().
-failExpected tells if the callee made a test that is expected to fail.
-The function logs the description followed by the value returned from bundleTest().
-It logs a pass if bundleTest() was expected to find an error and did or was not expected to find one and didn't.
-Otherwise it logs a fail. Then it logs a newline to separate the test from the next one.
-*/
-function run_bundleTest(description, argArray, failExpected = true){
-  /*Log the description*/
-  console.log(description);
-
-  /*Call output with the arguments provided in argArray and log the result*/
-  let output = bundleTest.apply(null, argArray);
-  console.log("Yields: " + output);
-
-  /*Log the result of this test*/
-  if((failExpected && output) || (!failExpected && !output)){
-    console.log("   -pass");
-  }
-  else{
-    console.log("   -fail");
-  }
-
-  /*Make a newline to separate from the next test or other console messages*/
-  console.log("");
-}
-
-/*Function for testing the bundleTest() function.
-Uses the help function run_bundleTest() to run a number of tests.
-Covers most kinds of input that are supposed to cause error messages along with some that aren't.
-*/
-function test_bundleTest(){
-  const bTestPre = "When giving bundleTest() ";
-  const mString = "The function argument";
-  const aString = "Subelement 123 of the function argument";
-  const tArray = ["test"];
-
-  /*Testing bundleTest()*/
-  console.log("---Testing bundleTest expecting error messages.---");
-  /*Second arg*/
-  run_bundleTest(bTestPre + "a non-string as its second argument:", [tArray, tArray]);
-  run_bundleTest(bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [tArray, "Subelement of the function argument"]);
-  run_bundleTest(bTestPre + "a string that starts with a numeric value:", [tArray, "1" + aString]);
-  run_bundleTest(bTestPre + "a string that ends with a numeric value:", [tArray, aString + "1"]);
-  run_bundleTest(bTestPre + "a string containing more than one numeric value:", [tArray, "Subelement 123 of the function456 argument"]);
-  run_bundleTest(bTestPre + "a string that doesn't start with TESTSUBPRE", [tArray, "Subelement123 of the function argument"]);
-  run_bundleTest(bTestPre + "a string that doesn't end with TESTSUBPOST", [tArray, "Subelement 123of the function argument"]);
-  /*Third arg*/
-  run_bundleTest(bTestPre + "a non-number as its third argument:", [tArray, aString, "1"]);
-  run_bundleTest(bTestPre + "an array of numbers as its third argument:", [tArray, aString, [1]]);
-  run_bundleTest(bTestPre + "a float as its third argument:", [tArray, aString, 3.14]);
-  run_bundleTest(bTestPre + "zero as its third argument:", [tArray, aString, 0]);
-  run_bundleTest(bTestPre + "a negative number as its third argument:", [tArray, aString, -1]);
-  /*Combinations*/
-  run_bundleTest(bTestPre + "more than three arguments:", [tArray, aString, 1, ""]);
-  run_bundleTest(bTestPre + "TESTMAIN combined with more than 1 minElems", [tArray, mString, 2]);
-  /*First arg*/
-  run_bundleTest(bTestPre + "a non-array as its first argument:", ["test"]);
-  run_bundleTest(bTestPre + "an empty array as its first argument:", [[]]);
-  run_bundleTest(bTestPre + "an array with fewer than minElems elements as its first argument:", [tArray, aString, 2]);
-
-  /*Arg combos that are supposed to be valid (returning an empty string)*/
-  console.log("---Testing bundleTest() expecting no error message.---");
-  run_bundleTest(bTestPre + "a string that equals TESTMAIN", [tArray, mString], false);
-  run_bundleTest(bTestPre + "a string that fits the regex matching:", [tArray, aString], false);
-  run_bundleTest(bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], false);
-  run_bundleTest(bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], false);
-
-  return;
-}
-
 /*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
-inputOne is expected be a string corresponding to a classname (starting with a dot).
-inputTwo is expected to be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
-Returns an empty string if no error was found. Otherwise, returns an error message.
-Based on inputTypes, the error message specifies the function that is assumed to have gotten the argument error (including itself).*/
+inputOne should be a string corresponding to a classname (starting with a dot).
+inputTwo should be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
+Returns an empty string if no error was found. Otherwise, returns an error message.*/
 function selectorTest(inputType, inputOne, inputTwo = ""){
-
   /*Test that the inputType has an expected value*/
   if(!(INPUTTYPES.includes(inputType))){
     return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
@@ -260,19 +233,19 @@ function selectorTest(inputType, inputOne, inputTwo = ""){
 
   /*Test that the callee doesn't give too many arguments*/
   if(arguments.length > 3){
-    return "Do not pass more than three arguments to selectorTest()."
+    return ERR_SELERR + "Do not pass more than three arguments."
   }
 
   /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
   if(inputType === CLASS){
     if(inputTwo){
-      return "Unnecessary argument passed to selectorTest() for inputType CLASS.";
+      return ERR_SELERR + "Do not pass more than two arguments for inputType CLASS.";
     }
   }
   else if(inputType === COMPOSITE){
     /*If no inputTwo is given, the array that is supposed to contain elements are tested*/
     if(!inputTwo){
-      return "selectorTest() requires three arguments when inputType is COMPOSITE.";
+      return ERR_SELERR + "Pass three arguments when inputType is COMPOSITE.";
     }
     else{
       if(!(TAGTYPES.includes(inputTwo))){
@@ -298,9 +271,11 @@ function selectorTest(inputType, inputOne, inputTwo = ""){
   return "";    /*No error detected*/
 }
 
-/*Function for testing if all classes in the classArray are absent from the html document.
+/*Function for testing if all classes in classArray are absent from the html document.
+It logs any error messages to the console.
 classArray should be an array of strings where all strings are class names starting with a dot.
-Returns true if all classes are absent. It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+Returns true if all classes are absent. It returns false otherwise.
+It also returns false if there is something wrong with the argument.*/
 function isAbsent(classArray){
   let isMissing = true;                       /*Assume that the argument is correct and its elements are absent until otherwise has been determined.*/
   let errorMsg = bundleTest(classArray);     /*Test the classArray argument*/
@@ -329,55 +304,15 @@ function isAbsent(classArray){
   return isMissing;
 }
 
-function run_isAbsent(description, argArray, failExpected = true){
-  /*Log the description*/
-  console.log(description);
-
-  /*Call output with the arguments provided in argArray and log the result*/
-  let output = isAbsent.apply(null, argArray);
-  console.log("Yields: " + output);
-
-  /*Log the result of this test*/
-  if((failExpected && !output) || (!failExpected && output)){
-    console.log("   -pass");
-  }
-  else{
-    console.log("   -fail");
-  }
-
-  /*Make a newline to separate from the next test or other console messages*/
-  console.log("");
-}
-
-function test_isAbsent(){
-  const aTestPre = "When giving isAbsent() ";
-
-  /*Testing isAbsent()*/
-  console.log("---Testing isAbsent() expecting error messages from bundleTest() or selectorTest().---");
-  run_isAbsent(aTestPre + "a non-array argument:", ["test"]);
-  run_isAbsent(aTestPre + "an empty array:", [[]]);
-  run_isAbsent(aTestPre + "an array with a non-string subelement:", [[123]]);
-  run_isAbsent(aTestPre + "an array with an array subelement:", [[["test"]]]);
-  run_isAbsent(aTestPre + "an array with an incorrectly named string:", [["test"]]);
-
-  console.log("---Testing isAbsent() with different classes.---");
-  run_isAbsent(aTestPre + "an absent element:", [[".test-zero"]], false);
-  run_isAbsent(aTestPre + "a unique element:", [[".test-one"]]);
-  run_isAbsent(aTestPre + "a non-unique element", [[".test-two"]]);
-
-  console.log("---Testing isAbsent() with several elements.---");
-  run_isAbsent(aTestPre + "several absent elements:", [[".test-zero", ".test-missing"]], false);
-  run_isAbsent(aTestPre + "a combo of absent and present elements:", [[".test-two", ".test-missing", ".test-zero", ".test-one"]]);
-  run_isAbsent(aTestPre + "several present elements:", [[".test-one", ".test-two"]]);
-}
-
-/*Function for testing if all elements in the selectorArray are present in the html document.
-Also tests that only the tag type in the selectorArray has the class from the selectorArray.
+/*Function for testing if all elements in selectorArray are present in the html document.
+It also tests that only the tag type in selectorArray has the class from selectorArray.
+It logs any error messages to the console.
 selectorArray should be an array of arrays of strings.
-Each string array should contains a tag first and then a class name (starting with a dot).
-The tags should be one of the tags in TAGTYPES.
+Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
+Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
 Returns true if all elements corresponding to tags and classes from the inner arrays are present.
-It returns false otherwise. It also returns false if there is something wrong with the argument.*/
+It returns false otherwise.
+It also returns false if there is something wrong with the argument.*/
 function isPresent(selectorArray){
   let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
   let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
@@ -405,7 +340,8 @@ function isPresent(selectorArray){
         console.log(ERR_PRESERR + errorMsg);
       }
       else{
-        /*Test that an elem exists. Tests that the number of elems of the given class is the same as the number of existing elems*/
+        /*Test that an elem matching the tag and classname exists.
+        Test that there are not elems of the class that doesn't match the tag.*/
         let $selection = $(subArray[0] + subArray[1]);
         if($selection.length === 0){
           exists = false;
@@ -430,56 +366,15 @@ function isPresent(selectorArray){
   return exists;
 }
 
-function run_isPresent(description, argArray, failExpected = true){
-  /*Log the description*/
-  console.log(description);
-
-  /*Call output with the arguments provided in argArray and log the result*/
-  let output = isPresent.apply(null, argArray);
-  console.log("Yields: " + output);
-
-  /*Log the result of this test*/
-  if((failExpected && !output) || (!failExpected && output)){
-    console.log("   -pass");
-  }
-  else{
-    console.log("   -fail");
-  }
-
-  /*Make a newline to separate from the next test or other console messages*/
-  console.log("");
-}
-
-function test_isPresent(){
-  const pTestPre = "When giving isPresent() ";
-
-  /*Testing isPresent()*/
-  console.log("---Testing isPresent() expecting error messages from bundleTest() or selectorTest().---");
-  run_isPresent(pTestPre + "a non-array argument:", ["test"]);
-  run_isPresent(pTestPre + "an empty array:", [[]]);
-  run_isPresent(pTestPre + "an array with a non-array subelement:", [["test"]]);
-  run_isPresent(pTestPre + "an array with an empty array as a subelement:", [[[]]]);
-  run_isPresent(pTestPre + "an array with an array of one element as a subelement:", [[["test"]]]);
-  run_isPresent(pTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [[["h6", "test"]]]);
-  run_isPresent(pTestPre + "an array with an array where the second element is not a string as a subelement:", [[["section", 123]]]);
-  run_isPresent(pTestPre + "an array with an array where the second element is an array as a subelement:", [[["section", ["test"]]]]);
-  run_isPresent(pTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [[["section", "test"]]]);
-
-  console.log("---Testing isPresent() with different classes.---");
-  run_isPresent(pTestPre + "an absent element:", [[["section", ".test-zero"]]]);
-  run_isPresent(pTestPre + "a unique element:", [[["section", ".test-one"]]], false);
-  run_isPresent(pTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
-  run_isPresent(pTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isPresent() with several elements.---");
-  run_isPresent(pTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
-  run_isPresent(pTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  run_isPresent(pTestPre + "several present elements:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
-  run_isPresent(pTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["body", ".test-body"], ["section", ".test-zero"]]]); /*The console might log two of these on the same line as repeats.*/
-
-  /*Could consider testing for combinations of bundle-test fails and different kinds of present/absent elements.*/
-}
-
+/*Function for testing if all elements in selectorArray exists exactly once in the html document.
+It does this both for tags and classes combined and when ignoring the tags.
+It logs any error messages to the console.
+selectorArray should be an array of arrays of strings.
+Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
+Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
+Returns true if all elements corresponding to tags and classes from the inner arrays occur exactly once.
+It returns false otherwise.
+It also returns false if there is something wrong with the argument.*/
 function isUnique(selectorArray){
   let existsOnce = true;    /*Assume that argument is correct and its elements are unique until otherwise has been determined.*/
   let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
@@ -536,46 +431,79 @@ function isUnique(selectorArray){
   return existsOnce;
 }
 
-function run_isUnique(description, argArray, failExpected = true){
-  /*Log the description*/
-  console.log(description);
+/*Function for testing if all elements in selectorArray occurs at most once in the html document.
+It also tests that only the tag type in selectorArray has the class from selectorArray.
+It logs any error messages to the console.
+A search for antonyms of plural didn't produce a useful description of a set of zero or one items,
+so using non-plural in the function name.
+selectorArray should be an array of arrays of strings.
+Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
+Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
+Returns true if all elements corresponding to tags and classes from the inner arrays occur at most once.
+It returns false otherwise.
+It also returns false if there is something wrong with the argument.*/
+function isNonPlural(selectorArray){
+  let isNotPlural = true;    /*Assume that argument is correct and its elements does not occur more than once until otherwise has been determined.*/
+  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
 
-  /*Call output with the arguments provided in argArray and log the result*/
-  let output = isUnique.apply(null, argArray);
-  console.log("Yields: " + output);
-
-  /*Log the result of this test*/
-  if((failExpected && !output) || (!failExpected && output)){
-    console.log("   -pass");
+  if(errorMsg){
+    console.log(ERR_NPLURERR + errorMsg);
+    return false;
   }
-  else{
-    console.log("   -fail");
-  }
 
-  /*Make a newline to separate from the next test or other console messages*/
-  console.log("");
+  let counter = 0;
+  /*Test the elements of selectorArray*/
+  selectorArray.forEach(function(subArray) {
+    /*Test subarray*/
+    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
+    if(errorMsg){
+      isNotPlural = false;
+      console.log(ERR_NPLURERR + errorMsg);
+    }
+    else{
+      /*Subarray is fine. Test its elements.*/
+      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
+
+      if(errorMsg){
+        isNotPlural = false;
+        console.log(ERR_NPLURERR + errorMsg);
+      }
+      else{
+        /*Test that there is not more than one element in the selection. Test that the class of the element does not occur on other tags.*/
+        let $selection = $(subArray[0] + subArray[1]);
+
+        if($selection.length > 1){
+          isNotPlural = false;
+          console.log(ERR_NPLURERR + 'Selector "' + subArray[0] + subArray[1] + '" occurs multiple times in the document.');
+        }
+        else{
+          let classCount = $(subArray[1]).length;
+          if(classCount < $selection.length){
+            isNotPlural = false;
+            console.log(ERR_NPLURERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
+          }
+          else if(classCount > $selection.length){
+            isNotPlural = false;
+            console.log(ERR_NPLURERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+          }
+        }
+      }
+    }
+    counter++;
+  });
+
+  return isNotPlural;
 }
 
-/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested.*/
-function test_isUnique(){
-  const uTestPre = "When giving isUnique() ";
-
-  /*Testing isUnique()*/
-  console.log("---Testing isUnique() with different classes.---");
-  run_isUnique(uTestPre + "an absent element:", [[["section", ".test-zero"]]]);
-  run_isUnique(uTestPre + "a unique element:", [[["section", ".test-one"]]], false);
-  run_isUnique(uTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
-  run_isUnique(uTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isUnique() with several elements.---");
-  run_isUnique(uTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
-  run_isUnique(uTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  run_isUnique(uTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]]);
-  run_isUnique(uTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
-  run_isUnique(uTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
+/*Function for testing all elements in selectorArray.
+It tests that only the tag type in selectorArray has the class from selectorArray.
+It logs any error messages to the console.
+selectorArray should be an array of arrays of strings.
+Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
+Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
+Returns true if no element having a classname from an inner array exists that does not have the tag from that array.
+It returns false otherwise.
+It also returns false if there is something wrong with the argument.*/
 function isTagSpecific(selectorArray){
   let isSpecific = true;    /*Assume that argument is correct and none of its elements shares their class with other tags.*/
   let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
@@ -623,6 +551,138 @@ function isTagSpecific(selectorArray){
   return isSpecific;
 }
 
+/*Function that acts as a helper for the functions that test the functions in ALLTESTS.
+fName is a string corresponding to a function in ALLTESTS.
+Description should describe the kind of input to fName() that is given (focused on its flaws if any).
+argArray is an array containing every argument to be passed to fName().
+It logs the given description and the output from fName().
+If the returned output suggests the same as passExpected, it logs "pass".
+Otherwise, it logs "fail". Finally, it logs a newline to signify the end of this logging.*/
+function runTest(fName, description, argArray, passExpected = false){
+  /*Test that the given fName is a function name in the global const ALLTESTS.*/
+  if(!(ALLTESTS.includes(fName))){
+    console.log(ERR_RUNTESTERR + fName + " is not in the ALLTESTS array.");
+    return;
+  }
+
+  /*Test that the final element is a boolean*/
+  if(typeof(passExpected) !== "boolean"){
+    console.log(ERR_RUNTESTERR + "Its fourth argument should be a boolean.");
+  }
+
+  /*Determine if the output of fName is expected to have a truthy or falsey value.*/
+  let expOutput = passExpected;
+  if(MSGTESTS.includes(fName)){
+    expOutput = !passExpected;    /*An empty string evaluates to false, but returning an empty string signifies that there were no errors (it passed).*/
+  }
+
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = window[fName].apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((expOutput && output) || (!expOutput && !output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+/*Function that runs bundleTest() and acts as a helper for test_bundleTest().
+Description is supposed to describe what kind of incorrect or correct input to bundleTest() that is given.
+argArray is an array containing every argument to be passed to bundleTest().
+failExpected tells if the callee made a test that is expected to fail.
+The function logs the description followed by the value returned from bundleTest().
+It logs a pass if bundleTest() was expected to find an error and did or was not expected to find one and didn't.
+Otherwise it logs a fail. Then it logs a newline to separate the test from the next one.
+*/
+function run_bundleTest(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = bundleTest.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && output) || (!failExpected && !output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function run_isAbsent(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isAbsent.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function run_isPresent(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isPresent.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
+function run_isUnique(description, argArray, failExpected = true){
+  /*Log the description*/
+  console.log(description);
+
+  /*Call output with the arguments provided in argArray and log the result*/
+  let output = isUnique.apply(null, argArray);
+  console.log("Yields: " + output);
+
+  /*Log the result of this test*/
+  if((failExpected && !output) || (!failExpected && output)){
+    console.log("   -pass");
+  }
+  else{
+    console.log("   -fail");
+  }
+
+  /*Make a newline to separate from the next test or other console messages*/
+  console.log("");
+}
+
 function run_isTagSpecific(description, argArray, failExpected = true){
   /*Log the description*/
   console.log(description);
@@ -641,81 +701,6 @@ function run_isTagSpecific(description, argArray, failExpected = true){
 
   /*Make a newline to separate from the next test or other console messages*/
   console.log("");
-}
-
-/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested.*/
-function test_isTagSpecific(){
-  const tTestPre = "When giving isTagSpecific() ";
-
-  /*Testing isTagSpecific()*/
-  console.log("---Testing isTagSpecific() with different classes.---");
-  run_isTagSpecific(tTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
-  run_isTagSpecific(tTestPre + "a unique element:", [[["section", ".test-one"]]], false);
-  run_isTagSpecific(tTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
-  run_isTagSpecific(tTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isTagSpecific() with several elements.---");
-  run_isTagSpecific(tTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
-  run_isTagSpecific(tTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]], false);
-  run_isTagSpecific(tTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
-  run_isTagSpecific(tTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
-  run_isTagSpecific(tTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
-/*A search for antonyms of plural didn't produce a useful description of a set of zero or one items,
-so using non-plural.*/
-function isNonPlural(selectorArray){
-  let isNotPlural = true;    /*Assume that argument is correct and its elements does not occur more than once until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_NPLURERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      isNotPlural = false;
-      console.log(ERR_NPLURERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
-
-      if(errorMsg){
-        isNotPlural = false;
-        console.log(ERR_NPLURERR + errorMsg);
-      }
-      else{
-        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
-        let $selection = $(subArray[0] + subArray[1]);
-
-        if($selection.length > 1){
-          isNotPlural = false;
-          console.log(ERR_NPLURERR + 'Selector "' + subArray[0] + subArray[1] + '" occurs multiple times in the document.');
-        }
-        else{
-          let classCount = $(subArray[1]).length;
-          if(classCount < $selection.length){
-            isNotPlural = false;
-            console.log(ERR_NPLURERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
-          }
-          else if(classCount > $selection.length){
-            isNotPlural = false;
-            console.log(ERR_NPLURERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
-          }
-        }
-      }
-    }
-    counter++;
-  });
-
-  return isNotPlural;
 }
 
 function run_isNonPlural(description, argArray, failExpected = true){
@@ -738,26 +723,6 @@ function run_isNonPlural(description, argArray, failExpected = true){
   console.log("");
 }
 
-/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested.*/
-function test_isNonPlural(){
-  const npTestPre = "When giving isNonPlural() ";
-
-  /*Testing isUnique()*/
-  console.log("---Testing isNonPlural() with different classes.---");
-  run_isNonPlural(npTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
-  run_isNonPlural(npTestPre + "a unique element:", [[["section", ".test-one"]]], false);
-  run_isNonPlural(npTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
-  run_isNonPlural(npTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isNonPlural() with several elements.---");
-  run_isNonPlural(npTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
-  run_isNonPlural(npTestPre + "a combo of absent and present (including plural) elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  run_isNonPlural(npTestPre + "several present elements, one being plural:", [[["section", ".test-one"], ["section", ".test-two"]]]);
-  run_isNonPlural(npTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
-  run_isNonPlural(npTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
 function run_selectorTest(description, argArray, failExpected = true){
   /*Log the description*/
   console.log(description);
@@ -776,6 +741,50 @@ function run_selectorTest(description, argArray, failExpected = true){
 
   /*Make a newline to separate from the next test or other console messages*/
   console.log("");
+}
+
+/*Function for testing the bundleTest() function.
+Uses the help function run_bundleTest() to run a number of tests.
+Covers most kinds of input that are supposed to cause error messages along with some that aren't.
+*/
+function test_bundleTest(){
+  const bTestPre = "When giving bundleTest() ";
+  const mString = "The function argument";
+  const aString = "Subelement 123 of the function argument";
+  const tArray = ["test"];
+
+  /*Testing bundleTest()*/
+  console.log("---Testing bundleTest expecting error messages.---");
+  /*Second arg*/
+  runTest("bundleTest", bTestPre + "a non-string as its second argument:", [tArray, tArray]);
+  run_bundleTest(bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [tArray, "Subelement of the function argument"]);
+  run_bundleTest(bTestPre + "a string that starts with a numeric value:", [tArray, "1" + aString]);
+  run_bundleTest(bTestPre + "a string that ends with a numeric value:", [tArray, aString + "1"]);
+  run_bundleTest(bTestPre + "a string containing more than one numeric value:", [tArray, "Subelement 123 of the function456 argument"]);
+  run_bundleTest(bTestPre + "a string that doesn't start with TESTSUBPRE", [tArray, "Subelement123 of the function argument"]);
+  run_bundleTest(bTestPre + "a string that doesn't end with TESTSUBPOST", [tArray, "Subelement 123of the function argument"]);
+  /*Third arg*/
+  run_bundleTest(bTestPre + "a non-number as its third argument:", [tArray, aString, "1"]);
+  run_bundleTest(bTestPre + "an array of numbers as its third argument:", [tArray, aString, [1]]);
+  run_bundleTest(bTestPre + "a float as its third argument:", [tArray, aString, 3.14]);
+  run_bundleTest(bTestPre + "zero as its third argument:", [tArray, aString, 0]);
+  run_bundleTest(bTestPre + "a negative number as its third argument:", [tArray, aString, -1]);
+  /*Combinations*/
+  run_bundleTest(bTestPre + "more than three arguments:", [tArray, aString, 1, ""]);
+  run_bundleTest(bTestPre + "TESTMAIN combined with more than 1 minElems", [tArray, mString, 2]);
+  /*First arg*/
+  run_bundleTest(bTestPre + "a non-array as its first argument:", ["test"]);
+  run_bundleTest(bTestPre + "an empty array as its first argument:", [[]]);
+  run_bundleTest(bTestPre + "an array with fewer than minElems elements as its first argument:", [tArray, aString, 2]);
+
+  /*Arg combos that are supposed to be valid (returning an empty string)*/
+  console.log("---Testing bundleTest() expecting no error message.---");
+  run_bundleTest(bTestPre + "a string that equals TESTMAIN", [tArray, mString], false);
+  run_bundleTest(bTestPre + "a string that fits the regex matching:", [tArray, aString], false);
+  run_bundleTest(bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], false);
+  run_bundleTest(bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], false);
+
+  return;
 }
 
 function test_selectorTest(){
@@ -801,6 +810,118 @@ function test_selectorTest(){
   return;
 }
 
+function test_isAbsent(){
+  const aTestPre = "When giving isAbsent() ";
+
+  /*Testing isAbsent()*/
+  console.log("---Testing isAbsent() expecting error messages from bundleTest() or selectorTest().---");
+  run_isAbsent(aTestPre + "a non-array argument:", ["test"]);
+  run_isAbsent(aTestPre + "an empty array:", [[]]);
+  run_isAbsent(aTestPre + "an array with a non-string subelement:", [[123]]);
+  run_isAbsent(aTestPre + "an array with an array subelement:", [[["test"]]]);
+  run_isAbsent(aTestPre + "an array with an incorrectly named string:", [["test"]]);
+
+  console.log("---Testing isAbsent() with different classes.---");
+  run_isAbsent(aTestPre + "an absent element:", [[".test-zero"]], false);
+  run_isAbsent(aTestPre + "a unique element:", [[".test-one"]]);
+  run_isAbsent(aTestPre + "a non-unique element", [[".test-two"]]);
+
+  console.log("---Testing isAbsent() with several elements.---");
+  run_isAbsent(aTestPre + "several absent elements:", [[".test-zero", ".test-missing"]], false);
+  run_isAbsent(aTestPre + "a combo of absent and present elements:", [[".test-two", ".test-missing", ".test-zero", ".test-one"]]);
+  run_isAbsent(aTestPre + "several present elements:", [[".test-one", ".test-two"]]);
+}
+
+function test_isPresent(){
+  const pTestPre = "When giving isPresent() ";
+
+  /*Testing isPresent()*/
+  console.log("---Testing isPresent() expecting error messages from bundleTest() or selectorTest().---");
+  run_isPresent(pTestPre + "a non-array argument:", ["test"]);
+  run_isPresent(pTestPre + "an empty array:", [[]]);
+  run_isPresent(pTestPre + "an array with a non-array subelement:", [["test"]]);
+  run_isPresent(pTestPre + "an array with an empty array as a subelement:", [[[]]]);
+  run_isPresent(pTestPre + "an array with an array of one element as a subelement:", [[["test"]]]);
+  run_isPresent(pTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [[["h6", "test"]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is not a string as a subelement:", [[["section", 123]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is an array as a subelement:", [[["section", ["test"]]]]);
+  run_isPresent(pTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [[["section", "test"]]]);
+
+  console.log("---Testing isPresent() with different classes.---");
+  run_isPresent(pTestPre + "an absent element:", [[["section", ".test-zero"]]]);
+  run_isPresent(pTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isPresent(pTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
+  run_isPresent(pTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isPresent() with several elements.---");
+  run_isPresent(pTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
+  run_isPresent(pTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isPresent(pTestPre + "several present elements:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
+  run_isPresent(pTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["body", ".test-body"], ["section", ".test-zero"]]]); /*The console might log two of these on the same line as repeats.*/
+
+  /*Could consider testing for combinations of bundle-test fails and different kinds of present/absent elements.*/
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isUnique(){
+  const uTestPre = "When giving isUnique() ";
+
+  /*Testing isUnique()*/
+  console.log("---Testing isUnique() with different classes.---");
+  run_isUnique(uTestPre + "an absent element:", [[["section", ".test-zero"]]]);
+  run_isUnique(uTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isUnique(uTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
+  run_isUnique(uTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isUnique() with several elements.---");
+  run_isUnique(uTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
+  run_isUnique(uTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isUnique(uTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]]);
+  run_isUnique(uTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isUnique(uTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isNonPlural(){
+  const npTestPre = "When giving isNonPlural() ";
+
+  /*Testing isUnique()*/
+  console.log("---Testing isNonPlural() with different classes.---");
+  run_isNonPlural(npTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
+  run_isNonPlural(npTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isNonPlural(npTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
+  run_isNonPlural(npTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isNonPlural() with several elements.---");
+  run_isNonPlural(npTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
+  run_isNonPlural(npTestPre + "a combo of absent and present (including plural) elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
+  run_isNonPlural(npTestPre + "several present elements, one being plural:", [[["section", ".test-one"], ["section", ".test-two"]]]);
+  run_isNonPlural(npTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isNonPlural(npTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
+}
+
+/*Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
+these will not be tested.*/
+function test_isTagSpecific(){
+  const tTestPre = "When giving isTagSpecific() ";
+
+  /*Testing isTagSpecific()*/
+  console.log("---Testing isTagSpecific() with different classes.---");
+  run_isTagSpecific(tTestPre + "an absent element:", [[["section", ".test-zero"]]], false);
+  run_isTagSpecific(tTestPre + "a unique element:", [[["section", ".test-one"]]], false);
+  run_isTagSpecific(tTestPre + "a non-unique element:", [[["section", ".test-two"]]], false);
+  run_isTagSpecific(tTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
+
+  console.log("---Testing isTagSpecific() with several elements.---");
+  run_isTagSpecific(tTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], false);
+  run_isTagSpecific(tTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]], false);
+  run_isTagSpecific(tTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]], false);
+  run_isTagSpecific(tTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], false);
+  run_isTagSpecific(tTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
+}
+
 function runAllTests(){
   /*Test the argument validation tests*/
   test_bundleTest();
@@ -810,37 +931,8 @@ function runAllTests(){
   test_isAbsent();
   test_isPresent();
   test_isUnique();
-  test_isTagSpecific();
   test_isNonPlural();
-}
-
-function logProgress(post, progress){
-  /*Test arguments*/
-  if(arguments.length !== 2){
-    console.log("logProgress() takes exactly two arguments.");
-    return;
-  }
-  if(typeof(progress) !== "string"){
-    console.log("logProgress() takes a string as its second argument.");
-    return;
-  }
-  if(typeof(post) !== "boolean"){
-    console.log("logProgress() takes a boolean as its first argument. The second argument:" + progress);
-    return;
-  }
-
-  /*Construct progress message*/
-  let timing = "";
-
-  if(post){
-    timing = "-Before ";
-  }
-  else{
-    timing = "-After ";
-  }
-
-  console.log(timing + progress);
-  return;
+  test_isTagSpecific();
 }
 
 /*** Generate additional html for the current site ***/
