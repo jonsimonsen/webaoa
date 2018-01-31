@@ -23,25 +23,26 @@ const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
 
 /**Names of functions used for testing**/
-const BTEST = "bundleTest";
-const STEST = "selectorTest";
-const ATEST = "isAbsent";
+const BTEST = "testBundle";
+const STEST = "testSelector";
+const VTEST = "testValidity";
+const ALLTESTS = [BTEST, STEST, VTEST];
+/*const ATEST = "isAbsent";
 const PTEST = "isPresent";
 const UTEST = "isUnique";
 const NPTEST = "isNonPlural";
-const TTEST = "isTagSpecific";
-const MSGTESTS = [BTEST, STEST];    /*Test functions that return error messages.*/
-const ALLTESTS = [BTEST, STEST, ATEST, PTEST, UTEST, NPTEST, TTEST];
+const TTEST = "isTagSpecific";*/
+/*const MSGTESTS = [BTEST, STEST];*/    /*Test functions that return error messages.*/
 
 /**Errors**/
 const ERR_POST = "() error: "
 const ERR_BUNDERR = BTEST + ERR_POST;
 const ERR_SELERR = STEST + ERR_POST;
-const ERR_ABSERR = ATEST + ERR_POST;
+/*const ERR_ABSERR = ATEST + ERR_POST;
 const ERR_PRESERR = PTEST + ERR_POST;
 const ERR_UNOERR = UTEST + ERR_POST;
 const ERR_NPLURERR = NPTEST + ERR_POST;
-const ERR_TAGERR = TTEST + ERR_POST;
+const ERR_TAGERR = TTEST + ERR_POST;*/
 const ERR_RUNTESTERR = "runTest" + ERR_POST;
 const ERR_VALIDERR = "isValid" + ERR_POST;
 
@@ -185,7 +186,7 @@ Look at the function or returned error message for its value range.
 Returns a description of the error. If no error, it returns an empty string.
 If any of the arguments to the function does not have the expected type or is outside the value range,
 the error message will inform about this.*/
-function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
+function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
   let fname = BTEST + "()";
 
   /*Test that the callee has given a valid arrayText.*/
@@ -235,7 +236,7 @@ function bundleTest(inputArray, arrayText = TESTMAIN, minElems = 1){
 inputOne should be a string corresponding to a classname (starting with a dot).
 inputTwo should be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
 Returns an empty string if no error was found. Otherwise, returns an error message.*/
-function selectorTest(inputType, inputOne, inputTwo = ""){
+function testSelector(inputType, inputOne, inputTwo = ""){
   /*Test that the inputType has an expected value*/
   if(!(INPUTTYPES.includes(inputType))){
     return ERR_SELERR + "The inputType argument must be equal to an element in the global const Array INPUTTYPES.";
@@ -561,14 +562,14 @@ function isTagSpecific(selectorArray){
   return isSpecific;
 }
 
-function isValid(constraint, selectorArray){
+function testValidity(constraint, selectorArray){
   /*Test that constraint is included in CONSTRAINTS*/
   if(!(CONSTRAINTS.includes(constraint))){
     console.log(ERR_VALIDERR + "Its first argument must be equal to an element in CONSTRAINTS.");
   }
 
   /*Test that selectorArray is a non-empty array*/
-  let errorMsg = isBundled(selectorArray);
+  let errorMsg = testBundle(selectorArray);
 
   if(errorMsg){
     console.log(ERR_VALIDERR + errorMsg);
@@ -580,7 +581,7 @@ function isValid(constraint, selectorArray){
 
   selectorArray.forEach(function(subElem) {
     if(constraint === ABSENT){
-      errorMsg = isSelector(CLASS, subElem);
+      errorMsg = testSelector(CLASS, subElem);
       if(errorMsg){
         validity = false;    /*Since a correct classname cannot be determined, validity has an unknown value and is assumed to be false.*/
         console.log(ERR_VALIDERR + "- With constraint ABSENT - " + errorMsg);
@@ -596,7 +597,7 @@ function isValid(constraint, selectorArray){
     }
     else{
       /*Test that subElem is an array with at least two elements.*/
-      errorMsg = isBundled(subElem, "Subelement " + counter + " of the function argument", 2);
+      errorMsg = testBundle(subElem, "Subelement " + counter + " of the function argument", 2);
 
       if(errorMsg){
         validity = false;
@@ -604,7 +605,7 @@ function isValid(constraint, selectorArray){
       }
       else{
         /*The subarray is fine. Test its elements.*/
-        errorMsg = isSelector(COMPOSITE, subElem[1], subElem[0]);
+        errorMsg = testSelector(COMPOSITE, subElem[1], subElem[0]);
 
         if(errorMsg){
           validity = false;
@@ -665,9 +666,9 @@ function runTest(fName, description, argArray, passExpected = false){
   }
 
   /*Determine if the output of fName is expected to have a truthy or falsey value.*/
-  let expOutput = passExpected;
-  if(MSGTESTS.includes(fName)){
-    expOutput = !passExpected;    /*An empty string evaluates to false, but returning an empty string signifies that there were no errors (it passed).*/
+  let expOutput = !passExpected;    /*An empty string evaluates to false, but returning an empty string signifies that there were no errors (it passed).*/
+  if(fName === VTEST){    /*So far, VTEST is the only test in ALLTESTS that returns a truth value directly.*/
+    expOutput = passExpected;
   }
 
   /*Log the description*/
@@ -689,18 +690,18 @@ function runTest(fName, description, argArray, passExpected = false){
   console.log("");
 }
 
-/*Function for testing the bundleTest() function.
+/*Function for testing the testBundle() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console. Returns nothing.*/
-function test_bundleTest(){
-  const bTestPre = "When giving bundleTest() ";
+function test_testBundle(){
+  const bTestPre = "When giving testBundle() ";
   const mString = "The function argument";
   const aString = "Subelement 123 of the function argument";
   const tArray = ["test"];
 
   /*Testing bundleTest()*/
-  console.log("---Testing bundleTest() expecting error messages.---");
+  console.log("---Testing testBundle() expecting error messages.---");
   /*Second arg*/
   runTest(BTEST, bTestPre + "a non-string as its second argument:", [tArray, tArray]);
   runTest(BTEST, bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [tArray, "Subelement of the function argument"]);
@@ -724,23 +725,23 @@ function test_bundleTest(){
   runTest(BTEST, bTestPre + "an array with fewer than minElems elements as its first argument:", [tArray, aString, 2]);
 
   /*Arg combos that are supposed to be valid (returning an empty string)*/
-  console.log("---Testing bundleTest() expecting no error message.---");
+  console.log("---Testing testBundle() expecting no error message.---");
   runTest(BTEST, bTestPre + "a string that equals TESTMAIN", [tArray, mString], true);
   runTest(BTEST, bTestPre + "a string that fits the regex matching:", [tArray, aString], true);
   runTest(BTEST, bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], true);
   runTest(BTEST, bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], true);
 }
 
-/*Function for testing the selectorTest() function.
+/*Function for testing the testSelector() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console. Returns nothing.*/
-function test_selectorTest(){
-  const sTestPre = "When giving selectorTest() ";
+function test_testSelector(){
+  const sTestPre = "When giving testSelector() ";
   const tString = "test";
 
   /*Testing selectorTest()*/
-  console.log("---Testing selectorTest() expecting error messages.---");
+  console.log("---Testing testSelector() expecting error messages.---");
   runTest(STEST, sTestPre + "a negative (non-allowed) inputType:", [NO_INPUT, tString]);
   runTest(STEST, sTestPre + "more than three arguments:", [CLASS, tString, tString, tString]);
   runTest(STEST, sTestPre + "three arguments with the first being CLASS:", [CLASS, tString, tString]);
@@ -751,9 +752,13 @@ function test_selectorTest(){
   runTest(STEST, sTestPre + "a second element that does not start with a dot:", [CLASS, tString]);
 
   /*Arg combos that are supposed to be valid (returning an empty string)*/
-  console.log("---Testing selectorTest() expecting no error message.---");
+  console.log("---Testing testSelector() expecting no error message.---");
   runTest(STEST, sTestPre + "CLASS followed by a classname:", [CLASS, ".test"], true);
   runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", "section"], true);
+}
+
+function test_testValidity(){
+
 }
 
 /*Function for testing the isAbsent() function.
