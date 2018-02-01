@@ -148,6 +148,18 @@ function getUserId(){
   }
 }
 
+/*Function for counting number of true and false values in an array that is assumed to contain bool values.
+The function might work on other arguments than arrays, but its behavior is undefined for such arguments.
+boolArray is assumed to be an array of booleans.
+The function counts the number of values that equals true and assumes that all other values are false.
+It returns an array with the number of true as the first element and the number of false as the second element.
+*/
+function countBools(boolArray){
+  let passes = (boolArray.filter(val => val === true)).length;
+  let fails = boolArray.length - passes;
+  return [passes, fails];
+}
+
 /*Function for logging the DOM-manipulation progress to the console.
 post should be a boolean telling if the message is logged before(true) or after(false) the step.
 progress should be a string saying what step was just finished or is just starting.
@@ -179,6 +191,15 @@ function logProgress(post, progress){
   }
 
   console.log(timing + progress);
+  return;
+}
+
+/*Function that logs a description of the test, then number of passes,
+then number of fails followed by an empty line. Returns nothing.*/
+function logTestRes(description, passes, fails){
+  console.log("For " + description + ":");
+  console.log("\t" + passes + " passes");
+  console.log("\t" + fails + " fails\n\n");
   return;
 }
 
@@ -882,18 +903,6 @@ function test_testValidity(){
   return countBools(resArray);
 }
 
-/*Function for counting number of true and false values in an array that is assumed to contain bool values.
-The function might work on other arguments than arrays, but its behavior is undefined for such arguments.
-boolArray is assumed to be an array of booleans.
-The function counts the number of values that equals true and assumes that all other values are false.
-It returns an array with the number of true as the first element and the number of false as the second element.
-*/
-function countBools(boolArray){
-  let passes = (boolArray.filter(val => val === true)).length;
-  let fails = boolArray.length - passes;
-  return [passes, fails];
-}
-
 /*Function for testing the isAbsent() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
@@ -1039,21 +1048,13 @@ function runAllTests(){
   test_isNonPlural();
   test_isTagSpecific();*/
 
-  /*Log a summary of the tests. Will probably not bother to refactor this by making a new function*/
+  /*Log a summary of the tests.*/
   console.log("Test summary");
   console.log("------------\n\n");
-  console.log("For test_testBundle():");
-  console.log("\t" + bundleRes[0] + " passes");
-  console.log("\t" + bundleRes[1] + " fails\n\n");
-  console.log("For test_testSelector():");
-  console.log("\t" + selRes[0] + " passes");
-  console.log("\t" + selRes[1] + " fails\n\n");
-  console.log("For test_testValidity():");
-  console.log("\t" + valRes[0] + " passes");
-  console.log("\t" + valRes[1] + " fails\n\n");
-  console.log("For all tests:");
-  console.log("\t" + (bundleRes[0] + selRes[0] + valRes[0]) + " passes");
-  console.log("\t" + (bundleRes[1] + selRes[1] + valRes[1]) + " fails\n\n");
+  logTestRes("test_testBundle()", bundleRes[0], bundleRes[1]);
+  logTestRes("test_testSelector()", selRes[0], selRes[1]);
+  logTestRes("test_testValidity()", valRes[0], valRes[1]);
+  logTestRes("all tests", (bundleRes[0] + selRes[0] + valRes[0]), (bundleRes[1] + selRes[1] + valRes[1]));
   console.log("------------\n\n");
   return;
 }
