@@ -14,15 +14,21 @@ More trivial comments use one star.**/
 /*** Global consts ***/
 
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
-const NO_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
+const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
 const CLASS = 1;        /*For a string corresponding to a class name.*/
 const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
 const INPUTTYPES = [CLASS, COMPOSITE];        /*Allowed values of inputType.*/
 
 /**Tag types. Controls what kind of tags are allowed for elements that are tested for occurrence in the html document.**/
-const NO_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
 const DEF_TAG = "section";    /*Default tag when testing. Should be in TAGTYPES and fit in there.*/
-const TAGTYPES = [DEF_TAG, "body"];         /*Allowed tags when testing occurrence.*/
+const TAGTYPES = [DEF_TAG, "body", "nav"];    /*Allowed tags when testing occurrence.*/
+
+/**Default garbage of different types**/
+const BAD_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
+const BAD_SSTR = ".test";
+const BAD_STR = "test";
+const BAD_ARR = [BAD_STR];
+const BAD_INT = 123;
 
 /**Message constants. Used as arguments or parts of arguments to identify what is being tested.**/
 const TESTMAIN = "The function argument";
@@ -400,13 +406,14 @@ function testValidity(constraint, selectorArray){
   return validity;
 }
 
-/*Function that acts as a helper for the functions that test the functions in ALLTESTS.
-fName is a string corresponding to a function in ALLTESTS.
-Description should describe the kind of input to fName() that is given (focused on its flaws if any).
+/*Function that acts as a helper for running test cases on functions corresponding to the names in ALLTESTS.
+fName is a string that should match a function name in ALLTESTS.
+description should describe the kind of input to fName() that is given (focused on its flaws if any).
 argArray is an array containing every argument to be passed to fName().
-It logs the given description and the output from fName().
-If the returned output suggests the same as passExpected, it logs "pass".
-Otherwise, it logs "fail". Finally, it logs a newline to signify the end of this logging.
+passExpected is a boolean that tells if the test case is expected to pass.
+The function logs the given description and the output from fName().
+If this output suggests the same as passExpected, it logs "pass".
+Otherwise, it logs "fail". In both cases, it logs a newline to signify the end of this logging.
 Returns true if the test passed and false if it failed.*/
 function runTest(fName, description, argArray, passExpected = false){
   /*Test that the given fName is a function name in the global const ALLTESTS.*/
@@ -422,19 +429,25 @@ function runTest(fName, description, argArray, passExpected = false){
   }
 
   /*Determine if the output of fName is expected to have a truthy or falsey value.*/
-  let expOutput = !passExpected;    /*An empty string evaluates to false, but returning an empty string signifies that there were no errors (it passed).*/
-  if(fName === VTEST){    /*So far, VTEST is the only test in ALLTESTS that returns a truth value directly.*/
+  let expOutput = null;
+  /*So far, VTEST is the only test in ALLTESTS that returns a truth value directly.*/
+  if(fName === VTEST){
     expOutput = passExpected;
+  }
+  else{
+    /*The other tests return an empty string (evaluates to false) on passing
+    and the opposite on failing. Therefore, the truth value has to be swapped.*/
+    expOutput = !passExpected;
   }
 
   /*Log the description*/
   console.log(description);
 
-  /*Call output with the arguments provided in argArray and log the result*/
+  /*Call function (named fname) with the arguments provided in argArray and log the result*/
   let output = window[fName].apply(null, argArray);
   console.log("Yields: " + output);
 
-  /*Log the result of this test and return the corresponding value.*/
+  /*Log the result (pass/fail) of this test and return the corresponding value.*/
   if((expOutput && output) || (!expOutput && !output)){
     console.log("   -pass\n\n");
     return true;
@@ -446,46 +459,45 @@ function runTest(fName, description, argArray, passExpected = false){
 }
 
 /*Function for testing the testBundle() function.
-Runs a number of tests on different kinds of input.
+Runs a number of test cases with different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
-Logs test output to the console. Returns nothing.*/
+Logs test output to the console.
+Returns a bool array containing number of passed tests followed by number of failed tests.*/
 function test_testBundle(){
   const bTestPre = "When giving testBundle() ";
-  const mString = "The function argument";
-  const aString = "Subelement 123 of the function argument";
-  const tArray = ["test"];
+  const aString = TESTSUBPRE + BAD_INT + TESTSUBPOST;
   let resArray = [];
 
   /*Testing bundleTest()*/
   console.log("---Testing testBundle() expecting error messages.---");
   /*Second arg*/
-  resArray.push(runTest(BTEST, bTestPre + "a non-string as its second argument:", [tArray, tArray]));
-  resArray.push(runTest(BTEST, bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [tArray, "Subelement of the function argument"]));
-  resArray.push(runTest(BTEST, bTestPre + "a string that starts with a numeric value:", [tArray, "1" + aString]));
-  resArray.push(runTest(BTEST, bTestPre + "a string that ends with a numeric value:", [tArray, aString + "1"]));
-  resArray.push(runTest(BTEST, bTestPre + "a string containing more than one numeric value:", [tArray, "Subelement 123 of the function456 argument"]));
-  resArray.push(runTest(BTEST, bTestPre + "a string that doesn't start with TESTSUBPRE", [tArray, "Subelement123 of the function argument"]));
-  resArray.push(runTest(BTEST, bTestPre + "a string that doesn't end with TESTSUBPOST", [tArray, "Subelement 123of the function argument"]));
+  resArray.push(runTest(BTEST, bTestPre + "a non-string as its second argument:", [BAD_ARR, BAD_ARR]));
+  resArray.push(runTest(BTEST, bTestPre + "a non-numeric string that doesn't equal TESTMAIN:", [BAD_ARR, "Subelement of the function argument"]));
+  resArray.push(runTest(BTEST, bTestPre + "a string that starts with a numeric value:", [BAD_ARR, "1" + aString]));
+  resArray.push(runTest(BTEST, bTestPre + "a string that ends with a numeric value:", [BAD_ARR, aString + "1"]));
+  resArray.push(runTest(BTEST, bTestPre + "a string containing more than one numeric value:", [BAD_ARR, "Subelement 123 of the function456 argument"]));
+  resArray.push(runTest(BTEST, bTestPre + "a string that doesn't start with TESTSUBPRE", [BAD_ARR, "Subelement123 of the function argument"]));
+  resArray.push(runTest(BTEST, bTestPre + "a string that doesn't end with TESTSUBPOST", [BAD_ARR, "Subelement 123of the function argument"]));
   /*Third arg*/
-  resArray.push(runTest(BTEST, bTestPre + "a non-number as its third argument:", [tArray, aString, "1"], true));
-  resArray.push(runTest(BTEST, bTestPre + "an array of numbers as its third argument:", [tArray, aString, [1]]));
-  resArray.push(runTest(BTEST, bTestPre + "a float as its third argument:", [tArray, aString, 3.14]));
-  resArray.push(runTest(BTEST, bTestPre + "zero as its third argument:", [tArray, aString, 0]));
-  resArray.push(runTest(BTEST, bTestPre + "a negative number as its third argument:", [tArray, aString, -1]));
+  resArray.push(runTest(BTEST, bTestPre + "a non-number as its third argument:", [BAD_ARR, aString, "1"], true));
+  resArray.push(runTest(BTEST, bTestPre + "an array of numbers as its third argument:", [BAD_ARR, aString, [1]]));
+  resArray.push(runTest(BTEST, bTestPre + "a float as its third argument:", [BAD_ARR, aString, 3.14]));
+  resArray.push(runTest(BTEST, bTestPre + "zero as its third argument:", [BAD_ARR, aString, 0]));
+  resArray.push(runTest(BTEST, bTestPre + "a negative number as its third argument:", [BAD_ARR, aString, -1]));
   /*Combinations*/
-  resArray.push(runTest(BTEST, bTestPre + "more than three arguments:", [tArray, aString, 1, ""]));
-  resArray.push(runTest(BTEST, bTestPre + "TESTMAIN combined with more than 1 minElems", [tArray, mString, 2]));
+  resArray.push(runTest(BTEST, bTestPre + "more than three arguments:", [BAD_ARR, aString, 1, ""]));
+  resArray.push(runTest(BTEST, bTestPre + "TESTMAIN combined with more than 1 minElems", [BAD_ARR, TESTMAIN, 2]));
   /*First arg*/
-  resArray.push(runTest(BTEST, bTestPre + "a non-array as its first argument:", ["test"]));
+  resArray.push(runTest(BTEST, bTestPre + "a non-array as its first argument:", [BAD_STR]));
   resArray.push(runTest(BTEST, bTestPre + "an empty array as its first argument:", [[]]));
-  resArray.push(runTest(BTEST, bTestPre + "an array with fewer than minElems elements as its first argument:", [tArray, aString, 2]));
+  resArray.push(runTest(BTEST, bTestPre + "an array with fewer than minElems elements as its first argument:", [BAD_ARR, aString, 2]));
 
   /*Arg combos that are supposed to be valid (returning an empty string)*/
   console.log("---Testing testBundle() expecting no error message.---");
-  resArray.push(runTest(BTEST, bTestPre + "a string that equals TESTMAIN", [tArray, mString], true));
-  resArray.push(runTest(BTEST, bTestPre + "a string that fits the regex matching:", [tArray, aString]));
-  resArray.push(runTest(BTEST, bTestPre + "a positive integer as its third argument:", [tArray, aString, 1], true));
-  resArray.push(runTest(BTEST, bTestPre + "an integer above 1 as its third argument:", [["test", "test"], aString, 2], true));
+  resArray.push(runTest(BTEST, bTestPre + "a string that equals TESTMAIN", [BAD_ARR, TESTMAIN], true));
+  resArray.push(runTest(BTEST, bTestPre + "a string that fits the regex matching:", [BAD_ARR, aString]));
+  resArray.push(runTest(BTEST, bTestPre + "a positive integer as its third argument:", [BAD_ARR, aString, 1], true));
+  resArray.push(runTest(BTEST, bTestPre + "an integer above 1 as its third argument:", [[BAD_STR, BAD_STR], aString, 2], true));
 
   /*Return number of passed tests and number of failed tests*/
   return countBools(resArray);
@@ -497,24 +509,23 @@ Covers most kinds of input that should cause error messages along with some that
 Logs test output to the console. Returns nothing.*/
 function test_testSelector(){
   const sTestPre = "When giving testSelector() ";
-  const tString = "test";
   let resArray = [];
 
   /*Testing selectorTest()*/
   console.log("---Testing testSelector() expecting error messages.---");
-  resArray.push(runTest(STEST, sTestPre + "a negative (non-allowed) inputType:", [NO_INPUT, tString]));
-  resArray.push(runTest(STEST, sTestPre + "more than three arguments:", [CLASS, tString, tString, tString], true));
-  resArray.push(runTest(STEST, sTestPre + "three arguments with the first being CLASS:", [CLASS, tString, tString], true));
-  resArray.push(runTest(STEST, sTestPre + "two arguments with the first being COMPOSITE:", [COMPOSITE, tString]));
-  resArray.push(runTest(STEST, sTestPre + "a third argument that is not in the TAGTYPES list:", [COMPOSITE, tString, NO_TAG]));
-  resArray.push(runTest(STEST, sTestPre + "a second element that is not a string:", [CLASS, 123]));
-  resArray.push(runTest(STEST, sTestPre + "a second element that is an array:", [CLASS, [tString]]));
-  resArray.push(runTest(STEST, sTestPre + "a second element that does not start with a dot:", [CLASS, tString]));
+  resArray.push(runTest(STEST, sTestPre + "a negative (non-allowed) inputType:", [BAD_INPUT, BAD_STR]));
+  resArray.push(runTest(STEST, sTestPre + "more than three arguments:", [CLASS, BAD_STR, BAD_STR, BAD_STR], true));
+  resArray.push(runTest(STEST, sTestPre + "three arguments with the first being CLASS:", [CLASS, BAD_STR, BAD_STR], true));
+  resArray.push(runTest(STEST, sTestPre + "two arguments with the first being COMPOSITE:", [COMPOSITE, BAD_STR]));
+  resArray.push(runTest(STEST, sTestPre + "a third argument that is not in the TAGTYPES list:", [COMPOSITE, BAD_STR, BAD_TAG]));
+  resArray.push(runTest(STEST, sTestPre + "a second element that is not a string:", [CLASS, BAD_INT]));
+  resArray.push(runTest(STEST, sTestPre + "a second element that is an array:", [CLASS, BAD_ARR]));
+  resArray.push(runTest(STEST, sTestPre + "a second element that does not start with a dot:", [CLASS, BAD_STR]));
 
   /*Arg combos that are supposed to be valid (returning an empty string)*/
   console.log("---Testing testSelector() expecting no error message.---");
-  resArray.push(runTest(STEST, sTestPre + "CLASS followed by a classname:", [CLASS, ".test"]));
-  resArray.push(runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", DEF_TAG], true));
+  resArray.push(runTest(STEST, sTestPre + "CLASS followed by a classname:", [CLASS, BAD_SSTR]));
+  resArray.push(runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, BAD_SSTR, DEF_TAG], true));
 
   /*Return number of passed tests and number of failed tests*/
   return countBools(resArray);
@@ -522,8 +533,6 @@ function test_testSelector(){
 
 function test_testValidity(){
   const vTestPre = "When giving testValidity() ";
-  const tString = "test";
-  const tNum = 123;
   const tZero = ".test-zero";
   const tOne = ".test-one";
   const tTwo = ".test-two";
@@ -534,16 +543,16 @@ function test_testValidity(){
 
   /*Testing first argument (constraint)*/
   console.log("---Testing testValidity() without a valid constraint---");
-  resArray.push(runTest(VTEST, vTestPre + "a non-valid constraint:", [BAD_CONSTRAINT, tString]));
+  resArray.push(runTest(VTEST, vTestPre + "a non-valid constraint:", [BAD_CONSTRAINT, BAD_STR]));
 
   /*Testing for absent elements*/
   console.log("---Testing testValidity() with ABSENT as constraint---");
   /*Expecting errors from testBundle() or testSelector()*/
-  resArray.push(runTest(VTEST, vTestPre + "a non-array element:", [ABSENT, tString]));
+  resArray.push(runTest(VTEST, vTestPre + "a non-array element:", [ABSENT, BAD_STR]));
   resArray.push(runTest(VTEST, vTestPre + "an empty array:", [ABSENT, []]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with a non-string subelement:", [ABSENT, [tNum]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array subelement:", [ABSENT, [[tString]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an incorrectly named string:", [ABSENT, [tString]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with a non-string subelement:", [ABSENT, [BAD_INT]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array subelement:", [ABSENT, [BAD_ARR]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an incorrectly named string:", [ABSENT, BAD_ARR]));
   /*Testing one-element arrays that are expected to pass testBundle() and testSelector()*/
   console.log("---Subtests for one-element arrays---");
   resArray.push(runTest(VTEST, vTestPre + "an absent element:", [ABSENT, [tZero]], true));
@@ -560,15 +569,15 @@ function test_testValidity(){
   /*Expecting errors from testBundle() or testSelector()*/
   /*Since it is assumed that the same code that handles PRESENT also handles UNIQUE, NON_PLURAL and FREE,
   those constraints will not test the bundling and selection.*/
-  resArray.push(runTest(VTEST, vTestPre + "a non-array element:", [PRESENT, tString]));
+  resArray.push(runTest(VTEST, vTestPre + "a non-array element:", [PRESENT, BAD_STR]));
   resArray.push(runTest(VTEST, vTestPre + "an empty array:", [PRESENT, []]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with a non-array subelement:", [PRESENT, [tString]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with a non-array subelement:", [PRESENT, BAD_ARR]));
   resArray.push(runTest(VTEST, vTestPre + "an array with an empty array as a subelement:", [PRESENT, [[]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array of one element as a subelement:", [PRESENT, [[tString]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [PRESENT, [[NO_TAG, tString]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is not a string as a subelement:", [PRESENT, [[DEF_TAG, tNum]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is an array as a subelement:", [PRESENT, [[DEF_TAG, [tString]]]]));
-  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [PRESENT, [[DEF_TAG, tString]]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array of one element as a subelement:", [PRESENT, [BAD_ARR]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [PRESENT, [[BAD_TAG, BAD_STR]]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is not a string as a subelement:", [PRESENT, [[DEF_TAG, BAD_INT]]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is an array as a subelement:", [PRESENT, [[DEF_TAG, BAD_ARR]]]));
+  resArray.push(runTest(VTEST, vTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [PRESENT, [[DEF_TAG, BAD_STR]]]));
   /*one-elems...*/
   console.log("---Subtests for one-element arrays---");
   resArray.push(runTest(VTEST, vTestPre + "an absent element:", [PRESENT, [[DEF_TAG, tZero]]]));
@@ -634,136 +643,6 @@ function test_testValidity(){
   return countBools(resArray);
 }
 
-/*Function for testing the isAbsent() function.
-Runs a number of tests on different kinds of input.
-Covers most kinds of input that should cause error messages along with some that shouldn't.
-Logs test output to the console. Returns nothing.*/
-function test_isAbsent(){
-  const aTestPre = "When giving isAbsent() ";
-
-  /*Testing isAbsent()*/
-  console.log("---Testing isAbsent() expecting error messages from bundleTest() or selectorTest().---");
-  runTest(ATEST, aTestPre + "a non-array argument:", ["test"]);
-  runTest(ATEST, aTestPre + "an empty array:", [[]]);
-  runTest(ATEST, aTestPre + "an array with a non-string subelement:", [[123]]);
-  runTest(ATEST, aTestPre + "an array with an array subelement:", [[["test"]]]);
-  runTest(ATEST, aTestPre + "an array with an incorrectly named string:", [["test"]]);
-
-  console.log("---Testing isAbsent() with different classes.---");
-  runTest(ATEST, aTestPre + "an absent element:", [[".test-zero"]], true);
-  runTest(ATEST, aTestPre + "a unique element:", [[".test-one"]]);
-  runTest(ATEST, aTestPre + "a non-unique element", [[".test-two"]]);
-
-  console.log("---Testing isAbsent() with several elements.---");
-  runTest(ATEST, aTestPre + "several absent elements:", [[".test-zero", ".test-missing"]], true);
-  runTest(ATEST, aTestPre + "a combo of absent and present elements:", [[".test-two", ".test-missing", ".test-zero", ".test-one"]]);
-  runTest(ATEST, aTestPre + "several present elements:", [[".test-one", ".test-two"]]);
-}
-
-/*Function for testing the isPresent() function.
-Runs a number of tests on different kinds of input.
-Covers most kinds of input that should cause error messages along with some that shouldn't.
-Logs test output to the console. Returns nothing.*/
-function test_isPresent(){
-  const pTestPre = "When giving isPresent() ";
-
-  /*Testing isPresent()*/
-  console.log("---Testing isPresent() expecting error messages from bundleTest() or selectorTest().---");
-  runTest(PTEST, pTestPre + "a non-array argument:", ["test"]);
-  runTest(PTEST, pTestPre + "an empty array:", [[]]);
-  runTest(PTEST, pTestPre + "an array with a non-array subelement:", [["test"]]);
-  runTest(PTEST, pTestPre + "an array with an empty array as a subelement:", [[[]]]);
-  runTest(PTEST, pTestPre + "an array with an array of one element as a subelement:", [[["test"]]]);
-  runTest(PTEST, pTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [[[NO_TAG, "test"]]]);
-  runTest(PTEST, pTestPre + "an array with an array where the second element is not a string as a subelement:", [[["section", 123]]]);
-  runTest(PTEST, pTestPre + "an array with an array where the second element is an array as a subelement:", [[["section", ["test"]]]]);
-  runTest(PTEST, pTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [[["section", "test"]]]);
-
-  console.log("---Testing isPresent() with different classes.---");
-  runTest(PTEST, pTestPre + "an absent element:", [[["section", ".test-zero"]]]);
-  runTest(PTEST, pTestPre + "a unique element:", [[["section", ".test-one"]]], true);
-  runTest(PTEST, pTestPre + "a non-unique element:", [[["section", ".test-two"]]], true);
-  runTest(PTEST, pTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isPresent() with several elements.---");
-  runTest(PTEST, pTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
-  runTest(PTEST, pTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  runTest(PTEST, pTestPre + "several present elements:", [[["section", ".test-one"], ["section", ".test-two"]]], true);
-  runTest(PTEST, pTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["body", ".test-body"], ["section", ".test-zero"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
-/*Function for testing the isUnique() function.
-Runs a number of tests on different kinds of input.
-Covers most kinds of input that should cause error messages along with some that shouldn't.
-Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested here.
-Logs test output to the console. Returns nothing.*/
-function test_isUnique(){
-  const uTestPre = "When giving isUnique() ";
-
-  /*Testing isUnique()*/
-  console.log("---Testing isUnique() with different classes.---");
-  runTest(UTEST, uTestPre + "an absent element:", [[["section", ".test-zero"]]]);
-  runTest(UTEST, uTestPre + "a unique element:", [[["section", ".test-one"]]], true);
-  runTest(UTEST, uTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
-  runTest(UTEST, uTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isUnique() with several elements.---");
-  runTest(UTEST, uTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]]);
-  runTest(UTEST, uTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  runTest(UTEST, uTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]]);
-  runTest(UTEST, uTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], true);
-  runTest(UTEST, uTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
-/*Function for testing the isNonPlural() function.
-Runs a number of tests on different kinds of input.
-Covers most kinds of input that should cause error messages along with some that shouldn't.
-Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested here.
-Logs test output to the console. Returns nothing.*/
-function test_isNonPlural(){
-  const npTestPre = "When giving isNonPlural() ";
-
-  /*Testing isUnique()*/
-  console.log("---Testing isNonPlural() with different classes.---");
-  runTest(NPTEST, npTestPre + "an absent element:", [[["section", ".test-zero"]]], true);
-  runTest(NPTEST, npTestPre + "a unique element:", [[["section", ".test-one"]]], true);
-  runTest(NPTEST, npTestPre + "a non-unique element:", [[["section", ".test-two"]]]);
-  runTest(NPTEST, npTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isNonPlural() with several elements.---");
-  runTest(NPTEST, npTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], true);
-  runTest(NPTEST, npTestPre + "a combo of absent and present (including plural) elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]]);
-  runTest(NPTEST, npTestPre + "several present elements, one being plural:", [[["section", ".test-one"], ["section", ".test-two"]]]);
-  runTest(NPTEST, npTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], true);
-  runTest(NPTEST, npTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
-/*Function for testing the isTagSpecific() function.
-Runs a number of tests on different kinds of input.
-Covers most kinds of input that should cause error messages along with some that shouldn't.
-Since the bundleTest() and selectorTest() errors should be the same as for isPresent(),
-these will not be tested here.
-Logs test output to the console. Returns nothing.*/
-function test_isTagSpecific(){
-  const tTestPre = "When giving isTagSpecific() ";
-
-  /*Testing isTagSpecific()*/
-  console.log("---Testing isTagSpecific() with different classes.---");
-  runTest(TTEST, tTestPre + "an absent element:", [[["section", ".test-zero"]]], true);
-  runTest(TTEST, tTestPre + "a unique element:", [[["section", ".test-one"]]], true);
-  runTest(TTEST, tTestPre + "a non-unique element:", [[["section", ".test-two"]]], true);
-  runTest(TTEST, tTestPre + "a unique element that has a non-unique class:", [[["section", ".test-body"]]]);
-
-  console.log("---Testing isTagSpecific() with several elements.---");
-  runTest(TTEST, tTestPre + "several absent elements:", [[["section", ".test-zero"], ["section", ".test-missing"]]], true);
-  runTest(TTEST, tTestPre + "a combo of absent and present elements:", [[["section", ".test-two"], ["section", ".test-missing"], ["section", ".test-zero"], ["section", ".test-one"]]], true);
-  runTest(TTEST, tTestPre + "several present elements, one being unique:", [[["section", ".test-one"], ["section", ".test-two"]]], true);
-  runTest(TTEST, tTestPre + "several unique elements:", [[["section", ".test-one"], ["section", ".test-unique"]]], true);
-  runTest(TTEST, tTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [[["section", ".test-body"], ["section", ".test-two"], ["section", ".test-one"], ["body", ".test-body"], ["section", ".test-zero"], ["section", ".test-unique"]]]); /*The console might log two of these on the same line as repeats.*/
-}
-
 /*Function for running all test functions containing test cases for argument validation and element occurence (JQuery selections).
 Returns nothing.*/
 function runAllTests(){
@@ -773,11 +652,6 @@ function runAllTests(){
 
   /*Test the occurence tests*/
   let valRes = test_testValidity();
-  /*test_isAbsent();
-  test_isPresent();
-  test_isUnique();
-  test_isNonPlural();
-  test_isTagSpecific();*/
 
   /*Log a summary of the tests.*/
   console.log("Test summary");
@@ -815,20 +689,20 @@ $(document).ready( () => {
   if(testing){
     if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
       runAllTests();
+      return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
   }
 
   /**Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts**/
   if(testing){
     /*Uniques*/
-    const base = ["body", ".base", true];
-    const banWrap = ["section", ".banner-wrapper", true];
+    const base = ["body", ".base"];
+    const banWrap = ["section", ".banner-wrapper"];
 
     if(!(testValidity(UNIQUE, [base, banWrap]))){
       logProgress(before, progress);
       return;
     }
-
 
     /*Non-plurals*/
     const mainWrap = ["section", ".content-wrapper"];
@@ -871,18 +745,45 @@ $(document).ready( () => {
   /***Browser compatibility testing (custom properties).***/
   /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
   /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
-  $baseBody.prepend('<div class="test"></div>');
-  let realCol = $baseBody.children().first().css("background-color");
+
+  /**Testing the absence of a test section.**/
+  if(testing){
+    if(!(testValidity(ABSENT, [".test"]))){
+      logProgress(before, progress);
+      return;
+    }
+  }
+  $baseBody.prepend('<section class="test"></section>');
+  progress = "browser compatibility test";    /*No need to change the before variable this time*/
+
+  /**Test that the test section was added.**/
+  if(testing){
+    if(!(testValidity(UNIQUE, [["section", ".test"]]))){
+      logProgress(before, progress);
+      return;
+    }
+  }
+
+  let realCol = $(".test").css("background-color");
   let browserCol = $baseBody.css("background-color");
   if(browserCol !== realCol){
     alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
   }
-  $baseBody.children().first().remove();
+  before = false;   /*Test completed*/
+  $(".test").remove();
 
-
+  /*Test that the test section was successfully removed.*/
+  if(testing){
+    if(!(testValidity(ABSENT, [".test"]))){
+      logProgress(before, progress);
+      return;
+    }
+  }
 
 
   /*** Create banner ***/
+  progress = "adding banner code";
+  before = true;
 
   /*Read banner file.*/
   let bannerCode = readFile(partPath + "banner.html");
@@ -890,6 +791,7 @@ $(document).ready( () => {
   if(bannerCode === null){
     /*If the file reading failed, give an error message alert and disable further file reading.*/
     readSuccess = false;
+    before = false;
     if(online){
       alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
     }
@@ -898,21 +800,22 @@ $(document).ready( () => {
     }
   }
   else{
-    /*Test that the initial DOM doesn't contain the class for the banner navbar.*/
+    /*Test that the document doesn't contain the class for the banner navbar.*/
     if(testing){
-      if(!(isAbsent(".nav-top"))){
-        console.log("Occurred before adding banner code.");
+      if(!(testValidity(ABSENT, [".nav-top"]))){
+        logProgress(before, progress);
         return;
       }
     }
 
     /*Add banner code.*/
     $banWrap.append(bannerCode);
+    before = false;
 
     /*Test that the banner code adds the banner nav bar.*/
     if(testing){
-      if(!(showUniqueness([["nav", ".nav-top", true]]))){
-        console.log("Occurred after adding banner code.");
+      if(!(testValidity(UNIQUE, [["nav", ".nav-top"]]))){
+        logProgress(before, progress);
         return;
       }
     }
@@ -928,11 +831,14 @@ $(document).ready( () => {
           $(this).addClass("unlink");
         }
       }
-      /*-Give classes with a footer a contact link. Otherwise, make an unclickable link.-*/
       else if(testing){
-        console.log("Check that the nav-top in banner.html does not contain links without the href attribute.");
-        console.log("Occurred while processing banner code.")
-        return;
+        console.log("Do not add anchors without a href attribute to the banner navbar.");
+        logProgress(before, progress);
+      }
+
+      /*Nothing more to do until the footer has been added.*/
+
+      /*-Give classes with a footer a contact link. Otherwise, make an unclickable link.-*/
         /*let dest = "#";
 
         if($foot[0]){
@@ -943,18 +849,21 @@ $(document).ready( () => {
         }
 
         $(this).attr("href", dest);*/
-      }
     });
   }
 
   /*** Create top wrapper (for navigating through dynamic content) ***/
-  if($topWrap.length){
+  if(readSuccess && $topWrap.length){
+    progress = "adding code to the top wrapper (navigation of dynamic content)";
+    before = true;
+
     /*Read top-wrapper file*/
     let topCode = readFile(partPath + "tops.html");
 
     if(topCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
       readSuccess = false;
+      before = false;
       if(online){
         alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
       }
@@ -965,8 +874,9 @@ $(document).ready( () => {
     else{
       /*Test that the DOM doesn't yet contain the scroll-menu wrapper*/
       if(testing){
-        if(!(isAbsent(".scroll-menu"))){
-          console.log("Occurred before adding top-wrapper code.")
+        if(!(testValidity(ABSENT, [".scroll-menu"]))){
+          logProgress(before, progress);
+          return;
         }
       }
 
