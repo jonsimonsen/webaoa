@@ -12,48 +12,46 @@ More trivial comments use one star.**/
 
 
 /*** Global consts ***/
+
+/**Input types (used in testSelector to differentiate between differently formatted input).**/
 const NO_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
 const CLASS = 1;        /*For a string corresponding to a class name.*/
 const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
 const INPUTTYPES = [CLASS, COMPOSITE];        /*Allowed values of inputType.*/
+
+/**Tag types. Controls what kind of tags are allowed for elements that are tested for occurrence in the html document.**/
 const NO_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
 const DEF_TAG = "section";    /*Default tag when testing. Should be in TAGTYPES and fit in there.*/
 const TAGTYPES = [DEF_TAG, "body"];         /*Allowed tags when testing occurrence.*/
+
+/**Message constants. Used as arguments or parts of arguments to identify what is being tested.**/
 const TESTMAIN = "The function argument";
 const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
 
-/**Names of functions used for testing**/
+/**Names of functions used for testing.**/
 const BTEST = "testBundle";
 const STEST = "testSelector";
 const VTEST = "testValidity";
 const ALLTESTS = [BTEST, STEST, VTEST];
-/*const ATEST = "isAbsent";
-const PTEST = "isPresent";
-const UTEST = "isUnique";
-const NPTEST = "isNonPlural";
-const TTEST = "isTagSpecific";*/
-/*const MSGTESTS = [BTEST, STEST];*/    /*Test functions that return error messages.*/
 
-/**Errors**/
+/**Error message prefixes for identifying where an error occurred.**/
 const ERR_POST = "() error: "
 const ERR_BUNDERR = BTEST + ERR_POST;
 const ERR_SELERR = STEST + ERR_POST;
-/*const ERR_ABSERR = ATEST + ERR_POST;
-const ERR_PRESERR = PTEST + ERR_POST;
-const ERR_UNOERR = UTEST + ERR_POST;
-const ERR_NPLURERR = NPTEST + ERR_POST;
-const ERR_TAGERR = TTEST + ERR_POST;*/
-const ERR_RUNTESTERR = "runTest" + ERR_POST;
 const ERR_VALIDERR = VTEST + ERR_POST;
+const ERR_RUNTESTERR = "runTest" + ERR_POST;
 
-/**Constraints. The class only occurs on the given tag type for all of them.**/
+/**Constraints that are allowed as arguments to testValidity().
+For all of them (including FREE), an additional constraint is that the class only occurs on the given tag type.**/
 const BAD_CONSTRAINT = -1;   /*For testing. Don't include this value in CONSTRAINTS.*/
 const ABSENT = 1;
 const PRESENT = 2;
 const UNIQUE = 3;       /*Exactly one*/
-const NON_PLURAL = 4;   /*At most one*/
-const FREE = 5;         /*No additional constraints*/
+/*At most one. A search for antonyms of plural didn't produce a useful description of a set of zero or one items,
+so using non-plural as the name.*/
+const NON_PLURAL = 4;
+const FREE = 5;         /*No constraints*/
 const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 
 /*** Functions made by others ***/
@@ -117,6 +115,7 @@ Attributes other than userid is not allowed. Could have more detailed error chec
 */
 function getUserId(){
   let match = "userid=";
+  let errPrefix = "Incorrect url. ";
   let url = window.location.href;
   let start = url.indexOf("?") + 1;
 
@@ -125,13 +124,13 @@ function getUserId(){
     return null;
   }
   else if(start > url.length - (match.length + 1)){ /*+1 since indices start at 0 while lengths start at 1.*/
-    alert("Incorrect url. Wrongly named attribute or no value.");
+    alert(errPrefix + "Wrongly named attribute or no value.");
     return null;
   }
 
   /*Test that the expected attribute string occurs directly after the separator.*/
   if(!(url.slice(start,(start + match.length)) === match)){
-    alert("Incorrect url. Wrongly named attribute.");
+    alert(errPrefix + "Wrongly named attribute.");
     return null;
   }
 
@@ -140,7 +139,7 @@ function getUserId(){
   /*Test that the value of the attribute is a number. If so, return it.*/
 
   if(isNaN(candidate)){
-    alert("Incorrect url. Either the userid is not a number or the url contains garbage otherwise.");
+    alert(errPrefix + "Either the userid is not a number or the url contains garbage otherwise.");
     return null;
   }
   else{
@@ -210,37 +209,37 @@ Returns a description of the error. If no error, it returns an empty string.
 If any of the arguments to the function does not have the expected type or is outside the value range,
 the error message will inform about this.*/
 function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
-  let fname = BTEST + "()";
+  let errPre = BTEST + "() expects ";
 
   /*Test that the callee has given a valid arrayText.*/
   if(typeof(arrayText) !== "string"){
-    return fname + " expects a string as its second argument.";
+    return errPre + "a string as its second argument.";
   }
   else if(arrayText !== TESTMAIN){
     let splitText = arrayText.split(/\d+/);    /*split string on digits*/
     /*Test that the split produces the desired result (two elements from the global consts).*/
     if(splitText.length !== 2){
-      return fname + " expects its second (string) argument to contain exactly one numeric part (unless it equals TESTMAIN).";
+      return errPre + "its second (string) argument to contain exactly one numeric part (unless it equals TESTMAIN).";
     }
     else if(splitText[0] !== TESTSUBPRE){
-      return fname + " expects its second (string) argument to start with TESTSUBPRE (unless it equals TESTMAIN).";
+      return errPre + "its second (string) argument to start with TESTSUBPRE (unless it equals TESTMAIN).";
     }
     else if(splitText[1] !== TESTSUBPOST){
-      return fname + " expects its second (string) argument to end with TESTSUBPOST (unless it equals TESTMAIN).";
+      return errPre + "its second (string) argument to end with TESTSUBPOST (unless it equals TESTMAIN).";
     }
   }
 
   /*Test other arguments that the callee might send.*/
   if(typeof(minElems) !== "number" || (!(Number.isInteger(minElems))) || minElems < 1){
-    return fname + " expects a positive integer as its third argument."
+    return errPre + "a positive integer as its third argument."
   }
   if(arguments.length > 3){
-    return "Do not pass more than three arguments to " + fname + ".";
+    return errPre + "at most three arguments.";
   }
 
   /*Test that the default value of minElems is used when the default value of arrayText is used*/
   if(arrayText === TESTMAIN && minElems !== 1){
-    return fname + " expects its third argument to equal 1 when the second argument equals TESTMAIN.";
+    return errPre + "its third argument to equal 1 when its second argument equals TESTMAIN.";
   }
 
   /*Do the actual test by making sure that the first argument satisfies the criteria.*/
@@ -305,286 +304,18 @@ function testSelector(inputType, inputOne, inputTwo = ""){
   return "";    /*No error detected*/
 }
 
-/*Function for testing if all classes in classArray are absent from the html document.
-It logs any error messages to the console.
-classArray should be an array of strings where all strings are class names starting with a dot.
-Returns true if all classes are absent. It returns false otherwise.
-It also returns false if there is something wrong with the argument.*/
-function isAbsent(classArray){
-  let isMissing = true;                       /*Assume that the argument is correct and its elements are absent until otherwise has been determined.*/
-  let errorMsg = bundleTest(classArray);     /*Test the classArray argument*/
+/*Function for testing if the occurence of all elements are as specified by constraint.
+If constraint is not included in CONSTRAINTS, this counts as a format error.
+The function also tests that the selectorArray is formatted according to constraint.
+ABSENT expects an array of strings (class names, each starting with a dot).
+The other constraint types expect an array of arrays of two strings
+(the first being a tag and the second being a class name).
+Each tag should be one of the tags in TAGTYPES.
+No element with other tag types should have the same class as any of those tags (counts as an occurence error).
 
-  if(errorMsg){
-    console.log(ERR_ABSERR + errorMsg);
-    return false;
-  }
-
-  /*Test the elements of classArray*/
-  classArray.forEach(function(className) {
-    errorMsg = selectorTest(CLASS, className);
-    if(errorMsg){
-      isMissing = false;    /*Since a correct classname cannot be determined, isMissing has an unknown value and is assumed to be false.*/
-      console.log(ERR_ABSERR + errorMsg);
-    }
-    else{
-      /*Test if the className is actually absent from the document*/
-      if($(className).length){
-        console.log(ERR_ABSERR + "There exists elements of class " + className + ".");
-        isMissing = false;
-      }
-    }
-  });
-
-  return isMissing;
-}
-
-/*Function for testing if all elements in selectorArray are present in the html document.
-It also tests that only the tag type in selectorArray has the class from selectorArray.
-It logs any error messages to the console.
-selectorArray should be an array of arrays of strings.
-Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
-Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
-Returns true if all elements corresponding to tags and classes from the inner arrays are present.
-It returns false otherwise.
-It also returns false if there is something wrong with the argument.*/
-function isPresent(selectorArray){
-  let exists = true;    /*Assume that argument is correct and its elements are present until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_PRESERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      exists = false;
-      console.log(ERR_PRESERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
-
-      if(errorMsg){
-        exists = false;
-        console.log(ERR_PRESERR + errorMsg);
-      }
-      else{
-        /*Test that an elem matching the tag and classname exists.
-        Test that there are not elems of the class that doesn't match the tag.*/
-        let $selection = $(subArray[0] + subArray[1]);
-        if($selection.length === 0){
-          exists = false;
-          console.log(ERR_PRESERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
-        }
-        else{
-          let classCount = $(subArray[1]).length;
-          if(classCount < $selection.length){
-            exists = false;
-            console.log(ERR_PRESERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
-          }
-          else if(classCount > $selection.length){
-            exists = false;
-            console.log(ERR_PRESERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
-          }
-        }
-      }
-    }
-    counter++;
-  });
-
-  return exists;
-}
-
-/*Function for testing if all elements in selectorArray exists exactly once in the html document.
-It does this both for tags and classes combined and when ignoring the tags.
-It logs any error messages to the console.
-selectorArray should be an array of arrays of strings.
-Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
-Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
-Returns true if all elements corresponding to tags and classes from the inner arrays occur exactly once.
-It returns false otherwise.
-It also returns false if there is something wrong with the argument.*/
-function isUnique(selectorArray){
-  let existsOnce = true;    /*Assume that argument is correct and its elements are unique until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_UNOERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      existsOnce = false;
-      console.log(ERR_UNOERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
-
-      if(errorMsg){
-        existsOnce = false;
-        console.log(ERR_UNOERR + errorMsg);
-      }
-      else{
-        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
-        let $selection = $(subArray[0] + subArray[1]);
-        if($selection.length === 0){
-          existsOnce = false;
-          console.log(ERR_UNOERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
-        }
-        else if($selection.length > 1){
-          existsOnce = false;
-          console.log(ERR_UNOERR + 'Selector "' + subArray[0] + subArray[1] + '" is not unique in the document.');
-        }
-        else{
-          let classCount = $(subArray[1]).length;
-          if(classCount === 0){
-            existsOnce = false;
-            console.log(ERR_UNOERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
-          }
-          else if(classCount > 1){
-            existsOnce = false;
-            console.log(ERR_UNOERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
-          }
-        }
-      }
-    }
-    counter++;
-  });
-
-  return existsOnce;
-}
-
-/*Function for testing if all elements in selectorArray occurs at most once in the html document.
-It also tests that only the tag type in selectorArray has the class from selectorArray.
-It logs any error messages to the console.
-A search for antonyms of plural didn't produce a useful description of a set of zero or one items,
-so using non-plural in the function name.
-selectorArray should be an array of arrays of strings.
-Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
-Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
-Returns true if all elements corresponding to tags and classes from the inner arrays occur at most once.
-It returns false otherwise.
-It also returns false if there is something wrong with the argument.*/
-function isNonPlural(selectorArray){
-  let isNotPlural = true;    /*Assume that argument is correct and its elements does not occur more than once until otherwise has been determined.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_NPLURERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      isNotPlural = false;
-      console.log(ERR_NPLURERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
-
-      if(errorMsg){
-        isNotPlural = false;
-        console.log(ERR_NPLURERR + errorMsg);
-      }
-      else{
-        /*Test that there is not more than one element in the selection. Test that the class of the element does not occur on other tags.*/
-        let $selection = $(subArray[0] + subArray[1]);
-
-        if($selection.length > 1){
-          isNotPlural = false;
-          console.log(ERR_NPLURERR + 'Selector "' + subArray[0] + subArray[1] + '" occurs multiple times in the document.');
-        }
-        else{
-          let classCount = $(subArray[1]).length;
-          if(classCount < $selection.length){
-            isNotPlural = false;
-            console.log(ERR_NPLURERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
-          }
-          else if(classCount > $selection.length){
-            isNotPlural = false;
-            console.log(ERR_NPLURERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
-          }
-        }
-      }
-    }
-    counter++;
-  });
-
-  return isNotPlural;
-}
-
-/*Function for testing all elements in selectorArray.
-It tests that only the tag type in selectorArray has the class from selectorArray.
-It logs any error messages to the console.
-selectorArray should be an array of arrays of strings.
-Each subarray of selectorArray should contains a tag first and then a class name (starting with a dot).
-Each tag should be one of the tags in TAGTYPES. Each class name should start with a dot.
-Returns true if no element having a classname from an inner array exists that does not have the tag from that array.
-It returns false otherwise.
-It also returns false if there is something wrong with the argument.*/
-function isTagSpecific(selectorArray){
-  let isSpecific = true;    /*Assume that argument is correct and none of its elements shares their class with other tags.*/
-  let errorMsg = bundleTest(selectorArray);    /*Test the selectorArray argument*/
-
-  if(errorMsg){
-    console.log(ERR_TAGERR + errorMsg);
-    return false;
-  }
-
-  let counter = 0;
-  /*Test the elements of selectorArray*/
-  selectorArray.forEach(function(subArray) {
-    /*Test subarray*/
-    errorMsg = bundleTest(subArray, "Subelement " + counter + " of the function argument", 2);
-    if(errorMsg){
-      isSpecific = false;
-      console.log(ERR_TAGERR + errorMsg);
-    }
-    else{
-      /*Subarray is fine. Test its elements.*/
-      errorMsg = selectorTest(COMPOSITE, subArray[1], subArray[0]);
-
-      if(errorMsg){
-        isSpecific = false;
-        console.log(ERR_TAGERR + errorMsg);
-      }
-      else{
-        /*Test that there is exactly one element in the selection. Test that the class of the element does not occur on other tags.*/
-        let tagCount = ($(subArray[0] + subArray[1])).length;
-        let classCount = ($(subArray[1])).length;
-
-        if(classCount < tagCount){
-          isSpecific = false;
-          console.log(ERR_TAGERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
-        }
-        else if(classCount > tagCount){
-          isSpecific = false;
-          console.log(ERR_TAGERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
-        }
-      }
-    }
-    counter++;
-  });
-
-  return isSpecific;
-}
-
+If the format is broken, a message for the first error is logged to the console. The function might or might not log further errors.
+Otherwise (constraint broken or tag restriction on classes broken), messages for all encountered errors are logged.
+Returns true if the constraints are met and no format errors occurred. Otherwise returns false.*/
 function testValidity(constraint, selectorArray){
   /*Test that constraint is included in CONSTRAINTS*/
   if(!(CONSTRAINTS.includes(constraint))){
