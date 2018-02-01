@@ -17,7 +17,8 @@ const CLASS = 1;        /*For a string corresponding to a class name.*/
 const COMPOSITE = 2;    /*For a combination of class name and a string corresponding to a tag.*/
 const INPUTTYPES = [CLASS, COMPOSITE];        /*Allowed values of inputType.*/
 const NO_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
-const TAGTYPES = ["body", "section"];         /*Allowed tags when testing occurrence.*/
+const DEF_TAG = "section";    /*Default tag when testing. Should be in TAGTYPES and fit in there.*/
+const TAGTYPES = [DEF_TAG, "body"];         /*Allowed tags when testing occurrence.*/
 const TESTMAIN = "The function argument";
 const TESTSUBPRE = "Subelement ";
 const TESTSUBPOST = " of the function argument";
@@ -44,9 +45,10 @@ const ERR_UNOERR = UTEST + ERR_POST;
 const ERR_NPLURERR = NPTEST + ERR_POST;
 const ERR_TAGERR = TTEST + ERR_POST;*/
 const ERR_RUNTESTERR = "runTest" + ERR_POST;
-const ERR_VALIDERR = "isValid" + ERR_POST;
+const ERR_VALIDERR = VTEST + ERR_POST;
 
 /**Constraints. The class only occurs on the given tag type for all of them.**/
+const BAD_CONSTRAINT = -1;   /*For testing. Don't include this value in CONSTRAINTS.*/
 const ABSENT = 1;
 const PRESENT = 2;
 const UNIQUE = 3;       /*Exactly one*/
@@ -566,6 +568,7 @@ function testValidity(constraint, selectorArray){
   /*Test that constraint is included in CONSTRAINTS*/
   if(!(CONSTRAINTS.includes(constraint))){
     console.log(ERR_VALIDERR + "Its first argument must be equal to an element in CONSTRAINTS.");
+    return false;
   }
 
   /*Test that selectorArray is a non-empty array*/
@@ -587,10 +590,10 @@ function testValidity(constraint, selectorArray){
         console.log(ERR_VALIDERR + "- With constraint ABSENT - " + errorMsg);
       }
       else{
-        /*Test if the className exists in the document*/
-        if($(className).length){
+        /*Test if subElem exists in the document*/
+        if($(subElem).length){
           validity = false;
-          console.log(ERR_VALIDERR + "There exists elements of class " + className + ".");
+          console.log(ERR_VALIDERR + "There exists elements of class " + subElem + ".");
         }
 
       }
@@ -621,18 +624,18 @@ function testValidity(constraint, selectorArray){
           }
           else if(classCount > tagCount){
             validity = false;
-            console.log(ERR_VALIDERR + "There exists " + subArray[1] + " elements that has the wrong html tag.");
+            console.log(ERR_VALIDERR + "There exists " + subElem[1] + " elements that has the wrong html tag.");
           }
           else{
             /*Test presence of subElem*/
             if((constraint === PRESENT || constraint === UNIQUE) && tagCount === 0){
               validity = false;
-              console.log(ERR_VALIDERR + 'Selector "' + subArray[0] + subArray[1] + '" does not exist in the document.');
+              console.log(ERR_VALIDERR + 'Selector "' + subElem[0] + subElem[1] + '" does not exist in the document.');
             }
             /*Test uniqueness of subElem*/
             if((constraint === UNIQUE || constraint === NON_PLURAL) && tagCount > 1){
               validity = false;
-              console.log(ERR_VALIDERR + 'Selector "' + subArray[0] + subArray[1] + '" is not unique in the document.');
+              console.log(ERR_VALIDERR + 'Selector "' + subElem[0] + subElem[1] + '" is not unique in the document.');
             }
 
           }
@@ -754,11 +757,117 @@ function test_testSelector(){
   /*Arg combos that are supposed to be valid (returning an empty string)*/
   console.log("---Testing testSelector() expecting no error message.---");
   runTest(STEST, sTestPre + "CLASS followed by a classname:", [CLASS, ".test"], true);
-  runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", "section"], true);
+  runTest(STEST, sTestPre + "COMPOSITE followed by a classname followed by a tag from TAGTYPES:", [COMPOSITE, ".test", DEF_TAG], true);
 }
 
 function test_testValidity(){
+  const vTestPre = "When giving testValidity() ";
+  const tString = "test";
+  const tNum = 123;
+  const tZero = ".test-zero";
+  const tOne = ".test-one";
+  const tTwo = ".test-two";
+  const tMiss = ".test-missing";
+  const tUno = ".test-unique";
+  const tBody = ".test-body";
 
+  /*Testing first argument (constraint)*/
+  console.log("---Testing testValidity() without a valid constraint---");
+  runTest(VTEST, vTestPre + "a non-valid constraint:", [BAD_CONSTRAINT, tString]);
+
+  /*Testing for absent elements*/
+  console.log("---Testing testValidity() with ABSENT as constraint---");
+  /*Expecting errors from testBundle() or testSelector()*/
+  runTest(VTEST, vTestPre + "a non-array element:", [ABSENT, tString]);
+  runTest(VTEST, vTestPre + "an empty array:", [ABSENT, []]);
+  runTest(VTEST, vTestPre + "an array with a non-string subelement:", [ABSENT, [tNum]]);
+  runTest(VTEST, vTestPre + "an array with an array subelement:", [ABSENT, [[tString]]]);
+  runTest(VTEST, vTestPre + "an array with an incorrectly named string:", [ABSENT, [tString]]);
+  /*Testing one-element arrays that are expected to pass testBundle() and testSelector()*/
+  console.log("---Subtests for one-element arrays---");
+  runTest(VTEST, vTestPre + "an absent element:", [ABSENT, [tZero]], true);
+  runTest(VTEST, vTestPre + "a unique element:", [ABSENT, [tOne]]);
+  runTest(VTEST, vTestPre + "a non-unique element", [ABSENT, [tTwo]]);
+  /*Testing multi-element arrays that are expected to pass testBundle() and testSelector()*/
+  console.log("---Subtests for multi-element arrays---");
+  runTest(VTEST, vTestPre + "several absent elements:", [ABSENT, [tZero, tMiss]], true);
+  runTest(VTEST, vTestPre + "a combo of absent and present elements:", [ABSENT, [tTwo, tMiss, tZero, tOne]]);
+  runTest(VTEST, vTestPre + "several present elements:", [ABSENT, [tOne, tTwo]]);
+
+  /*Testing for present elements*/
+  console.log("---Testing testValidity() with PRESENT as constraint---");
+  /*Expecting errors from testBundle() or testSelector()*/
+  /*Since it is assumed that the same code that handles PRESENT also handles UNIQUE, NON_PLURAL and FREE,
+  those constraints will not test the bundling and selection.*/
+  runTest(VTEST, vTestPre + "a non-array element:", [PRESENT, tString]);
+  runTest(VTEST, vTestPre + "an empty array:", [PRESENT, []]);
+  runTest(VTEST, vTestPre + "an array with a non-array subelement:", [PRESENT, [tString]]);
+  runTest(VTEST, vTestPre + "an array with an empty array as a subelement:", [PRESENT, [[]]]);
+  runTest(VTEST, vTestPre + "an array with an array of one element as a subelement:", [PRESENT, [[tString]]]);
+  runTest(VTEST, vTestPre + "an array with an array where the first element is not a valid tag as a subelement:", [PRESENT, [[NO_TAG, tString]]]);
+  runTest(VTEST, vTestPre + "an array with an array where the second element is not a string as a subelement:", [PRESENT, [[DEF_TAG, tNum]]]);
+  runTest(VTEST, vTestPre + "an array with an array where the second element is an array as a subelement:", [PRESENT, [[DEF_TAG, [tString]]]]);
+  runTest(VTEST, vTestPre + "an array with an array where the second element is not starting with a dot as a subelement:", [PRESENT, [[DEF_TAG, tString]]]);
+  /*one-elems...*/
+  console.log("---Subtests for one-element arrays---");
+  runTest(VTEST, vTestPre + "an absent element:", [PRESENT, [[DEF_TAG, tZero]]]);
+  runTest(VTEST, vTestPre + "a unique element:", [PRESENT, [[DEF_TAG, tOne]]], true);
+  runTest(VTEST, vTestPre + "a non-unique element:", [PRESENT, [[DEF_TAG, tTwo]]], true);
+  runTest(VTEST, vTestPre + "a unique element that has a non-unique class:", [PRESENT, [[DEF_TAG, tBody]]]);
+  /*multi-elems...*/
+  console.log("---Subtests for multi-element arrays---");
+  runTest(VTEST, vTestPre + "several absent elements:", [PRESENT, [[DEF_TAG, tZero], [DEF_TAG, tMiss]]]);
+  runTest(VTEST, vTestPre + "a combo of absent and present elements:", [PRESENT, [[DEF_TAG, tTwo], [DEF_TAG, tMiss], [DEF_TAG, tZero], [DEF_TAG, tOne]]]);
+  runTest(VTEST, vTestPre + "several present elements:", [PRESENT, [[DEF_TAG, tOne], [DEF_TAG, tTwo]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [PRESENT, [[DEF_TAG, tBody], [DEF_TAG, tTwo], ["body", tBody], [DEF_TAG, tZero]]]); /*The console might log two of these on the same line as repeats.*/
+
+  /*Testing for unique elements*/
+  console.log("---Testing testValidity() with UNIQUE as constraint---");
+  /*one-elems...*/
+  console.log("\n---Subtests for one-element arrays---");
+  runTest(VTEST, vTestPre + "an absent element:", [UNIQUE, [[DEF_TAG, tZero]]]);
+  runTest(VTEST, vTestPre + "a unique element:", [UNIQUE, [[DEF_TAG, tOne]]], true);
+  runTest(VTEST, vTestPre + "a non-unique element:", [UNIQUE, [[DEF_TAG, tTwo]]]);
+  runTest(VTEST, vTestPre + "a unique element that has a non-unique class:", [UNIQUE, [[DEF_TAG, tBody]]]);
+  /*multi-elems...*/
+  console.log("---Subtests for multi-element arrays---");
+  runTest(VTEST, vTestPre + "several absent elements:", [UNIQUE, [[DEF_TAG, tZero], [DEF_TAG, tMiss]]]);
+  runTest(VTEST, vTestPre + "a combo of absent and present elements:", [UNIQUE, [[DEF_TAG, tTwo], [DEF_TAG, tMiss], [DEF_TAG, tZero], [DEF_TAG, tOne]]]);
+  runTest(VTEST, vTestPre + "several present elements, one being unique:", [UNIQUE, [[DEF_TAG, tOne], [DEF_TAG, tTwo]]]);
+  runTest(VTEST, vTestPre + "several unique elements:", [UNIQUE, [[DEF_TAG, tOne], [DEF_TAG, tUno]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [UNIQUE, [[DEF_TAG, tBody], [DEF_TAG, tTwo], [DEF_TAG, tOne], ["body", tBody], [DEF_TAG, tZero], [DEF_TAG, tUno]]]); /*The console might log two of these on the same line as repeats.*/
+
+  /*Testing for elements that should occur at most once*/
+  console.log("---Testing testValidity() with NON_PLURAL as constraint---");
+  /*one-elems...*/
+  console.log("\n---Subtests for one-element arrays---");
+  runTest(VTEST, vTestPre + "an absent element:", [NON_PLURAL, [[DEF_TAG, tZero]]], true);
+  runTest(VTEST, vTestPre + "a unique element:", [NON_PLURAL, [[DEF_TAG, tOne]]], true);
+  runTest(VTEST, vTestPre + "a non-unique element:", [NON_PLURAL, [[DEF_TAG, tTwo]]]);
+  runTest(VTEST, vTestPre + "a unique element that has a non-unique class:", [NON_PLURAL, [[DEF_TAG, tBody]]]);
+  /*multi-elems...*/
+  console.log("---Subtests for multi-element arrays---");
+  runTest(VTEST, vTestPre + "several absent elements:", [NON_PLURAL, [[DEF_TAG, tZero], [DEF_TAG, tMiss]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent and present (including plural) elements:", [NON_PLURAL, [[DEF_TAG, tTwo], [DEF_TAG, tMiss], [DEF_TAG, tZero], [DEF_TAG, tOne]]]);
+  runTest(VTEST, vTestPre + "several present elements, one being plural:", [NON_PLURAL, [[DEF_TAG, tOne], [DEF_TAG, tTwo]]]);
+  runTest(VTEST, vTestPre + "several unique elements:", [NON_PLURAL, [[DEF_TAG, tOne], [DEF_TAG, tUno]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [NON_PLURAL, [[DEF_TAG, tBody], [DEF_TAG, tTwo], [DEF_TAG, tOne], ["body", tBody], [DEF_TAG, tZero], [DEF_TAG, tUno]]]); /*The console might log two of these on the same line as repeats.*/
+
+  /*Testing for elements with no constraint (except that for each, there should be no other elements of that class.)*/
+  console.log("---Testing testValidity() with FREE as constraint (no constraint)---");
+  /*one-elems...*/
+  console.log("\n---Subtests for one-element arrays---");
+  runTest(VTEST, vTestPre + "an absent element:", [FREE, [[DEF_TAG, tZero]]], true);
+  runTest(VTEST, vTestPre + "a unique element:", [FREE, [[DEF_TAG, tOne]]], true);
+  runTest(VTEST, vTestPre + "a non-unique element:", [FREE, [[DEF_TAG, tTwo]]], true);
+  runTest(VTEST, vTestPre + "a unique element that has a non-unique class:", [FREE, [[DEF_TAG, tBody]]]);
+  /*multi-elems...*/
+  console.log("---Subtests for multi-element arrays---");
+  runTest(VTEST, vTestPre + "several absent elements:", [FREE, [[DEF_TAG, tZero], [DEF_TAG, tMiss]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent and present elements:", [FREE, [[DEF_TAG, tTwo], [DEF_TAG, tMiss], [DEF_TAG, tZero], [DEF_TAG, tOne]]], true);
+  runTest(VTEST, vTestPre + "several present elements:", [FREE, [[DEF_TAG, tOne], [DEF_TAG, tTwo]]], true);
+  runTest(VTEST, vTestPre + "several unique elements:", [FREE, [[DEF_TAG, tOne], [DEF_TAG, tUno]]], true);
+  runTest(VTEST, vTestPre + "a combo of absent, present and non-specific (multi-tag) elements:", [FREE, [[DEF_TAG, tBody], [DEF_TAG, tTwo], [DEF_TAG, tOne], ["body", tBody], [DEF_TAG, tZero], [DEF_TAG, tUno]]]); /*The console might log two of these on the same line as repeats.*/
 }
 
 /*Function for testing the isAbsent() function.
@@ -895,15 +1004,16 @@ function test_isTagSpecific(){
 Returns nothing.*/
 function runAllTests(){
   /*Test the argument validation tests*/
-  test_bundleTest();
-  test_selectorTest();
+  test_testBundle();
+  test_testSelector();
 
   /*Test the occurence tests*/
-  test_isAbsent();
+  test_testValidity();
+  /*test_isAbsent();
   test_isPresent();
   test_isUnique();
   test_isNonPlural();
-  test_isTagSpecific();
+  test_isTagSpecific();*/
 
   /*Indicate that all tests have been run.
   Could consider logging number of failed tests too.*/
@@ -945,7 +1055,7 @@ $(document).ready( () => {
     const base = ["body", ".base", true];
     const banWrap = ["section", ".banner-wrapper", true];
 
-    if(!(isUnique([base, banWrap]))){
+    if(!(testValidity(UNIQUE, [base, banWrap]))){
       logProgress(before, progress);
       return;
     }
@@ -957,7 +1067,7 @@ $(document).ready( () => {
     const servWrap = ["section", ".service-wrapper"];
     const empWrap = ["section", ".employee-wrapper"];
 
-    if(!(isNonPlural([mainWrap, topWrap, servWrap, empWrap]))){
+    if(!(testValidity(NON_PLURAL, [mainWrap, topWrap, servWrap, empWrap]))){
       logProgress(before, progress);
       return;
     }
