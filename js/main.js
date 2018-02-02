@@ -20,6 +20,15 @@ const EMPPAGE = "ansatte.html";
 const ACTPAGE = "aktiv.html";
 const TESTPAGE = "test.html";
 
+/**Paths and files for html partials, employees and workplaces**/
+const PART_PATH = "./html/";
+const INFO_PATH = "./Info/";
+const IMG_PATH = "./Bilder/";
+const TXT_END = ".txt";
+const IMG_END = ".jpg";
+const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
+const JOBS = ["DREIS", "DagsJobben", "Jobs"];
+
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
 const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
 const CLASS = 1;        /*For a string corresponding to a class name.*/
@@ -113,9 +122,16 @@ function capitalizeFirstLetter(string){
 
 /*Function for reading a file and returning an array of paragraphs using double newlines as separators.
 Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
+If the file reading failed, the function returns null.
 */
 function readParas(file){
-  return readFile(file).split("\r\n\r\n");
+  fileStr = readFile(file);
+  if(fileStr === null){
+    return null;
+  }
+  else{
+    return fileStr.split("\r\n\r\n");
+  }
 }
 
 /*Function for extracting userid from url. Returns null if the url has no attributes.
@@ -671,6 +687,25 @@ function runAllTests(){
   return;
 }
 
+/*Function for reading main content. Can be used during page loading or in response to events.*/
+function readContent(fName){
+  let paragraphs = readParas(INFO_PATH + fName + TXT_END);
+  if(paragraphs === null){
+    return null;
+  }
+  else if(paragraphs.length !== 4){
+    console.log("readContent" + ERR_POST + "The content file is expected to contain exactly four groups of paragraphs.");
+    return null;
+  }
+
+  /*Update picture*/
+  imgParas = paragraphs[0].split("\r\n");
+  $(".illustration").children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
+  $(".illustration").children("img").attr("alt", imgParas[1]);
+
+  return;
+}
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
@@ -682,19 +717,9 @@ $(document).ready( () => {
   let progress = "any DOM-manipulation";   /*Update this to keep track of where errors occur*/
   let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
 
-
-  /**Paths and files for html partials, employees and workplaces**/
-  const partPath = "./html/";
-  const storyPath = "./Info/";
-  const imgPath = "./Temp/";
-  const textEnding = ".txt";
-  const imgEnding = ".jpg";
-  const users = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
-  const workPlaces = ["DREIS", "DagsJobben", "Default"];
-
   /**Testing the test framework**/
   if(testing){
-    if(window.location.pathname.endsWith(partPath.slice(1) + TESTPAGE)){
+    if(window.location.pathname.endsWith(PART_PATH.slice(1) + TESTPAGE)){
       runAllTests();
       return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
@@ -793,7 +818,7 @@ $(document).ready( () => {
   before = true;
 
   /*Read banner file.*/
-  let bannerCode = readFile(partPath + "banner.html");
+  let bannerCode = readFile(PART_PATH + "banner.html");
 
   if(bannerCode === null){
     /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -865,7 +890,7 @@ $(document).ready( () => {
     before = true;
 
     /*Read top-wrapper file*/
-    let topCode = readFile(partPath + "tops.html");
+    let topCode = readFile(PART_PATH + "tops.html");
 
     if(topCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -906,10 +931,10 @@ $(document).ready( () => {
       let buttonFile = "";
 
       if(window.location.pathname.endsWith(JOBPAGE)){
-        buttonFile = "top-jobs.html";
+        buttonFile = "top_jobs.html";
       }
       else if(window.location.pathname.endsWith(EMPPAGE)){
-        buttonFile = "top-emps.html";
+        buttonFile = "top_emps.html";
       }
 
       if(!buttonFile){
@@ -920,7 +945,7 @@ $(document).ready( () => {
         return;
       }
 
-      let buttonCode = readFile(partPath + buttonFile);
+      let buttonCode = readFile(PART_PATH + buttonFile);
 
       if(buttonCode === null){
         /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -946,11 +971,11 @@ $(document).ready( () => {
 
   /*** Create content (base content consists of an img section, an info section and a footer). ***/
   if($mainWrap.length){
-    progress = "adding code to the wrapper for main content";
+    progress = "adding structural code to the wrapper for main content";
     before = true;
 
     /*Read content file*/
-    let mainCode = readFile(partPath + "content.html");
+    let mainCode = readFile(PART_PATH + "content.html");
 
     if(mainCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -976,6 +1001,7 @@ $(document).ready( () => {
 
       /*Add content to the content wrapper*/
       $mainWrap.append(mainCode);
+      before = false;
 
       if(testing){
         const illWrap = ["section", ".illustration"];
@@ -989,7 +1015,25 @@ $(document).ready( () => {
       }
 
       /*Read page-specific content file*/
+      progress = "adding site-specific content to subwrappers of the main content wrapper"
+      before = true;
 
+      let contentFile = "";
+
+      if(window.location.pathname.endsWith(HOMEPAGE)){
+        contentFile = "index";
+      }
+      else if(window.location.pathname.endsWith(JOBPAGE)){
+        contentFile = "jobs";
+      }
+
+      if(!contentFile){
+        console.log("Content wrapper exists on a page that has no defined contentFile.");
+        logProgress(before, progress);
+        return;   /*Seems to be ok to stop processing. Should consider giving an alert.*/
+      }
+
+      readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
     }
   }
 

@@ -1,9 +1,14 @@
-DagsJobben er en sentral som utfører småjobber for kommunale enheter, næringslivet og private.
+djob/cafe103
+DagsJobben sine lokaler
 
+-
+
+DagsJobben er en sentral som utfører småjobber for kommunale enheter, næringslivet og private.
 Våre arbeidstakere er mennesker som har utfordringer i forhold til rus. Hvis dette tilbudet passer for deg,
 kan du møte opp i Kafè 103 eller ringe oss. Potensielle oppdragsgivere kan også ringe for en uforpliktende samtale.
 
-con_djob
+djob
+DagsJobben
 Grønnegata 103
 9008 TROMSØ
 902 39 202 / 902 16 832
