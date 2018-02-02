@@ -13,6 +13,13 @@ More trivial comments use one star.**/
 
 /*** Global consts ***/
 
+/**Pages**/
+const HOMEPAGE = "index.html";
+const JOBPAGE = "arbeid.html";
+const EMPPAGE = "ansatte.html";
+const ACTPAGE = "aktiv.html";
+const TESTPAGE = "test.html";
+
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
 const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
 const CLASS = 1;        /*For a string corresponding to a class name.*/
@@ -21,7 +28,7 @@ const INPUTTYPES = [CLASS, COMPOSITE];        /*Allowed values of inputType.*/
 
 /**Tag types. Controls what kind of tags are allowed for elements that are tested for occurrence in the html document.**/
 const DEF_TAG = "section";    /*Default tag when testing. Should be in TAGTYPES and fit in there.*/
-const TAGTYPES = [DEF_TAG, "body", "nav"];    /*Allowed tags when testing occurrence.*/
+const TAGTYPES = [DEF_TAG, "body", "nav", "div"];    /*Allowed tags when testing occurrence.*/
 
 /**Default garbage of different types**/
 const BAD_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
@@ -687,13 +694,13 @@ $(document).ready( () => {
 
   /**Testing the test framework**/
   if(testing){
-    if(window.location.pathname.endsWith(partPath.slice(1) + "test.html")){
+    if(window.location.pathname.endsWith(partPath.slice(1) + TESTPAGE)){
       runAllTests();
       return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
   }
 
-  /**Testing uniqueness(non-multiplicity and optionally existence) before DOM manipulation starts**/
+  /**Testing element occurrence before DOM manipulation starts**/
   if(testing){
     /*Uniques*/
     const base = ["body", ".base"];
@@ -728,9 +735,9 @@ $(document).ready( () => {
   const $baseBody = $("body.base");
   const $banWrap = $("section.banner-wrapper");
   const $topWrap = $("section.top-wrapper");
+  const $mainWrap = $("section.content-wrapper");
 
-  /*const $mainWrap = $("section.content-wrapper");
-  const $servWrap = $("section.service-wrapper");
+  /*const $servWrap = $("section.service-wrapper");
   const $empWrap = $("section.employee-wrapper");*/
 
   /*const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
@@ -854,7 +861,7 @@ $(document).ready( () => {
 
   /*** Create top wrapper (for navigating through dynamic content) ***/
   if(readSuccess && $topWrap.length){
-    progress = "adding code to the top wrapper (navigation of dynamic content)";
+    progress = "adding general code to the top wrapper (navigation of dynamic content)";
     before = true;
 
     /*Read top-wrapper file*/
@@ -868,7 +875,7 @@ $(document).ready( () => {
         alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
       }
       else{
-        alert("Failed to load main content. Unknown cause.");
+        alert("Failed to load top wrapper structure. Unknown cause.");
       }
     }
     else{
@@ -882,19 +889,73 @@ $(document).ready( () => {
 
       /*Add top-wrapper code*/
       $topWrap.append(topCode);
+      before = false;
+
+      /*Test that the DOM has gotten a scroll-menu wrapper*/
+      if(testing){
+        if(!(testValidity(UNIQUE, [["div", ".scroll-menu"]]))){
+          logProgress(before, progress);
+          return;
+        }
+      }
+
+      /*Try to read inner content from file into scroll-menu*/
+      progress = "adding site-specific code to the top wrapper (navigation of dynamic content)";
+      before = true;
+
+      let buttonFile = "";
+
+      if(window.location.pathname.endsWith(JOBPAGE)){
+        buttonFile = "top-jobs.html";
+      }
+      else if(window.location.pathname.endsWith(EMPPAGE)){
+        buttonFile = "top-emps.html";
+      }
+
+      if(!buttonFile){
+        console.log("Top wrapper exists on a page that has no defined buttonFile.");
+        logProgress(before, progress);
+        /*Since the page would lose its main functionality,
+        it doesn't seem like continuing makes much sense. Consider giving an alert too.*/
+        return;
+      }
+
+      let buttonCode = readFile(partPath + buttonFile);
+
+      if(buttonCode === null){
+        /*If the file reading failed, give an error message alert and disable further file reading.*/
+        readSuccess = false;
+        before = false;
+        if(online){
+          alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+        }
+        else{
+          alert("Failed to load top wrapper content. Unknown cause.");
+        }
+      }
+      else{
+        $(".scroll-menu").append(buttonCode);
+        before = false;
+
+        /*Since there are no common classes for the buttonCode content, no tests are made.*/
+      }
+
     }
   }
 
-  return;
 
   /*** Create content (base content consists of an img section, an info section and a footer). ***/
   if($mainWrap.length){
+    progress = "adding code to the wrapper for main content";
+    before = true;
+
     /*Read content file*/
     let mainCode = readFile(partPath + "content.html");
 
     if(mainCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
       readSuccess = false;
+      before = false;
       if(online){
         alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
       }
@@ -907,13 +968,8 @@ $(document).ready( () => {
       if(testing){
         let success = true;
         sections = [".illustration", ".info", ".footer"];
-        sections.forEach(function(item) {
-          if(!(isAbsent(item))){
-            console.log("Occurred before adding content code.");
-            success = false;
-          }
-        });
-        if(!success){
+        if(!(testValidity(ABSENT, sections))){
+          logProgress(before, progress);
           return;
         }
       }
@@ -922,12 +978,12 @@ $(document).ready( () => {
       $mainWrap.append(mainCode);
 
       if(testing){
-        const illWrap = ["section", ".illustration", true];
-        const infoWrap = ["section", ".info", true];
-        const foot = ["section", ".footer", true];
+        const illWrap = ["section", ".illustration"];
+        const infoWrap = ["section", ".info"];
+        const foot = ["section", ".footer"];
 
-        if(!(showUniqueness([illWrap, infoWrap, foot]))){
-          console.log("Occurred after adding content code.");
+        if(!(testValidity(UNIQUE, [illWrap, infoWrap, foot]))){
+          logProgress(before, progress);
           return;
         }
       }
@@ -936,6 +992,8 @@ $(document).ready( () => {
 
     }
   }
+
+  return;
 
   /*** Story link creation. Might come back in later if the links are used in more places ***/
 
