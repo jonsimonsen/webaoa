@@ -1,7 +1,7 @@
 job_select
 Viser ulike jobber
 
-Valg av arbeidsplass
+Velg en arbeidsplass fra knapperaden
 
 Introside for våre arbeidstilbud.
 Trykk på en knapp over for å se informasjon om den arbeidsplassen.

@@ -689,21 +689,137 @@ function runAllTests(){
 
 /*Function for reading main content. Can be used during page loading or in response to events.*/
 function readContent(fName){
+  let errPre = "readContent" + ERR_POST;
   let paragraphs = readParas(INFO_PATH + fName + TXT_END);
   if(paragraphs === null){
-    return null;
+    return false;
   }
   else if(paragraphs.length !== 4){
-    console.log("readContent" + ERR_POST + "The content file is expected to contain exactly four groups of paragraphs.");
-    return null;
+    console.log(errPre + "The content file is expected to contain exactly four groups of paragraphs.");
+    return false;
   }
 
   /*Update picture*/
-  imgParas = paragraphs[0].split("\r\n");
+  let imgParas = paragraphs[0].split("\r\n");
   $(".illustration").children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
   $(".illustration").children("img").attr("alt", imgParas[1]);
 
-  return;
+  /*Update picture text(step one)*/
+  let imgText = paragraphs[1].split("\r\n");
+  if(imgText.length > 1){
+    console.log(errPre + "The second paragraph of the content file should contain a single line.");
+    return false;
+  }
+
+  $(".ill-text").append("<h3>" + imgText[0] + "</h3>");
+  if(imgText[0] === "-"){
+    $(".ill-text").children("h3").addClass("usynlig");
+  }
+
+  /*Update info section*/
+  let infoText = paragraphs[2].split("\r\n");
+  $(".info").append("<h2>" + infoText[0] + "</h2>");
+  $(".info").append("<p></p>");
+  infoText.slice(1).forEach(function(line) {
+    $(".info").children("p").append(line + "<br>");
+  });
+
+  /*Read footer file*/
+  let footCode = readFile(PART_PATH + "footer.html");
+
+  if(footCode === null){
+    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    if(online){
+      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+    }
+    else{
+      alert("Failed to load footer structure. Unknown cause.");
+    }
+
+    return false;
+  }
+  else{
+    /*Test that there is exactly one footer*/
+    if(!(testValidity(UNIQUE, [["section", ".footer"]]))){
+      return false;
+    }
+
+    /*Add structure to the footer wrapper*/
+    $(".footer").append(footCode);
+
+  }
+
+  /*Add content to the footer*/
+  footLines = paragraphs[3].split("\r\n");
+  if(footLines[footLines.length - 1] === ""){
+    /*In case the final newline has been included in the paragraph, remove the last element*/
+    footLines = footLines.slice(0, footLines.length - 1);
+  }
+
+  if(footLines[0] !== "-"){
+    if(footLines.length < 5){
+      console.log(errPre + "The fourth (last) paragraph of the content file should contain at least five lines when the first line consists of something else than a single dash.");
+      return false;
+    }
+    /*Update contact link in banner and illustration*/
+    $(".footer").attr("id", footLines[0]);
+    $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
+    $(".illustration").find("a").attr("href", "#" + footLines[0]);
+  }
+  else{
+    if(footLines.length > 2){
+      console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
+      return false;
+    }
+    /*Hide contact link from image text and remove the footer*/
+    $(".ill-link").children("a").addClass("usynlig");
+    $(".footer").remove();
+  }
+
+  if(!footLines[1]){
+    console.log(errPre + "The fourth (last) paragraph of the content file should contain at least two lines.");
+    return false;
+  }
+  else{
+    /*Update image text with the name of the unit/workplace*/
+    $(".ill-text").prepend("<h2>" + footLines[1] + "</h2>");
+  }
+
+  /*Read file containing a separator for contact fields*/
+  let sepCode = readFile(PART_PATH + "seps.html");
+
+  if(sepCode === null){
+    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    if(online){
+      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+    }
+    else{
+      alert("Failed to load footer separator code. Unknown cause.");
+    }
+
+    return false;
+  }
+
+  const seps = " " + sepCode;
+
+  $(".adr").append(footLines[2] + seps);
+  $(".padr").append(footLines[3] + seps);
+  $(".tlf").append(footLines[4]);
+
+  /*Add address to facebook link if it's given. Otherwise, hide the link.*/
+  if(footLines[5]){
+    $(".fb-link").attr("href", footLines[5]);
+  }
+  else{
+    $(".fb-link").addClass("usynlig");
+  }
+
+  if(footLines[6]){
+    console.log(errPre + "The fourth (last) paragraph of the content file should not contain more than six lines.");
+    return false;
+  }
+
+  return true;
 }
 
 /*** Generate additional html for the current site ***/
