@@ -983,20 +983,6 @@ $(document).ready( () => {
         console.log("Do not add anchors without a href attribute to the banner navbar.");
         logProgress(before, progress);
       }
-
-      /*Nothing more to do until the footer has been added.*/
-
-      /*-Give classes with a footer a contact link. Otherwise, make an unclickable link.-*/
-        /*let dest = "#";
-
-        if($foot[0]){
-          dest += $foot.attr("id");
-        }
-        else{
-          $(this).addClass("unlink");
-        }
-
-        $(this).attr("href", dest);*/
     });
   }
 
@@ -1149,11 +1135,91 @@ $(document).ready( () => {
         return;   /*Seems to be ok to stop processing. Should consider giving an alert.*/
       }
 
-      readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
+      let newContent = readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
+
+      if(!newContent){
+        logProgress(before, progress);
+        return;
+      }
     }
   }
 
-  return;
+  /*** Create additional home page content ***/
+
+  /**Make options section and storygrid section**/
+  if(window.location.pathname.endsWith(HOMEPAGE)){
+    progress = "adding options section to home page"
+    before = true;
+    let optCode = readFile(PART_PATH + "opts.html");
+
+    if(optCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      before = false;
+      if(online){
+        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      }
+      else{
+        alert("Failed to load options section for home page. Unknown cause.");
+      }
+    }
+    else{
+      /*Insert the option code directly before the footer element*/
+      $(".footer").before(optCode);
+      before = false;
+    }
+
+    progress = "adding storygrid section to home page";
+    before = true;
+    let gridCode = readFile(PART_PATH + "storygrid.html");
+
+    if(gridCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      before = false;
+      if(online){
+        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      }
+      else{
+        alert("Failed to load storygrid structure for home page. Unknown cause.");
+      }
+    }
+    else{
+      /*Insert the storygrid code directly before the footer element*/
+      $(".footer").before(gridCode);
+      before = false;
+    }
+
+    /**Employee story creation for home page**/
+
+    $sGrid = $(".stories");
+
+    if(readSuccess === true && $sGrid.length){
+      let empCode = readFile(PART_PATH + "empboxes.html");
+      let linkCode = readFile(PART_PATH + "storylink.html");
+
+      /*Populate the story grid with boxes for each employee story*/
+      for(let i = 0; i < EMPS.length - 1; i++){
+        $sGrid.append(empCode);
+      }
+
+      /*Add storylinks to the boxes*/
+      $sGrid.find(".storylink").append(linkCode);
+
+      /*Update paragraphs and signature for each employee box*/
+      for(let j = 0; j < EMPS.length - 1; j++ ){
+        let $empbox = $(".employee").eq(j);
+        let paragraphs = readParas(INFO_PATH + "emps/" + EMPS[j] + TXT_END);
+
+        $empbox.find("p.excerpt").append(paragraphs[0]);
+        $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+
+        /*Update the address of the storylink*/
+        $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+      }
+    }
+  }
+
 
   /*** Story link creation. Might come back in later if the links are used in more places ***/
 
@@ -1168,34 +1234,7 @@ $(document).ready( () => {
 
   }*/
 
-
-  /***Employee story creation for home page***/
-
-  if(readSuccess === true && $storyGrid[0]){
-    let empCode = readFile("./empboxes.html");
-    let linkCode = readFile("./storylink.html");
-
-    /*Populate the story grid with boxes for each employee story*/
-    for(let i = 0; i < users.length - 1; i++){
-      $sgrid.append(empCode);
-    }
-
-    /*Add storylinks to the boxes*/
-    $sgrid.find(".storylink").append(linkCode);
-
-    /*Update paragraphs and signature for each employee box*/
-    for(let j = 0; j < users.length - 1; j++ ){
-      let $empbox = $(".employee").eq(j);
-      let paragraphs = readParas(storyPath + users[j] + textEnding);
-
-      $empbox.find("p.excerpt").append(paragraphs[0]);
-      $empbox.find("p.sign").append("-" + capitalizeFirstLetter(users[j]));
-
-      /*Update the address of the storylink*/
-      $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
-    }
-  }
-
+  return;
 
   /***Employee story creation and navigation for employee page***/
   if(readSuccess === true && $empwindow[0]){
@@ -1291,35 +1330,6 @@ $(document).ready( () => {
   /***Home link creation***/
   if(readSuccess === true && $homeLink[0]){
     $hlink.append(readFile("./homelink.html"));
-  }
-
-
-
-  /*** Footer ***/
-
-  if(readSuccess === true && $(".footer")[0]) {
-    /*Read footer file and append it to the footer div.*/
-    let footerCode = readFile("./footer.html");
-    $(".footer").append(footerCode);
-
-    /*Add social media links (initially Facebook)*/
-    let fadr = $(".footer").attr("data-fb");
-    let $fblink = $(".fb-link");
-
-    if ((typeof fadr !== typeof undefined) && fadr !== false) {
-      $fblink.attr("href", fadr);
-      $fblink.attr("alt", $(".footer").attr("data-avd") + " på Facebook");
-    }
-    else{
-      $fblink.addClass("usynlig");
-    }
-
-    /*Add contact info*/
-    const SEPS = " " + readFile("./seps.html");
-
-    $(".adr").append($(".footer").attr("data-adr") + SEPS);
-    $(".padr").append($(".footer").attr("data-padr") + SEPS);
-    $(".tlf").append($(".footer").attr("data-tel"));
   }
 
 });
