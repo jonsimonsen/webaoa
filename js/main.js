@@ -703,50 +703,70 @@ function runAllTests(){
   return;
 }
 
-/*Function for reading main content. Can be used during page loading or in response to events.*/
+/*Function for reading main content and applying it to the document.
+Can be used during page loading or in response to events.
+Returns true if the reading and updating proceeded as expected.
+Returns false otherwise.*/
 function readContent(fName){
   let errPre = "readContent" + ERR_POST;
+
+  /*Make variables for frequently used selections*/
+  let $illWrap = $(".illustration");
+  let $textWrap = $(".ill-text");
+  let $linkWrap = $(".ill-link");
+  let $infoWrap = $(".info");
+  let $foot = $(".footer");
+
+  /*Read all paragraphs from the content file*/
   let paragraphs = readParas(INFO_PATH + fName + TXT_END);
   if(paragraphs === null){
     return false;
   }
   else if(paragraphs.length !== 4){
-    console.log(errPre + "The content file is expected to contain exactly four groups of paragraphs.");
+    console.log(errPre + "The content file should contain exactly four of paragraphs.");
     return false;
   }
 
   /*Update picture*/
   let imgParas = paragraphs[0].split("\r\n");
-  $(".illustration").children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
-  $(".illustration").children("img").attr("alt", imgParas[1]);
+
+  if(imgParas.length !== 2){
+    console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
+    return false;
+  }
+  else{
+    $illWrap.children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
+    $illWrap.children("img").attr("alt", imgParas[1]);
+  }
 
   /*Update picture text(step one)*/
   let imgText = paragraphs[1].split("\r\n");
+
   if(imgText.length > 1){
     console.log(errPre + "The second paragraph of the content file should contain a single line.");
     return false;
   }
 
-  $(".ill-text").append("<h3>" + imgText[0] + "</h3>");
+  $textWrap.append("<h3>" + imgText[0] + "</h3>");
   if(imgText[0] === "-"){
-    $(".ill-text").children("h3").addClass("usynlig");
+    $textWrap.children("h3").addClass("usynlig");
   }
 
   /*Update info section*/
   let infoText = paragraphs[2].split("\r\n");
-  $(".info").append("<h2>" + infoText[0] + "</h2>");
-  $(".info").append("<p></p>");
+  $infoWrap.append("<h2>" + infoText[0] + "</h2>");
+  $infoWrap.append("<p></p>");
   infoText.slice(1).forEach(function(line) {
-    $(".info").children("p").append(line + "<br>");
+    $infoWrap.children("p").append(line + "<br>");
   });
 
   /*Read footer file*/
   let footCode = readFile(PART_PATH + "footer.html");
 
   if(footCode === null){
-    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    /*If the file reading failed, give an error message alert for the current environment.*/
     if(online){
-      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      webReadAlert();
     }
     else{
       alert("Failed to load footer structure. Unknown cause.");
@@ -755,13 +775,8 @@ function readContent(fName){
     return false;
   }
   else{
-    /*Test that there is exactly one footer*/
-    if(!(testValidity(UNIQUE, [["section", ".footer"]]))){
-      return false;
-    }
-
     /*Add structure to the footer wrapper*/
-    $(".footer").append(footCode);
+    $foot.append(footCode);
 
   }
 
@@ -778,9 +793,9 @@ function readContent(fName){
       return false;
     }
     /*Update contact link in banner and illustration*/
-    $(".footer").attr("id", footLines[0]);
+    $foot.attr("id", footLines[0]);
     $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
-    $(".illustration").find("a").attr("href", "#" + footLines[0]);
+    $illWrap.find("a").attr("href", "#" + footLines[0]);
   }
   else{
     if(footLines.length > 2){
@@ -788,8 +803,8 @@ function readContent(fName){
       return false;
     }
     /*Hide contact link from image text and remove the footer*/
-    $(".ill-link").children("a").addClass("usynlig");
-    $(".footer").remove();
+    $illWrap.find("a").addClass("usynlig");
+    $foot.remove();
   }
 
   if(!footLines[1]){
@@ -798,16 +813,16 @@ function readContent(fName){
   }
   else{
     /*Update image text with the name of the unit/workplace*/
-    $(".ill-text").prepend("<h2>" + footLines[1] + "</h2>");
+    $textWrap.prepend("<h2>" + footLines[1] + "</h2>");
   }
 
   /*Read file containing a separator for contact fields*/
   let sepCode = readFile(PART_PATH + "seps.html");
 
   if(sepCode === null){
-    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    /*If the file reading failed, give an error message alert for the current environment.*/
     if(online){
-      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      webReadAlert();
     }
     else{
       alert("Failed to load footer separator code. Unknown cause.");
@@ -1083,7 +1098,7 @@ $(document).ready( () => {
 
 
   /*** Create content (base content consists of an img section, an info section and a footer). ***/
-  if($mainWrap.length){
+  if(readSuccess && $mainWrap.length){
     progress = "adding structural code to the wrapper for main content";
     before = true;
 
@@ -1106,9 +1121,8 @@ $(document).ready( () => {
     else{
       /*Test that the DOM doesn't yet contain the elements that are supposed to be in the content code.*/
       if(testing){
-        let success = true;
-        sections = [".illustration", ".info", ".footer"];
-        if(!(testValidity(ABSENT, sections))){
+        let classes = [".illustration", ".info", ".footer", ".ill-text", ".ill-link"];
+        if(!(testValidity(ABSENT, classes))){
           logProgress();
           return;
         }
@@ -1122,15 +1136,17 @@ $(document).ready( () => {
         const illWrap = ["section", ".illustration"];
         const infoWrap = ["section", ".info"];
         const foot = ["section", ".footer"];
+        const illText = ["div", ".ill-text"];
+        const illLink = ["div", ".ill-link"];
 
-        if(!(testValidity(UNIQUE, [illWrap, infoWrap, foot]))){
+        if(!(testValidity(UNIQUE, [illWrap, infoWrap, foot, illText, illLink]))){
           logProgress();
           return;
         }
       }
 
       /*Read page-specific content file*/
-      progress = "adding site-specific content to subwrappers of the main content wrapper"
+      progress = "adding site-specific content to subwrappers of the main content wrapper";
       before = true;
 
       let contentFile = "";
@@ -1151,103 +1167,146 @@ $(document).ready( () => {
       let newContent = readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
 
       if(!newContent){
-        logProgress(before, progress);
+        logProgress();
         return;
       }
+
     }
-  }
 
-  /*** Create additional home page content ***/
+    /**Create additional home page content**/
+    if(readSuccess && window.location.pathname.endsWith(HOMEPAGE)){
+      /*Make options section*/
+      progress = "adding options section to home page"
+      before = true;
 
-  /**Make options section and storygrid section**/
-  if(window.location.pathname.endsWith(HOMEPAGE)){
-    progress = "adding options section to home page"
-    before = true;
-    let optCode = readFile(PART_PATH + "opts.html");
+      /*Test that the DOM doesn't yet contain the elements that are supposed to get added.*/
+      if(testing){
+        if(!(testValidity(ABSENT, [".options", ".storygrid"]))){
+          logProgress();
+          return;
+        }
+      }
 
-    if(optCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-      if(online){
-        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      let optCode = readFile(PART_PATH + "opts.html");
+
+      if(optCode === null){
+        /*If the file reading failed, give an error message alert and disable further file reading.*/
+        readSuccess = false;
+        before = false;
+
+        if(online){
+          webReadAlert();
+        }
+        else{
+          alert("Failed to load options section for home page. Unknown cause.");
+        }
       }
       else{
-        alert("Failed to load options section for home page. Unknown cause.");
+        /*Insert the option code directly before the footer element*/
+        $(".footer").before(optCode);
+        before = false;
       }
-    }
-    else{
-      /*Insert the option code directly before the footer element*/
-      $(".footer").before(optCode);
-      before = false;
-    }
 
-    progress = "adding storygrid section to home page";
-    before = true;
-    let gridCode = readFile(PART_PATH + "storygrid.html");
+      /*Make storygrid section*/
 
-    if(gridCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-      if(online){
-        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      progress = "adding storygrid section to home page";
+      before = true;
+
+      let gridCode = readFile(PART_PATH + "storygrid.html");
+
+      if(gridCode === null){
+        /*If the file reading failed, give an error message alert and disable further file reading.*/
+        readSuccess = false;
+        before = false;
+
+        if(online){
+          webReadAlert();
+        }
+        else{
+          alert("Failed to load storygrid structure for home page. Unknown cause.");
+        }
       }
       else{
-        alert("Failed to load storygrid structure for home page. Unknown cause.");
-      }
-    }
-    else{
-      /*Insert the storygrid code directly before the footer element*/
-      $(".footer").before(gridCode);
-      before = false;
-    }
-
-    /**Employee story creation for home page**/
-
-    $sGrid = $(".stories");
-
-    if(readSuccess === true && $sGrid.length){
-      let empCode = readFile(PART_PATH + "empboxes.html");
-      let linkCode = readFile(PART_PATH + "storylink.html");
-
-      /*Populate the story grid with boxes for each employee story*/
-      for(let i = 0; i < EMPS.length - 1; i++){
-        $sGrid.append(empCode);
+        /*Insert the storygrid code directly before the footer element*/
+        $(".footer").before(gridCode);
+        before = false;
       }
 
-      /*Add storylinks to the boxes*/
-      $sGrid.find(".storylink").append(linkCode);
+      /**Populate employee storygrid**/
 
-      /*Update paragraphs and signature for each employee box*/
-      for(let j = 0; j < EMPS.length - 1; j++ ){
-        let $empbox = $(".employee").eq(j);
-        let paragraphs = readParas(INFO_PATH + "emps/" + EMPS[j] + TXT_END);
+      $sGrid = $(".storygrid");
 
-        $empbox.find("p.excerpt").append(paragraphs[0]);
-        $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+      if(readSuccess && $sGrid.length){
+        progress = "populating storygrid";
+        before = true;
 
-        /*Update the address of the storylink*/
-        $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+        /*Add storyboxes*/
+        let empCode = readFile(PART_PATH + "empboxes.html");
+
+        if(empCode === null){
+          /*If the file reading failed, give an error message alert and disable further file reading.*/
+          readSuccess = false;
+          before = false;
+
+          if(online){
+            webReadAlert();
+          }
+          else{
+            alert("Failed to load storybox structure for home page. Unknown cause.");
+          }
+        }
+        else{
+          /*Populate the story grid with boxes for each employee story*/
+          for(let i = 0; i < EMPS.length - 1; i++){
+            $sGrid.append(empCode);
+          }
+        }
+
+        if(readSuccess){
+          /*Add storylinks to each storybox*/
+          let linkCode = readFile(PART_PATH + "storylink.html");
+
+          if(linkCode === null){
+            /*If the file reading failed, give an error message alert and disable further file reading.*/
+            readSuccess = false;
+            before = false;
+
+            if(online){
+              webReadAlert();
+            }
+            else{
+              alert("Failed to load storylink content for storyboxes on the home page. Unknown cause.");
+            }
+          }
+          else{
+            $sGrid.find(".storylink").append(linkCode);
+          }
+
+          /*Update paragraphs and signature for each employee box*/
+          if($(".employee").length !== EMPS.length - 1){
+            alert("Home page has the wrong number of employee boxes.");
+          }
+          else{
+            for(let j = 0; j < EMPS.length - 1; j++ ){
+              let $empbox = $(".employee").eq(j);
+              let paragraphs = readParas(INFO_PATH + "emps/" + EMPS[j] + TXT_END);
+
+              $empbox.find("p.excerpt").append(paragraphs[0]);
+              $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+
+              /*Update the address of the storylink*/
+              $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+            }
+          }
+
+          before = false;
+        }
       }
     }
   }
-
-
-  /*** Story link creation. Might come back in later if the links are used in more places ***/
-
-  /*Read storylink file and append it to the storylink divs*/
-  /*if($slinks[0]){
-    let linkCode = readFile("./storylink.html");
-    $slinks.append(linkCode);
-
-    $slinks.each(function (){
-      $(this).find("a").attr("href", $(this).attr("data-src"));
-    });
-
-  }*/
 
   return;
+
 
   /***Employee story creation and navigation for employee page***/
   if(readSuccess === true && $empwindow[0]){
