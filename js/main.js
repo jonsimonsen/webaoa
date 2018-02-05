@@ -76,6 +76,12 @@ const NON_PLURAL = 4;
 const FREE = 5;         /*No constraints*/
 const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 
+
+/*** Global variables (variables that needs to be accessible from several functions) ***/
+let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
+let progress = "any DOM-manipulation";    /*Update this to keep track of where errors occur*/
+
+
 /*** Functions made by others ***/
 
 /*Function for reading a file (Should use a different one/load when going live)*/
@@ -134,6 +140,15 @@ function readParas(file){
   }
 }
 
+/*Function for giving an alert if local file reading was used in an online environment.
+When the current file reading gets disabled, the alert should instead be about a failed load (if this function is kept around).
+*/
+function webReadAlert(){
+  /*Change file reading code and this message appropriately for online environment.*/
+  alert("Web server file reading error. JS File needs to be changed by site admins.");
+  return;
+}
+
 /*Function for extracting userid from url. Returns null if the url has no attributes.
 Returns null and displays an alert if there's something wrong with the attribute.
 Otherwise, the value of the attribute (as a number) is returned.
@@ -189,29 +204,30 @@ function countBools(boolArray){
 }
 
 /*Function for logging the DOM-manipulation progress to the console.
-post should be a boolean telling if the message is logged before(true) or after(false) the step.
+Uses values from the global variables before and progress in the logging.
+before should be a boolean telling if the message is logged before(true) or after(false) the step.
 progress should be a string saying what step was just finished or is just starting.
 Returns nothing.*/
-function logProgress(post, progress){
-  let errPre = "logProgress() takes "
+function logProgress(){
+  let errPre = "logProgress" + ERR_POST;
   /*Test arguments*/
-  if(arguments.length !== 2){
-    console.log(errPre + "exactly two arguments.");
+  if(arguments.length > 0){
+    console.log(errPre + "The function expects no arguments.");
     return;
   }
-  if(typeof(post) !== "boolean"){
-    console.log(errPre + "a boolean as its first argument.");
+  if(typeof(before) !== "boolean"){
+    console.log(errPre + 'The variable "before" should be global and have a bool value.');
     return;
   }
   if(typeof(progress) !== "string"){
-    console.log(errPre + "a string as its second argument.");
+    console.log(errPre + 'The variable "progress" should be global and be a string.');
     return;
   }
 
   /*Construct progress message*/
   let timing = "";
 
-  if(post){
+  if(before){
     timing = "-Before ";
   }
   else{
@@ -828,27 +844,23 @@ $(document).ready( () => {
   /**Environments and flow controlling vars**/
   const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
   const testing = true; /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
-  let running = true; /*Should stop applying JS if this becomes false.*/
   let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
-  let progress = "any DOM-manipulation";   /*Update this to keep track of where errors occur*/
-  let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
 
-  /**Testing the test framework**/
   if(testing){
+    /**Testing the test framework**/
     if(window.location.pathname.endsWith(PART_PATH.slice(1) + TESTPAGE)){
       runAllTests();
       return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
-  }
 
-  /**Testing element occurrence before DOM manipulation starts**/
-  if(testing){
+    /**Testing element occurrence before DOM manipulation starts**/
+
     /*Uniques*/
     const base = ["body", ".base"];
     const banWrap = ["section", ".banner-wrapper"];
 
     if(!(testValidity(UNIQUE, [base, banWrap]))){
-      logProgress(before, progress);
+      logProgress();
       return;
     }
 
@@ -859,16 +871,9 @@ $(document).ready( () => {
     const empWrap = ["section", ".employee-wrapper"];
 
     if(!(testValidity(NON_PLURAL, [mainWrap, topWrap, servWrap, empWrap]))){
-      logProgress(before, progress);
+      logProgress();
       return;
     }
-
-    /*const illSection = [".illustration", "illustration section"];
-    const infoSection = [".info", "info section"];
-    const optSection = [".options", "option section"];*/    /*190118: Note that it's relatively likely that this section is deprecated soon.*/
-    /*const storySection = [".stories", "story section"];*/   /*190118: Might want to rename the class/description to story-wrapper, excerpt or something similar.*/
-    /*const footerSection = [".footer", "wrappers for footer code"];*/    /*190118: It is possible that footers will soon be exclusively made by DOM-manipulation. In that case, a pure existence test should be used instead.*/
-    /*Consider if activities should actually be used or merged with services*/
   }
 
 
@@ -881,14 +886,6 @@ $(document).ready( () => {
   /*const $servWrap = $("section.service-wrapper");
   const $empWrap = $("section.employee-wrapper");*/
 
-  /*const $baseBody = singleSelect(".base", "elements of the base class (only supposed to be used for the body)", true);
-  const $storyGrid = singleSelect(".stories", "story grids");
-  const $empwindow = singleSelect(".employee-wrapper", "employee windows");
-  const $jobwindow = singleSelect(".job-wrapper", "job windows");
-  const $homeLink = singleSelect(".home", "home links");
-  const $foot = singleSelect(".footer", "footers");*/
-
-
 
   /***Browser compatibility testing (custom properties).***/
   /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
@@ -897,39 +894,46 @@ $(document).ready( () => {
   /**Testing the absence of a test section.**/
   if(testing){
     if(!(testValidity(ABSENT, [".test"]))){
-      logProgress(before, progress);
+      logProgress();
       return;
     }
   }
+
+  /*Add test section at the start of the body*/
   $baseBody.prepend('<section class="test"></section>');
   progress = "browser compatibility test";    /*No need to change the before variable this time*/
 
   /**Test that the test section was added.**/
   if(testing){
     if(!(testValidity(UNIQUE, [["section", ".test"]]))){
-      logProgress(before, progress);
+      logProgress();
       return;
     }
   }
 
+  /**Test that an element (basebody) using custom properties has the same colors as an element using direct assignment (.test)**/
   let realCol = $(".test").css("background-color");
   let browserCol = $baseBody.css("background-color");
+
   if(browserCol !== realCol){
     alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
   }
-  before = false;   /*Test completed*/
-  $(".test").remove();
+
+  before = false;         /*Test completed*/
+  $(".test").remove();    /*Remove the test section*/
 
   /*Test that the test section was successfully removed.*/
   if(testing){
     if(!(testValidity(ABSENT, [".test"]))){
-      logProgress(before, progress);
+      logProgress();
       return;
     }
   }
 
 
   /*** Create banner ***/
+
+  /*Update the progress*/
   progress = "adding banner code";
   before = true;
 
@@ -940,18 +944,20 @@ $(document).ready( () => {
     /*If the file reading failed, give an error message alert and disable further file reading.*/
     readSuccess = false;
     before = false;
+
+    /*Make an alert for the current environment*/
     if(online){
-      alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+      webReadAlert();
     }
     else{
-      alert("Failed to load page banner. This is likely due to browser restrictions on reading local files.");
+      alert("Failed to load page banner. There might be browser restrictions on reading local files.");
     }
   }
   else{
     /*Test that the document doesn't contain the class for the banner navbar.*/
     if(testing){
       if(!(testValidity(ABSENT, [".nav-top"]))){
-        logProgress(before, progress);
+        logProgress();
         return;
       }
     }
@@ -960,7 +966,7 @@ $(document).ready( () => {
     $banWrap.append(bannerCode);
     before = false;
 
-    /*Test that the banner code adds the banner nav bar.*/
+    /*Test that the banner code added the banner nav bar.*/
     if(testing){
       if(!(testValidity(UNIQUE, [["nav", ".nav-top"]]))){
         logProgress(before, progress);
@@ -981,7 +987,8 @@ $(document).ready( () => {
       }
       else if(testing){
         console.log("Do not add anchors without a href attribute to the banner navbar.");
-        logProgress(before, progress);
+        logProgress();
+        return;
       }
     });
   }
@@ -998,8 +1005,10 @@ $(document).ready( () => {
       /*If the file reading failed, give an error message alert and disable further file reading.*/
       readSuccess = false;
       before = false;
+
+      /*Make alert for current environment*/
       if(online){
-        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+        webReadAlert();
       }
       else{
         alert("Failed to load top wrapper structure. Unknown cause.");
@@ -1009,7 +1018,7 @@ $(document).ready( () => {
       /*Test that the DOM doesn't yet contain the scroll-menu wrapper*/
       if(testing){
         if(!(testValidity(ABSENT, [".scroll-menu"]))){
-          logProgress(before, progress);
+          logProgress();
           return;
         }
       }
@@ -1021,7 +1030,7 @@ $(document).ready( () => {
       /*Test that the DOM has gotten a scroll-menu wrapper*/
       if(testing){
         if(!(testValidity(UNIQUE, [["div", ".scroll-menu"]]))){
-          logProgress(before, progress);
+          logProgress();
           return;
         }
       }
@@ -1040,10 +1049,10 @@ $(document).ready( () => {
       }
 
       if(!buttonFile){
-        console.log("Top wrapper exists on a page that has no defined buttonFile.");
-        logProgress(before, progress);
-        /*Since the page would lose its main functionality,
-        it doesn't seem like continuing makes much sense. Consider giving an alert too.*/
+        alert("Top wrapper exists on page that doesn't have a defined buttonFile. Site admins have to update JS code.");
+        logProgress();
+        /*Since the page would presumably lose its main functionality,
+        it doesn't seem like continuing makes much sense.*/
         return;
       }
 
@@ -1053,8 +1062,10 @@ $(document).ready( () => {
         /*If the file reading failed, give an error message alert and disable further file reading.*/
         readSuccess = false;
         before = false;
+
+        /*Make alert for the current environment*/
         if(online){
-          alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+          webReadAlert();
         }
         else{
           alert("Failed to load top wrapper content. Unknown cause.");
@@ -1083,8 +1094,10 @@ $(document).ready( () => {
       /*If the file reading failed, give an error message alert and disable further file reading.*/
       readSuccess = false;
       before = false;
+
+      /*Make alert for the current environment*/
       if(online){
-        alert("Web server file reading error. JS File needs to be changed by site admins."); /*Change file reading code and this message appropriately for online environment.*/
+        webReadAlert();
       }
       else{
         alert("Failed to load main content. Unknown cause.");
@@ -1096,7 +1109,7 @@ $(document).ready( () => {
         let success = true;
         sections = [".illustration", ".info", ".footer"];
         if(!(testValidity(ABSENT, sections))){
-          logProgress(before, progress);
+          logProgress();
           return;
         }
       }
@@ -1111,7 +1124,7 @@ $(document).ready( () => {
         const foot = ["section", ".footer"];
 
         if(!(testValidity(UNIQUE, [illWrap, infoWrap, foot]))){
-          logProgress(before, progress);
+          logProgress();
           return;
         }
       }
@@ -1130,9 +1143,9 @@ $(document).ready( () => {
       }
 
       if(!contentFile){
-        console.log("Content wrapper exists on a page that has no defined contentFile.");
-        logProgress(before, progress);
-        return;   /*Seems to be ok to stop processing. Should consider giving an alert.*/
+        alert("Content wrapper exists on page that doesn't have a defined contentFile. Site admins have to update JS code.");
+        logProgress();
+        return;   /*Seems to be ok to stop processing.*/
       }
 
       let newContent = readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
