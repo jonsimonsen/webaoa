@@ -19,8 +19,9 @@ const JOBPAGE = "arbeid.html";
 const EMPPAGE = "ansatte.html";
 const ACTPAGE = "aktiv.html";
 const TESTPAGE = "test.html";
+const ALLPAGES = [HOMEPAGE, JOBPAGE, EMPPAGE, ACTPAGE, TESTPAGE];
 
-/**Paths and files for html partials, employees and workplaces**/
+/**Paths and files for html partials, employees, activities and workplaces**/
 const PART_PATH = "./html/";
 const INFO_PATH = "./Info/";
 const IMG_PATH = "./Bilder/";
@@ -28,6 +29,9 @@ const TXT_END = ".txt";
 const IMG_END = ".jpg";
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 const JOBS = ["DREIS", "DagsJobben", "Jobs"];
+const ACTIVITIES = ["værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
+const DREIS = ["almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
+const DJOB = ["djob"];
 
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
 const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
@@ -853,6 +857,20 @@ function readContent(fName){
   return true;
 }
 
+/*Function that takes a path (url with no attributes) and returns its index in ALLPAGES (or -1 if not found).
+Be aware that it assumes that it does not matter where the file is located (it ignores the folders in the url).
+*/
+function findPageIndex(path){
+  for(let i=0 ; i < ALLPAGES.length ; i++){
+    if(path.endsWith("/" + ALLPAGES[i])){
+      return i;
+    }
+  }
+
+  /*If the page was not found, return -1*/
+  return -1;
+}
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
@@ -861,9 +879,12 @@ $(document).ready( () => {
   const testing = true; /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
   let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
 
+  /**Find out what page is being readied**/
+  let pageInd = findPageIndex(window.location.pathname);
+
   if(testing){
     /**Testing the test framework**/
-    if(window.location.pathname.endsWith(PART_PATH.slice(1) + TESTPAGE)){
+    if(ALLPAGES[pageInd] === TESTPAGE){
       runAllTests();
       return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
@@ -882,10 +903,9 @@ $(document).ready( () => {
     /*Non-plurals*/
     const mainWrap = ["section", ".content-wrapper"];
     const topWrap = ["section", ".top-wrapper"];
-    const servWrap = ["section", ".service-wrapper"];
     const empWrap = ["section", ".employee-wrapper"];
 
-    if(!(testValidity(NON_PLURAL, [mainWrap, topWrap, servWrap, empWrap]))){
+    if(!(testValidity(NON_PLURAL, [mainWrap, topWrap, empWrap]))){
       logProgress();
       return;
     }
@@ -898,8 +918,6 @@ $(document).ready( () => {
   const $topWrap = $("section.top-wrapper");
   const $mainWrap = $("section.content-wrapper");
   const $empWrap = $("section.employee-wrapper");
-
-  /*const $servWrap = $("section.service-wrapper");*/
 
 
   /***Browser compatibility testing (custom properties).***/
@@ -1340,9 +1358,34 @@ $(document).ready( () => {
         before = false;
       }
 
+      /*Test that exactly one service section now exists*/
+      if(testing){
+        if(!(testValidity(UNIQUE, [["section", ".services"]]))){
+          logProgress();
+          return;
+        }
+      }
+
       /*Read files for each service...*/
 
     }
+  }
+
+  /*** Create services content for job page or activity page. ***/
+  if(readSuccess && (window.location.pathname.endsWith(JOBPAGE) || window.location.pathname.endsWith(ACTPAGE))){
+    progress = "adding service section to JOBPAGE or ACTPAGE";
+    before = true;
+
+    /*Test that the DOM doesn't yet contain a service section.*/
+    if(testing){
+      if(!(testValidity(ABSENT, [".services"]))){
+        logProgress();
+        return;
+      }
+    }
+
+    /*If no job is selected, skip the service creation*/
+
   }
 
   /*** Create employee window with content inside the employee wrapper ***/
