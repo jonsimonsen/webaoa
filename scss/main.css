@@ -528,7 +528,7 @@ body.multipage {
   margin-top: 196px; /*Should be the same as base, but with height of the top wrapper added to it.*/
 }
 
-/**Employee navigation buttons**/
+/**Navigation buttons for employees and workplaces**/
 .top-wrapper {
   border: var(--pads) solid var(--bgcolor);
   position: fixed;

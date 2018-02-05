@@ -897,9 +897,9 @@ $(document).ready( () => {
   const $banWrap = $("section.banner-wrapper");
   const $topWrap = $("section.top-wrapper");
   const $mainWrap = $("section.content-wrapper");
+  const $empWrap = $("section.employee-wrapper");
 
-  /*const $servWrap = $("section.service-wrapper");
-  const $empWrap = $("section.employee-wrapper");*/
+  /*const $servWrap = $("section.service-wrapper");*/
 
 
   /***Browser compatibility testing (custom properties).***/
@@ -1194,6 +1194,7 @@ $(document).ready( () => {
         readSuccess = false;
         before = false;
 
+        /*Make alert for the current environment*/
         if(online){
           webReadAlert();
         }
@@ -1241,9 +1242,9 @@ $(document).ready( () => {
         before = true;
 
         /*Add storyboxes*/
-        let empCode = readFile(PART_PATH + "empboxes.html");
+        let boxCode = readFile(PART_PATH + "empboxes.html");
 
-        if(empCode === null){
+        if(boxCode === null){
           /*If the file reading failed, give an error message alert and disable further file reading.*/
           readSuccess = false;
           before = false;
@@ -1258,7 +1259,7 @@ $(document).ready( () => {
         else{
           /*Populate the story grid with boxes for each employee story*/
           for(let i = 0; i < EMPS.length - 1; i++){
-            $sGrid.append(empCode);
+            $sGrid.append(boxCode);
           }
         }
 
@@ -1289,7 +1290,7 @@ $(document).ready( () => {
           else{
             for(let j = 0; j < EMPS.length - 1; j++ ){
               let $empbox = $(".employee").eq(j);
-              let paragraphs = readParas(INFO_PATH + "emps/" + EMPS[j] + TXT_END);
+              let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
 
               $empbox.find("p.excerpt").append(paragraphs[0]);
               $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
@@ -1303,22 +1304,81 @@ $(document).ready( () => {
         }
       }
     }
+
+    /**Create additional workplace page content.**/
+    if(readSuccess && window.location.pathname.endsWith(JOBPAGE)){
+      progress = "adding service section to job page";
+      before = true;
+
+      /*Test that the DOM doesn't yet contain a service section.*/
+      if(testing){
+        if(!(testValidity(ABSENT, [".services"]))){
+          logProgress();
+          return;
+        }
+      }
+
+      /*Read structure file*/
+      let servCode = readFile(PART_PATH + "service.html");
+
+      if(servCode === null){
+        /*If the file reading failed, give an error message alert and disable further file reading.*/
+        readSuccess = false;
+        before = false;
+
+        /*Make alert for the current environment*/
+        if(online){
+          webReadAlert();
+        }
+        else{
+          alert("Failed to load service structure for job page. Unknown cause.");
+        }
+      }
+      else{
+        /*Insert the service code directly before the footer element*/
+        $(".footer").before(servCode);
+        before = false;
+      }
+
+      /*Read files for each service...*/
+
+    }
   }
 
-  return;
+  /*** Create employee window with content inside the employee wrapper ***/
+  if(readSuccess && $empWrap.length){
+    progress = "adding structural code to the employee wrapper";
+    before = true;
 
+    /*Read structure file*/
+    let empCode = readFile(PART_PATH + "empwindow.html");
 
-  /***Employee story creation and navigation for employee page***/
-  if(readSuccess === true && $empwindow[0]){
+    if(empCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      before = false;
+
+      /*Make alert for the current environment*/
+      if(online){
+        webReadAlert();
+      }
+      else{
+        alert("Failed to load employee window. Unknown cause.");
+      }
+    }
+    else{
+      /*Add content to the employee wrapper*/
+      $empWrap.append(empCode);
+    }
 
     /*Find out what user to display based on url attribute*/
     let current = getUserId();
     if(current === null){
-      current = users.length - 1; /*Start at intro page*/
+      current = EMPS.length - 1; /*Start at intro page*/
     }
-    else if (current < 0 || current >= users.length - 1) {
+    else if (current < 0 || current >= EMPS.length - 1) {
       alert("userid attribute in url is outside the range of valid userids");
-      current = users.length - 1;
+      current = EMPS.length - 1;
     }
 
     /*Fix the links so they direct to the right user. Since JS doesn't have a proper modulo operator,
@@ -1326,39 +1386,72 @@ $(document).ready( () => {
     let next = current + 1;
     let prev = current -1;
 
-    if(current === (users.length - 1) || current === (users.length - 2)) {
+    if(current === (EMPS.length - 1) || current === (EMPS.length - 2)) {
       next = 0;
     }
     else if(current === 0){
-      prev = users.length - 2;
+      prev = EMPS.length - 2;
     }
-    $(".stealthy").eq(0).attr("href", "./ansatte.html?userid=" + (prev));
-    $(".stealthy").eq(1).attr("href", "./ansatte.html?userid=" + (next));
+
+    $empButtons = $(".stealthy");
+    /*Test that the correct number of navigation objects (buttons with class stealthy) exists.*/
+    if($empButtons.length !== 2){
+      alert("Default employee navigation is broken. Site admins have to update the code.");
+    }
+    else{
+      $(".stealthy").eq(0).attr("href", "./ansatte.html?userid=" + (prev));
+      $(".stealthy").eq(1).attr("href", "./ansatte.html?userid=" + (next));
+    }
+
+    /*Add the storybox class to the employee wrapper*/
+    $empWrap.addClass("storybox");
 
     /*Append employee window code to the employee window*/
-    let empWinCode = readFile("./empwindow.html");
-    $empwindow.append(empWinCode);
+    progress = "adding employee-specific content to the employee window"
+    before = true;
 
-    let paragraphs = readParas(storyPath + users[current] + textEnding);
+    let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[current] + TXT_END);
 
-    /*Add img to the html*/
-    $empwindow.children("img").attr("src", imgPath + users[current] + imgEnding);
-    $empwindow.children("img").attr("alt", paragraphs[paragraphs.length - 1]);
+    if(paragraphs === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      before = false;
 
-    /*Add paragraphs to the html code*/
-    for(let i=0; i < paragraphs.length - 1; i++){
-      if($.trim(paragraphs[i]).length > 0){
-        $("<p>" + paragraphs[i] + "</p>").insertBefore($empwindow.children("p.sign"));
+      /*Make alert for the current environment*/
+      if(online){
+        webReadAlert();
+      }
+      else{
+        alert("Failed to read employee content. Unknown cause.");
       }
     }
+    else{
+      /*Add img to the html*/
+      $empWrap.children("img").attr("src", IMG_PATH + "ansatte/" + EMPS[current] + IMG_END);
+      $empWrap.children("img").attr("alt", paragraphs[paragraphs.length - 1]);
 
-    /*Add signature*/
-    $empwindow.children("p.sign").append("-" + capitalizeFirstLetter(users[current]));
+      /*Add paragraphs to the html code*/
+      for(let i=0; i < paragraphs.length - 1; i++){
+        if($.trim(paragraphs[i]).length > 0){
+          $("<p>" + paragraphs[i] + "</p>").insertBefore($empWrap.children("p.sign"));
+        }
+      }
+
+      /*Add signature*/
+      $empWrap.children("p.sign").append("-" + capitalizeFirstLetter(EMPS[current]));
+
+      before = false;
+    }
+
   }
 
+  return;
+
+  /***Add content to the JOBPAGE***/
+  if(readSuccess )
 
   /***Workplace creation***/
-  if(readSuccess === true && $jobwindow[0]){
+  if(readSuccess && $jobwindow[0]){
     let jobWinCode = readFile("./jobwindow.html");
     $jobwindow.append(jobWinCode);
 
@@ -1370,6 +1463,7 @@ $(document).ready( () => {
       $(".info").append("<p>" + paragraphs[i] + "</p>");
     }
   }
+
 
   /***Event handling for workplaces***/
   const $wbuttons = $(".scroll-menu").find("a");
