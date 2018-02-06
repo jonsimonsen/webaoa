@@ -612,6 +612,11 @@ a.active:hover {
   display: none;
 }
 
+/**Remove content that isn't active from the document flow**/
+.inactive {
+  display: none;
+}
+
 /**Unclickable links**/
 a.unlink {
   background-color: #CC9;

@@ -28,10 +28,11 @@ const IMG_PATH = "./Bilder/";
 const TXT_END = ".txt";
 const IMG_END = ".jpg";
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
+const DREIS = ["/dreis", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
+const DJOB = ["/djob", "djob"];
+const ACTIVITIES = ["/akts", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
 const JOBS = ["DREIS", "DagsJobben", "Jobs"];
-const ACTIVITIES = ["værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
-const DREIS = ["almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
-const DJOB = ["djob"];
+const SERVICES = [DREIS, DJOB, ACTIVITIES];   /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
 
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
 const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
@@ -129,6 +130,22 @@ function capitalizeFirstLetter(string){
 
 
 /*** Functions made by Jon Simonsen ***/
+
+/*Function that takes a path (url with no attributes)
+and returns the name of the associated file (ending with .html)
+if that file is an element in ALLPAGES (or an empty string if not found).
+Be aware that it assumes that it does not matter where the file is located (it ignores the folders in the url).
+*/
+function findPageName(path){
+  for(let i=0 ; i < ALLPAGES.length ; i++){
+    if(path.endsWith("/" + ALLPAGES[i])){
+      return ALLPAGES[i];
+    }
+  }
+
+  /*If the page was not found, return an empty string*/
+  return "";
+}
 
 /*Function for reading a file and returning an array of paragraphs using double newlines as separators.
 Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
@@ -806,9 +823,9 @@ function readContent(fName){
       console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
       return false;
     }
-    /*Hide contact link from image text and remove the footer*/
+    /*Hide contact link from image text and remove hide the footer*/
     $illWrap.find("a").addClass("usynlig");
-    $foot.remove();
+    $foot.addClass("inactive");
   }
 
   if(!footLines[1]){
@@ -857,19 +874,106 @@ function readContent(fName){
   return true;
 }
 
-/*Function that takes a path (url with no attributes) and returns its index in ALLPAGES (or -1 if not found).
-Be aware that it assumes that it does not matter where the file is located (it ignores the folders in the url).
+/*Function for reading content into the services section for workplaces or activities.
+workPlace should only be given as an argument if pName is equal to JOBPAGE.
 */
-function findPageIndex(path){
-  for(let i=0 ; i < ALLPAGES.length ; i++){
-    if(path.endsWith("/" + ALLPAGES[i])){
-      return i;
-    }
+function readServices(pName, workPlace = ""){
+  progress = "reading service files";
+  before = true;
+
+  let errPre = "readServices()" + ERR_POST;
+  let servArray = [];
+
+  /*Test that the arrays for jobs and services match*/
+  if(JOBS.length !== SERVICES.length){
+    console.log(errPre + "The global const arrays JOBS and SERVICES should have equal length.");
+    return false;
   }
 
-  /*If the page was not found, return -1*/
-  return -1;
+  /*Test arguments. Initialize servArray if arguments are ok.*/
+  if(pName !== JOBPAGE && pName !== ACTPAGE){
+    console.log(errPre + "Its first argument doesn't equal JOBPAGE or ACTPAGE.");
+    return false;
+  }
+
+  if(pName === ACTPAGE){
+    if(workPlace){
+      console.log(errPre + "Its second argument should not be given when the first equals ACTPAGE.");
+      return false;
+    }
+    else{
+      servArray = SERVICES[SERVICES.length - 1];
+    }
+
+  }
+  else if(pName === JOBPAGE){
+    for(let i=0 ; i < JOBS.length - 1 ; i++){
+      if(workPlace === JOBS[i]){
+        break;
+      }
+    }
+
+    if(i >= JOBS.length - 1){
+      console.log(errPre + "Its second argument should equal an element in JOBS (but not the last) when the first equals JOBPAGE.");
+      return false;
+    }
+    else{
+      servArray = SERVICES[i];
+    }
+
+  }
+
+  let $servWrap = (".services");
+  let servFolder = servArray[0];
+
+  /*Remove existing storyboxes from the services content*/
+  $servWrap.children(".storybox").remove();
+
+  /*Test that the divs that are about to be added and updated does not yet exist in the DOM*/
+  if(!(testValidity(ABSENT, [".imgcell", ".infotext"]))){
+    return false;
+  }
+
+  /*Read service box structure*/
+  let sBoxCode = readFile(PART_PATH + "serv_story.html");
+
+  if(sBoxCode === null){
+    /*If the file reading failed, give an error message alert for the current environment.*/
+    if(online){
+      webReadAlert();
+    }
+    else{
+      alert("Failed to load service box structure. Unknown cause.");
+    }
+
+    return false;
+  }
+
+  /*For each service, read the service's file, add a service box structure, and update the service box content*/
+  servArray.slice(1).forEach(function(sName) {
+    let paragraphs = readParas(INFO_PATH + servFolder + sName + TXT_END);
+
+    if(paragraphs === null){
+      /*If the file reading failed, give an error message alert for the current environment.*/
+      if(online){
+        webReadAlert();
+      }
+      else{
+        alert("Failed to load service box content. Unknown cause.");
+      }
+
+      return false;
+    }
+    else{
+      /*Add structure*/
+      $servWrap.append(sBoxCode);
+
+
+    }
+
+  });
 }
+
 
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
@@ -880,11 +984,11 @@ $(document).ready( () => {
   let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
 
   /**Find out what page is being readied**/
-  let pageInd = findPageIndex(window.location.pathname);
+  let pageName = findPageName(window.location.pathname);
 
   if(testing){
     /**Testing the test framework**/
-    if(ALLPAGES[pageInd] === TESTPAGE){
+    if(pageName === TESTPAGE){
       runAllTests();
       return;     /*The test framework page has done its job, so the JS code can stop here.*/
     }
@@ -1009,12 +1113,16 @@ $(document).ready( () => {
 
     let $bnav = $("nav.nav-top");
 
+    /*Add formatting to the nav links.
+    An idea for later is to add the links dynamically based on ALLPAGES
+    (make sure not to add links for pages that are not supposed to be in the navbar).
+    */
     $bnav.children().each(function (){
       let target = $(this).attr("href");
 
       /*Give self-pointing links class unlink (not clickable).*/
       if(typeof target !== typeof undefined){
-        if(window.location.pathname.endsWith(target.slice(1))){
+        if(pageName === target.slice(2)){
           $(this).addClass("unlink");
         }
       }
@@ -1074,10 +1182,10 @@ $(document).ready( () => {
 
       let buttonFile = "";
 
-      if(window.location.pathname.endsWith(JOBPAGE)){
+      if(pageName === JOBPAGE){
         buttonFile = "top_jobs.html";
       }
-      else if(window.location.pathname.endsWith(EMPPAGE)){
+      else if(pageName === EMPPAGE){
         buttonFile = "top_emps.html";
       }
 
@@ -1169,10 +1277,10 @@ $(document).ready( () => {
 
       let contentFile = "";
 
-      if(window.location.pathname.endsWith(HOMEPAGE)){
+      if(pageName === HOMEPAGE){
         contentFile = "index";
       }
-      else if(window.location.pathname.endsWith(JOBPAGE)){
+      else if(pageName === JOBPAGE){
         contentFile = "jobs";
       }
 
@@ -1192,9 +1300,9 @@ $(document).ready( () => {
     }
 
     /**Create additional home page content**/
-    if(readSuccess && window.location.pathname.endsWith(HOMEPAGE)){
+    if(readSuccess && pageName === HOMEPAGE){
       /*Make options section*/
-      progress = "adding options section to home page"
+      progress = "adding options section to home page";
       before = true;
 
       /*Test that the DOM doesn't yet contain the elements that are supposed to get added.*/
@@ -1322,57 +1430,10 @@ $(document).ready( () => {
         }
       }
     }
-
-    /**Create additional workplace page content.**/
-    if(readSuccess && window.location.pathname.endsWith(JOBPAGE)){
-      progress = "adding service section to job page";
-      before = true;
-
-      /*Test that the DOM doesn't yet contain a service section.*/
-      if(testing){
-        if(!(testValidity(ABSENT, [".services"]))){
-          logProgress();
-          return;
-        }
-      }
-
-      /*Read structure file*/
-      let servCode = readFile(PART_PATH + "service.html");
-
-      if(servCode === null){
-        /*If the file reading failed, give an error message alert and disable further file reading.*/
-        readSuccess = false;
-        before = false;
-
-        /*Make alert for the current environment*/
-        if(online){
-          webReadAlert();
-        }
-        else{
-          alert("Failed to load service structure for job page. Unknown cause.");
-        }
-      }
-      else{
-        /*Insert the service code directly before the footer element*/
-        $(".footer").before(servCode);
-        before = false;
-      }
-
-      /*Test that exactly one service section now exists*/
-      if(testing){
-        if(!(testValidity(UNIQUE, [["section", ".services"]]))){
-          logProgress();
-          return;
-        }
-      }
-
-      /*Read files for each service...*/
-
-    }
   }
 
   /*** Create services content for job page or activity page. ***/
-  if(readSuccess && (window.location.pathname.endsWith(JOBPAGE) || window.location.pathname.endsWith(ACTPAGE))){
+  if(readSuccess && (pageName === JOBPAGE || pageName === ACTPAGE)){
     progress = "adding service section to JOBPAGE or ACTPAGE";
     before = true;
 
@@ -1384,8 +1445,68 @@ $(document).ready( () => {
       }
     }
 
-    /*If no job is selected, skip the service creation*/
+    /*Read structure file*/
+    let servCode = readFile(PART_PATH + "service.html");
 
+    if(servCode === null){
+      /*If the file reading failed, give an error message alert and disable further file reading.*/
+      readSuccess = false;
+      before = false;
+
+      /*Make alert for the current environment*/
+      if(online){
+        webReadAlert();
+      }
+      else{
+        alert("Failed to load service structure for job page. Unknown cause.");
+      }
+    }
+    else if(pageName === JOBPAGE){
+      /*Insert the service code directly before the footer element*/
+      $(".footer").before(servCode);
+      before = false;
+    }
+    else if(pageName === ACTPAGE){
+      /*Insert the service code directly after the banner element*/
+      $banWrap.after(servCode);
+      before = false;
+    }
+    else{
+      alert("Service section loaded from page that isn't defined as having services. Site admins have to fix this.");
+      logProgress();
+      return;
+    }
+
+    /*Test that exactly one service section now exists*/
+    if(testing){
+      if(!(testValidity(UNIQUE, [["section", ".services"]]))){
+        logProgress();
+        return;
+      }
+    }
+
+    if(readSuccess){
+      progress = "populating service section on JOBPAGE or ACTPAGE";
+      before = true;
+
+      let $servWrap = $(".services");
+
+      /*Update service section based on page*/
+      if(pageName === JOBPAGE){
+        /*Since no button should be active yet, the user is told that the section is empty for now.
+        The empty paragraph is there to push the text to the next grid position to prevent a small column width.
+        It is not an optimal solution, but it isn't straightforward to get something better within the grid.*/
+        $servWrap.append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
+      }
+      else if(pageName === ACTPAGE){
+        readServices(ACTPAGE);
+      }
+      else{
+        alert("Service section updated from page that isn't defined as having services. Site admins have to fix this.");
+        logProgress();
+        return;
+      }
+    }
   }
 
   /*** Create employee window with content inside the employee wrapper ***/
@@ -1491,7 +1612,7 @@ $(document).ready( () => {
   return;
 
   /***Add content to the JOBPAGE***/
-  if(readSuccess )
+  if(readSuccess)
 
   /***Workplace creation***/
   if(readSuccess && $jobwindow[0]){
