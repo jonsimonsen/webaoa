@@ -28,9 +28,9 @@ const IMG_PATH = "./Bilder/";
 const TXT_END = ".txt";
 const IMG_END = ".jpg";
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
-const DREIS = ["/dreis", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
-const DJOB = ["/djob", "djob"];
-const ACTIVITIES = ["/akts", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
+const DREIS = ["dreis/", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
+const DJOB = ["djob/", "djob"];
+const ACTIVITIES = ["akts/", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
 const JOBS = ["DREIS", "DagsJobben", "Jobs"];
 const SERVICES = [DREIS, DJOB, ACTIVITIES];   /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
 
@@ -785,14 +785,6 @@ function readContent(fName){
   let footCode = readFile(PART_PATH + "footer.html");
 
   if(footCode === null){
-    /*If the file reading failed, give an error message alert for the current environment.*/
-    if(online){
-      webReadAlert();
-    }
-    else{
-      alert("Failed to load footer structure. Unknown cause.");
-    }
-
     return false;
   }
   else{
@@ -841,14 +833,6 @@ function readContent(fName){
   let sepCode = readFile(PART_PATH + "seps.html");
 
   if(sepCode === null){
-    /*If the file reading failed, give an error message alert for the current environment.*/
-    if(online){
-      webReadAlert();
-    }
-    else{
-      alert("Failed to load footer separator code. Unknown cause.");
-    }
-
     return false;
   }
 
@@ -923,7 +907,7 @@ function readServices(pName, workPlace = ""){
 
   }
 
-  let $servWrap = (".services");
+  let $servWrap = $(".services");
   let servFolder = servArray[0];
 
   /*Remove existing storyboxes from the services content*/
@@ -938,40 +922,68 @@ function readServices(pName, workPlace = ""){
   let sBoxCode = readFile(PART_PATH + "serv_story.html");
 
   if(sBoxCode === null){
-    /*If the file reading failed, give an error message alert for the current environment.*/
-    if(online){
-      webReadAlert();
-    }
-    else{
-      alert("Failed to load service box structure. Unknown cause.");
-    }
-
     return false;
   }
 
   /*For each service, read the service's file, add a service box structure, and update the service box content*/
   servArray.slice(1).forEach(function(sName) {
-    let paragraphs = readParas(INFO_PATH + servFolder + sName + TXT_END);
+    let fPath = INFO_PATH + servFolder + sName + TXT_END;
+    let paragraphs = readParas(fPath);
 
     if(paragraphs === null){
-      /*If the file reading failed, give an error message alert for the current environment.*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to load service box content. Unknown cause.");
-      }
-
+      console.log("bad file path " + fPath);
       return false;
     }
     else{
+      if(paragraphs.length !== 3){
+        console.log(errPre + "The file " + fPath + " must contain exactly three paragraphs.");
+        return false;
+      }
+
       /*Add structure*/
       $servWrap.append(sBoxCode);
 
+      /*Process first paragraph (img and heading)*/
+      let imgParas = paragraphs[0].split("\r\n");
 
+      if(imgParas.length > 2){
+        console.log(errPre + "The first paragraph in " + fPath + " must contain at most two lines.");
+        return false;
+      }
+      else{
+        let $currImg = $(".imgcell").last().children("img");
+        let iPath = "";
+        if(imgParas.length === 1){
+          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+        }
+        else{
+          iPath = IMG_PATH + "no_img" + IMG_END;
+        }
+        $currImg.attr("src", iPath);
+        $currImg.attr("alt", imgParas[0]);
+
+        let $currTextbox = $(".infotext").last();
+        $currTextbox.children("h4").append(imgParas[0]);
+
+        /*Process second paragraph (treat is as a single html paragraph)*/
+        $currTextbox.children("p").append(paragraphs[1]);   /*Not bothering testing that the input is correctly formatted*/
+
+        /*Process third paragraph*/
+        let lines = paragraphs[2].split("\r\n");
+        if(!(lines[lines.length - 1])){
+          lines = lines.slice(0, lines.length - 1);
+        }
+
+        lines.forEach(function(line) {
+          $currTextbox.children("ul").append("<li>" + line + "</li>");
+        });
+
+      }
     }
 
   });
+
+  return true;
 }
 
 
@@ -1472,7 +1484,7 @@ $(document).ready( () => {
       before = false;
     }
     else{
-      alert("Service section loaded from page that isn't defined as having services. Site admins have to fix this.");
+      alert("Service section was attempted to be loaded from a page that isn't defined as having services. Site admins have to fix this.");
       logProgress();
       return;
     }
@@ -1497,12 +1509,20 @@ $(document).ready( () => {
         The empty paragraph is there to push the text to the next grid position to prevent a small column width.
         It is not an optimal solution, but it isn't straightforward to get something better within the grid.*/
         $servWrap.append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
+        before = false;
       }
       else if(pageName === ACTPAGE){
-        readServices(ACTPAGE);
+        let serviceUpdate = readServices(ACTPAGE);
+
+        if(!serviceUpdate){
+          logProgress();
+          return;
+        }
+
+        before = false;
       }
       else{
-        alert("Service section updated from page that isn't defined as having services. Site admins have to fix this.");
+        alert("Service section was attempted to be updated from a page that isn't defined as having services. Site admins have to fix this.");
         logProgress();
         return;
       }
@@ -1609,6 +1629,41 @@ $(document).ready( () => {
 
   }
 
+  /***Event handling for workplaces***/
+  if(readSuccess && pageName === JOBPAGE){
+    progress = "adding event handling to the job page"
+    before = true;
+    /*Confirm that the page has the expected wrappers*/
+    if(!(testValidity(UNIQUE, [["section", ".illustration"], ["div", ".ill-text"], ["div", ".ill-link"], ["section", ".info"], ["section", ".footer"], ["section", ".services"], ["div", ".scroll-menu"]]))){
+      logProgress();
+      return;
+    }
+    else{
+      const $wbuttons = $(".scroll-menu").find("a");
+
+      for(let j=0; j < $wbuttons.length; j++){
+        $wbuttons.eq(j).on("click", () => {
+          /*Make the clicked button the only active one*/
+          $wbuttons.removeClass("active");
+          $wbuttons.eq(j).addClass("active");
+
+          /*Update initial content sections*/
+          let fileName = $wbuttons.eq(j).text().toLowerCase();
+          console.log(fileName);
+          let updateContent = readContent(fileName);
+
+          if(!updateContent){
+            logProgress();
+            return;
+          }
+
+        });
+      }
+    }
+
+
+  }
+
   return;
 
   /***Add content to the JOBPAGE***/
@@ -1616,7 +1671,7 @@ $(document).ready( () => {
 
   /***Workplace creation***/
   if(readSuccess && $jobwindow[0]){
-    let jobWinCode = readFile("./jobwindow.html");
+    let jobWinCode = readFile("./jobwindow.html"); /*Can probably delete this file...*/
     $jobwindow.append(jobWinCode);
 
     let paragraphs = readParas(storyPath + workPlaces[workPlaces.length - 1] + textEnding);
