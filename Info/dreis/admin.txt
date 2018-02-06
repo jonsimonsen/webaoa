@@ -1,5 +1,5 @@
 DREIS administrasjon
-debug
+x
 
 Avdelingen skal ikke presenteres på nettsiden, men kan brukes til debugging.
 lorem ipsum dolor sit amet conseciteur lorem ipsum dolor sit amet conseciteur.

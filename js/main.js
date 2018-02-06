@@ -768,6 +768,10 @@ function readContent(fName){
     return false;
   }
 
+  /*Remove old heading*/
+  $textWrap.children("h3").remove();
+
+  /*Add a new one*/
   $textWrap.append("<h3>" + imgText[0] + "</h3>");
   if(imgText[0] === "-"){
     $textWrap.children("h3").addClass("usynlig");
@@ -775,6 +779,12 @@ function readContent(fName){
 
   /*Update info section*/
   let infoText = paragraphs[2].split("\r\n");
+
+  /*Remove old heading and paragraph*/
+  $infoWrap.children("h2").remove();
+  $infoWrap.children("p").remove();
+
+  /*Add new ones*/
   $infoWrap.append("<h2>" + infoText[0] + "</h2>");
   $infoWrap.append("<p></p>");
   infoText.slice(1).forEach(function(line) {
@@ -788,9 +798,13 @@ function readContent(fName){
     return false;
   }
   else{
+    /*Remove old footer content*/
+    $foot.children("h2").remove();
+    $foot.children(".socials").remove();
+    $foot.children(".contacts").remove();
+
     /*Add structure to the footer wrapper*/
     $foot.append(footCode);
-
   }
 
   /*Add content to the footer*/
@@ -807,8 +821,11 @@ function readContent(fName){
     }
     /*Update contact link in banner and illustration*/
     $foot.attr("id", footLines[0]);
+    $("nav.nav-top").children(':contains("Kontakt")').remove();  /*Remove old link if any*/
     $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
     $illWrap.find("a").attr("href", "#" + footLines[0]);
+    $illWrap.find("a").removeClass("usynlig");    /*Make sure the contact link is displayed*/
+    $foot.removeClass("inactive");    /*Make sure the footer is displayed*/
   }
   else{
     if(footLines.length > 2){
@@ -826,7 +843,8 @@ function readContent(fName){
   }
   else{
     /*Update image text with the name of the unit/workplace*/
-    $textWrap.prepend("<h2>" + footLines[1] + "</h2>");
+    $textWrap.children("h2").remove();                    /*Remove old header*/
+    $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
   }
 
   /*Read file containing a separator for contact fields*/
@@ -867,6 +885,7 @@ function readServices(pName, workPlace = ""){
 
   let errPre = "readServices()" + ERR_POST;
   let servArray = [];
+  let i = undefined;    /*iterator for the JOBPAGES array*/
 
   /*Test that the arrays for jobs and services match*/
   if(JOBS.length !== SERVICES.length){
@@ -891,7 +910,7 @@ function readServices(pName, workPlace = ""){
 
   }
   else if(pName === JOBPAGE){
-    for(let i=0 ; i < JOBS.length - 1 ; i++){
+    for(i = 0 ; i < JOBS.length - 1 ; i++){
       if(workPlace === JOBS[i]){
         break;
       }
@@ -910,8 +929,9 @@ function readServices(pName, workPlace = ""){
   let $servWrap = $(".services");
   let servFolder = servArray[0];
 
-  /*Remove existing storyboxes from the services content*/
+  /*Remove existing storyboxes and paragraphs from the services content*/
   $servWrap.children(".storybox").remove();
+  $servWrap.children("p").remove();
 
   /*Test that the divs that are about to be added and updated does not yet exist in the DOM*/
   if(!(testValidity(ABSENT, [".imgcell", ".infotext"]))){
@@ -956,8 +976,14 @@ function readServices(pName, workPlace = ""){
         if(imgParas.length === 1){
           iPath = IMG_PATH + servArray[0] + sName + IMG_END;
         }
-        else{
+        else if(imgParas[1] === "-"){
           iPath = IMG_PATH + "no_img" + IMG_END;
+        }
+        else{
+          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+          $(".imgcell").last().addClass("debug");
+          $(".infocell").last().addClass("debug");
+          $(".infotext").last().addClass("debug");
         }
         $currImg.attr("src", iPath);
         $currImg.attr("alt", imgParas[0]);
@@ -1649,7 +1675,6 @@ $(document).ready( () => {
 
           /*Update initial content sections*/
           let fileName = $wbuttons.eq(j).text().toLowerCase();
-          console.log(fileName);
           let updateContent = readContent(fileName);
 
           if(!updateContent){
@@ -1657,11 +1682,18 @@ $(document).ready( () => {
             return;
           }
 
+          /*Update serviceboxes*/
+          let updateServices = readServices(JOBPAGE, $wbuttons.eq(j).text());
+
+          if(!updateContent){
+            logProgress();
+            return;
+          }
         });
       }
     }
 
-
+    before = false;
   }
 
   return;
