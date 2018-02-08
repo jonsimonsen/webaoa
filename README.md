@@ -12,8 +12,8 @@ Around version 0.5, the project started using JavaScript and JQuery to prevent u
 
 # browser compatibility
 -Chrome  (Versions prior to 0.55 work in Chrome. The current file reading function is not automatically allowed in Chrome. See the notes in the version history for details)  
--Firefox (seems to give about the same result as Chrome)  
--Early versions of Edge yields poor layout. Should presumably be fixable by updating Windows.  
+-Firefox (seems to give about the same result as Chrome until version 0.55). After that, Firefox actually allows the site to be displayed as intended without having to provide any flags.    
+-Early versions of Edge yields poor layout. Should presumably be fixable (for pre-v0.55) by updating Windows. For the later versions, it seems like Edge will have the same kinds of issues as Chrome.  
 -Internet Explorer does not support the CSS syntax used, and there is no current plans to make the site compatible with IE.  
 
 # pre-versions:
@@ -120,11 +120,14 @@ v0.62: Do some fixing of browser compatibility issues.
 -Do a console log if the current html page contains multiples of certain elements that shouldn't occur more than one time.  
 
 v0.63: Planning to look more closely into combining DREIS and DagsJobben into a single page (with JS to select the content).  
--Under development...  
--Use the experiences from combining employees into a single page to attempt a similar approach here.  
--Make a separate folder for html files that are not standalone files.  
+-Used the experiences from combining employees into a single page to take a similar approach here.  
+-Made a separate folder for html files that are not standalone files.  
+-Added more subfolders for grouping content and renamed some files and folders.  
 -Added a substantial amount of tests using the global variable named testing to determine if these are run or not.  
--Some of the tests have a large amount of duplicated code. Especially isPresent, isUnique, isNonPlural and isTagSpecific can be refactored quite a bit.  
+-Fixed it so all job pages can be viewed from arbeid.html.  
+-Loading html code into the pages in several steps using JS.  
+-It seems like the home link will not be used anymore.  
 
-TODO: Consider removing the home link completely or replacing it with a different link.  
-TODO: An idea of combining DREIS and DagsJobben into a single page with JS to select the content exists, but it is currently unclear if this is a reasonable step (considering resulting design and time usage).  
+v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desireable. The agenda of this version will therefore be to clean up after 0.63.  
+-Under development...  
+-The variable online (and perhaps testing) should probably be made global since there are functions that would greatly benefit from having access to its value.  
