@@ -1041,6 +1041,8 @@ $(document).ready( () => {
   /**Find out what page is being readied**/
   let pageName = findPageName(window.location.pathname);
 
+
+  /***Test section***/
   if(testing){
     /**Testing the test framework**/
     if(pageName === TESTPAGE){
@@ -1071,7 +1073,7 @@ $(document).ready( () => {
   }
 
 
-  /**JQuery constants and variables that are used multiple times below.**/
+  /***JQuery constants for step-1 html selections.***/
   const $baseBody = $("body.base");
   const $banWrap = $("section.banner-wrapper");
   const $topWrap = $("section.top-wrapper");
@@ -1114,7 +1116,7 @@ $(document).ready( () => {
   before = false;         /*Test completed*/
   $(".test").remove();    /*Remove the test section*/
 
-  /*Test that the test section was successfully removed.*/
+  /**Test that the test section was successfully removed.**/
   if(testing){
     if(!(testValidity(ABSENT, [".test"]))){
       logProgress();
@@ -1123,13 +1125,13 @@ $(document).ready( () => {
   }
 
 
-  /*** Create banner ***/
+  /***Create banner***/
 
   /*Update the progress*/
   progress = "adding banner code";
   before = true;
 
-  /*Read banner file.*/
+  /**Read banner file.**/
   let bannerCode = readFile(PART_PATH + "banner.html");
 
   if(bannerCode === null){
@@ -1161,7 +1163,7 @@ $(document).ready( () => {
     /*Test that the banner code added the banner nav bar.*/
     if(testing){
       if(!(testValidity(UNIQUE, [["nav", ".nav-top"]]))){
-        logProgress(before, progress);
+        logProgress();
         return;
       }
     }
@@ -1189,12 +1191,12 @@ $(document).ready( () => {
     });
   }
 
-  /*** Create top wrapper (for navigating through dynamic content) ***/
+  /***Create top wrapper (for navigating through dynamic content)***/
   if(readSuccess && $topWrap.length){
     progress = "adding general code to the top wrapper (navigation of dynamic content)";
     before = true;
 
-    /*Read top-wrapper file*/
+    /**Read top-wrapper file**/
     let topCode = readFile(PART_PATH + "tops.html");
 
     if(topCode === null){
@@ -1230,11 +1232,14 @@ $(document).ready( () => {
           return;
         }
       }
+    }
 
-      /*Try to read inner content from file into scroll-menu*/
+    if(readSuccess){
       progress = "adding site-specific code to the top wrapper (navigation of dynamic content)";
       before = true;
 
+      /*Test that the page is one of the ones that is expected to have a top wrapper.
+      Find the file for the top wrapper content.*/
       let buttonFile = "";
 
       if(pageName === JOBPAGE){
@@ -1245,13 +1250,14 @@ $(document).ready( () => {
       }
 
       if(!buttonFile){
-        alert("Top wrapper exists on page that doesn't have a defined buttonFile. Site admins have to update JS code.");
+        alert("Top wrapper exists on a page that doesn't have a defined buttonFile." + BUGALERT_POST);
         logProgress();
         /*Since the page would presumably lose its main functionality,
         it doesn't seem like continuing makes much sense.*/
         return;
       }
 
+      /**Read content file for top wrapper**/
       let buttonCode = readFile(PART_PATH + buttonFile);
 
       if(buttonCode === null){
@@ -1273,17 +1279,16 @@ $(document).ready( () => {
 
         /*Since there are no common classes for the buttonCode content, no tests are made.*/
       }
-
     }
   }
 
 
-  /*** Create content (base content consists of an img section, an info section and a footer). ***/
+  /***Create content (initially consists of an img section, an info section and a footer).***/
   if(readSuccess && $mainWrap.length){
     progress = "adding structural code to the wrapper for main content";
     before = true;
 
-    /*Read content file*/
+    /**Read content file**/
     let mainCode = readFile(PART_PATH + "content.html");
 
     if(mainCode === null){
@@ -1325,11 +1330,14 @@ $(document).ready( () => {
           return;
         }
       }
+    }
 
-      /*Read page-specific content file*/
+    if(readSuccess){
       progress = "adding site-specific content to subwrappers of the main content wrapper";
       before = true;
 
+      /*Test that the page is one of those that is expected to have a content wrapper.
+      Find the file for the content wrapper content.*/
       let contentFile = "";
 
       if(pageName === HOMEPAGE){
@@ -1340,18 +1348,18 @@ $(document).ready( () => {
       }
 
       if(!contentFile){
-        alert("Content wrapper exists on page that doesn't have a defined contentFile. Site admins have to update JS code.");
+        alert("Content wrapper exists on page that doesn't have a defined contentFile." + BUGALERT_POST);
         logProgress();
         return;   /*Seems to be ok to stop processing.*/
       }
 
+      /**Read page-specific content file**/
       let newContent = readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
 
       if(!newContent){
         logProgress();
         return;
       }
-
     }
 
     /**Create additional home page content**/
