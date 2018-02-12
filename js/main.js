@@ -30,6 +30,7 @@ const ALLPAGES = [HOMEPAGE, JOBPAGE, EMPPAGE, ACTPAGE, TESTPAGE];
 const PART_PATH = "./html/";
 const INFO_PATH = "./Info/";
 const IMG_PATH = "./Bilder/";
+const PART_END = ".html"
 const TXT_END = ".txt";
 const IMG_END = ".jpg";
 
@@ -91,8 +92,9 @@ const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 
 
 /*** Global variables (variables that needs to be accessible from several functions) ***/
-let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
 let progress = "any DOM-manipulation";    /*Update this to keep track of where errors occur*/
+let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
+let readSuccess = true; /*Stop trying to read files when this becomes false.*/
 
 
 /*** Functions made by others ***/
@@ -1031,12 +1033,57 @@ function readServices(pName, workPlace = ""){
   return true;
 }
 
+function readPartial(pName, target, addArray = []){
+  let errPre = "readPartial" + ERR_POST;
+  if(typeof(pName !== string)){
+    console.log(errPre + "The argument must be a string.");
+    return false;
+  }
+
+  let partCode = readFile(PART_PATH + pName + PART_END);
+
+  if(partCode === null){
+    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    readSuccess = false;
+    before = false;
+
+    /*Make an alert for the current environment*/
+    if(online){
+      webReadAlert();
+    }
+    else{
+      alert("Failed to load page banner. There might be browser restrictions on reading local files.");
+    }
+  }
+  else{
+    if(TESTING && addArray.length){
+      /*Unpack...*/
+      let classArray = [];
+
+      addArray.forEach(function(subArray) {
+        classArray.push(subArray[1]);
+      });
+
+      if(!(testValidity(ABSENT, classArray))){
+        logProgress();
+        return false;
+      }
+    }
+
+    target.append(partCode);
+
+    if(TESTING && addArray.length){
+      if(!(testValidity(UNIQUE, addArray))){
+        logProgress();
+        return false;
+      }
+    }
+}
 
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
   /**Flow controlling variables**/
-  let readSuccess = true; /*Stop trying to read files when this becomes false. It might be desirable to make this global if that makes it easier for the functions that might cause a change to this value.*/
 
   /**Find out what page is being readied**/
   let pageName = findPageName(window.location.pathname);
@@ -1132,7 +1179,7 @@ $(document).ready( () => {
   before = true;
 
   /**Read banner file.**/
-  let bannerCode = readFile(PART_PATH + "banner.html");
+  let bannerCode = readFile(PART_PATH + "banner" + PART_END);
 
   if(bannerCode === null){
     /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -1197,7 +1244,7 @@ $(document).ready( () => {
     before = true;
 
     /**Read top-wrapper file**/
-    let topCode = readFile(PART_PATH + "tops.html");
+    let topCode = readFile(PART_PATH + "tops" + PART_END);
 
     if(topCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -1243,10 +1290,10 @@ $(document).ready( () => {
       let buttonFile = "";
 
       if(pageName === JOBPAGE){
-        buttonFile = "top_jobs.html";
+        buttonFile = "top_jobs";
       }
       else if(pageName === EMPPAGE){
-        buttonFile = "top_emps.html";
+        buttonFile = "top_emps";
       }
 
       if(!buttonFile){
@@ -1258,7 +1305,7 @@ $(document).ready( () => {
       }
 
       /**Read content file for top wrapper**/
-      let buttonCode = readFile(PART_PATH + buttonFile);
+      let buttonCode = readFile(PART_PATH + buttonFile + PART_END);
 
       if(buttonCode === null){
         /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -1289,7 +1336,7 @@ $(document).ready( () => {
     before = true;
 
     /**Read content file**/
-    let mainCode = readFile(PART_PATH + "content.html");
+    let mainCode = readFile(PART_PATH + "content" + PART_END);
 
     if(mainCode === null){
       /*If the file reading failed, give an error message alert and disable further file reading.*/
