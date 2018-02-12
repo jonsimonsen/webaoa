@@ -6,12 +6,17 @@ More trivial comments use one star.**/
 
 /*Sections (230118):
 -Global constants
+-Global variables
 -Functions by others
 -Functions by me
 -html generation (when document is ready)*/
 
 
 /*** Global consts ***/
+
+/**Environments**/
+const ONLINE = false;   /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
+const TESTING = true;   /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
 
 /**Pages**/
 const HOMEPAGE = "index.html";
@@ -21,12 +26,14 @@ const ACTPAGE = "aktiv.html";
 const TESTPAGE = "test.html";
 const ALLPAGES = [HOMEPAGE, JOBPAGE, EMPPAGE, ACTPAGE, TESTPAGE];
 
-/**Paths and files for html partials, employees, activities and workplaces**/
+/**Paths and files for pictures, html partials and textfile info**/
 const PART_PATH = "./html/";
 const INFO_PATH = "./Info/";
 const IMG_PATH = "./Bilder/";
 const TXT_END = ".txt";
 const IMG_END = ".jpg";
+
+/**Employees, activities and workplaces**/
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 const DREIS = ["dreis/", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
 const DJOB = ["djob/", "djob"];
@@ -45,9 +52,9 @@ const DEF_TAG = "section";    /*Default tag when testing. Should be in TAGTYPES 
 const TAGTYPES = [DEF_TAG, "body", "nav", "div"];    /*Allowed tags when testing occurrence.*/
 
 /**Default garbage of different types**/
-const BAD_TAG = "h7";    /*Used for testing. Do not include this value in TAGTYPES.*/
-const BAD_SSTR = ".test";
-const BAD_STR = "test";
+const BAD_TAG = "h7";       /*Used for testing. Do not include this value in TAGTYPES.*/
+const BAD_SSTR = ".test";   /*Assuming that the test document does not use this class in its html.*/
+const BAD_STR = "test";     /*Not correctly formatted for a classname string*/
 const BAD_ARR = [BAD_STR];
 const BAD_INT = 123;
 
@@ -62,12 +69,13 @@ const STEST = "testSelector";
 const VTEST = "testValidity";
 const ALLTESTS = [BTEST, STEST, VTEST];
 
-/**Error message prefixes for identifying where an error occurred.**/
+/**Error message partials for identifying where an error occurred.**/
 const ERR_POST = "() error: "
 const ERR_BUNDERR = BTEST + ERR_POST;
 const ERR_SELERR = STEST + ERR_POST;
 const ERR_VALIDERR = VTEST + ERR_POST;
 const ERR_RUNTESTERR = "runTest" + ERR_POST;
+const BUGALERT_POST = " Site admins have to update JS code.";
 
 /**Constraints that are allowed as arguments to testValidity().
 For all of them (including FREE), an additional constraint is that the class only occurs on the given tag type.**/
@@ -133,7 +141,7 @@ function capitalizeFirstLetter(string){
 
 /*Function that takes a path (url with no attributes)
 and returns the name of the associated file (ending with .html)
-if that file is an element in ALLPAGES (or an empty string if not found).
+if that file is an element in ALLPAGES or an empty string if not found.
 Be aware that it assumes that it does not matter where the file is located (it ignores the folders in the url).
 */
 function findPageName(path){
@@ -166,7 +174,7 @@ When the current file reading gets disabled, the alert should instead be about a
 */
 function webReadAlert(){
   /*Change file reading code and this message appropriately for online environment.*/
-  alert("Web server file reading error. JS File needs to be changed by site admins.");
+  alert("Web server file reading error." + BUGALERT_POST);
   return;
 }
 
@@ -201,14 +209,14 @@ function getUserId(){
 
   let candidate = url.slice(start + match.length);
 
-  /*Test that the value of the attribute is a number. If so, return it.*/
+  /*Test if the value of the candidate is a number.*/
 
   if(isNaN(candidate)){
     alert(errPrefix + "Either the userid is not a number or the url contains garbage otherwise.");
     return null;
   }
   else{
-    return Number(candidate);
+    return Number(candidate);   /*Return the candidate as a number*/
   }
 }
 
@@ -228,6 +236,7 @@ function countBools(boolArray){
 Uses values from the global variables before and progress in the logging.
 before should be a boolean telling if the message is logged before(true) or after(false) the step.
 progress should be a string saying what step was just finished or is just starting.
+If it is called incorrectly or the globals are undefined or have an unexpected type, this is logged instead.
 Returns nothing.*/
 function logProgress(){
   let errPre = "logProgress" + ERR_POST;
@@ -237,11 +246,11 @@ function logProgress(){
     return;
   }
   if(typeof(before) !== "boolean"){
-    console.log(errPre + 'The variable "before" should be global and have a bool value.');
+    console.log(errPre + 'The variable "before" should be a (global) bool.');
     return;
   }
   if(typeof(progress) !== "string"){
-    console.log(errPre + 'The variable "progress" should be global and be a string.');
+    console.log(errPre + 'The variable "progress" should be a (global) string.');
     return;
   }
 
@@ -322,7 +331,7 @@ function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
 
 /*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
 inputOne should be a string corresponding to a classname (starting with a dot).
-inputTwo should be a string containing an html tag that is expected to be a member of a global TAGTYPES array.
+inputTwo should be a string containing an html tag (without the "<" and ">" chars) that is expected to be a member of a global TAGTYPES array.
 Returns an empty string if no error was found. Otherwise, returns an error message.*/
 function testSelector(inputType, inputOne, inputTwo = ""){
   /*Test that the inputType has an expected value*/
@@ -354,7 +363,7 @@ function testSelector(inputType, inputOne, inputTwo = ""){
   }
   else{
     /*This should not be possible unless this function is wrong (possibly due to not updating).*/
-    return ERR_SELERR + "The function needs to be updated to process all possible inputTypes correctly.";
+    return ERR_SELERR + "The inputTypes are not processed correctly." + BUGALERT_POST;
   }
 
   /*Test that inputOne is a string containing a class name.*/
@@ -381,7 +390,8 @@ No element with other tag types should have the same class as any of those tags 
 
 If the format is broken, a message for the first error is logged to the console. The function might or might not log further errors.
 Otherwise (constraint broken or tag restriction on classes broken), messages for all encountered errors are logged.
-Returns true if the constraints are met and no format errors occurred. Otherwise returns false.*/
+Returns true if the constraints are met and no format errors occurred. Otherwise returns false.
+*/
 function testValidity(constraint, selectorArray){
   /*Test that constraint is included in CONSTRAINTS*/
   if(!(CONSTRAINTS.includes(constraint))){
@@ -496,7 +506,7 @@ function runTest(fName, description, argArray, passExpected = false){
   }
   else{
     /*The other tests return an empty string (evaluates to false) on passing
-    and the opposite on failing. Therefore, the truth value has to be swapped.*/
+    and a non-empty string on failing. Therefore, the truth value has to be swapped.*/
     expOutput = !passExpected;
   }
 
@@ -522,11 +532,12 @@ function runTest(fName, description, argArray, passExpected = false){
 Runs a number of test cases with different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console.
-Returns a bool array containing number of passed tests followed by number of failed tests.*/
+Returns a bool array containing number of passed tests followed by number of failed tests.
+*/
 function test_testBundle(){
   const bTestPre = "When giving testBundle() ";
   const aString = TESTSUBPRE + BAD_INT + TESTSUBPOST;
-  let resArray = [];
+  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing bundleTest()*/
   console.log("---Testing testBundle() expecting error messages.---");
@@ -566,10 +577,12 @@ function test_testBundle(){
 /*Function for testing the testSelector() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
-Logs test output to the console. Returns nothing.*/
+Logs test output to the console.
+Returns a bool array containing number of passed tests followed by number of failed tests.
+*/
 function test_testSelector(){
   const sTestPre = "When giving testSelector() ";
-  let resArray = [];
+  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing selectorTest()*/
   console.log("---Testing testSelector() expecting error messages.---");
@@ -591,6 +604,12 @@ function test_testSelector(){
   return countBools(resArray);
 }
 
+/*Function for testing the testValidity() function.
+Runs a number of tests on different kinds of input.
+Covers most kinds of input that should cause error messages along with some that shouldn't.
+Logs test output to the console.
+Returns a bool array containing number of passed tests followed by number of failed tests.
+*/
 function test_testValidity(){
   const vTestPre = "When giving testValidity() ";
   const tZero = ".test-zero";
@@ -599,7 +618,7 @@ function test_testValidity(){
   const tMiss = ".test-missing";
   const tUno = ".test-unique";
   const tBody = ".test-body";
-  let resArray = [];
+  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing first argument (constraint)*/
   console.log("---Testing testValidity() without a valid constraint---");
@@ -1016,10 +1035,8 @@ function readServices(pName, workPlace = ""){
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
 
-  /**Environments and flow controlling vars**/
-  const online = false; /*When the site is put on a webserver, the JS file should be checked to make sure that stuff that needs changing gets changed.*/
-  const testing = true; /*Since running tests takes time, this enables tests to be turned off. Having certain tests on in a dev environment and disabled in a live environment seems like a good idea.*/
-  let readSuccess = true; /*Stop trying to read files when this becomes false. Initially only bother changing this if the banner read fails.*/
+  /**Flow controlling variables**/
+  let readSuccess = true; /*Stop trying to read files when this becomes false. It might be desirable to make this global if that makes it easier for the functions that might cause a change to this value.*/
 
   /**Find out what page is being readied**/
   let pageName = findPageName(window.location.pathname);

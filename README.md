@@ -98,7 +98,7 @@ v0.55: Expand the activity page, and possibly the job pages.
 v0.56: Clean up the JS file, and try to incorporate more JS in arbeid.html.  
 -First part done and tested. Second part delayed to next version.
 
-v0.57: Additional cleanup of JS and layout
+v0.57: Additional cleanup of JS and layout  
 -Fixed a bug that made links partly unclickable when they're behind elements that are overlayed on the link. The link overlays now have pointer-events: none  
 -Version 0.57 will not be published separately, instead version 0.6 will be the next one since it contains a major change in the page structure.  
 
@@ -128,6 +128,6 @@ v0.63: Planning to look more closely into combining DREIS and DagsJobben into a 
 -Loading html code into the pages in several steps using JS.  
 -It seems like the home link will not be used anymore.  
 
-v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desireable. The agenda of this version will therefore be to clean up after 0.63.  
+v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desirable. The agenda of this version will therefore be to clean up after 0.63.  
 -Under development...  
 -The variable online (and perhaps testing) should probably be made global since there are functions that would greatly benefit from having access to its value.  
