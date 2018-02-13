@@ -1035,8 +1035,20 @@ function readServices(pName, workPlace = ""){
 
 function readPartial(pName, target, addArray = []){
   let errPre = "readPartial" + ERR_POST;
-  if(typeof(pName !== string)){
-    console.log(errPre + "The argument must be a string.");
+
+  /*Test that the arguments are as expected*/
+  if(typeof(pName) !== "string"){
+    console.log(errPre + "The first argument must be a string.");
+    return false;
+  }
+
+  if(!(target instanceof jQuery)){
+    console.log(errPre + "The second argument must be a jQuery selection.");
+    return false;
+  }
+
+  if(!(Array.isArray(addArray))){
+    console.log(errPre + "The third arguments must be an array.");
     return false;
   }
 
@@ -1045,10 +1057,9 @@ function readPartial(pName, target, addArray = []){
   if(partCode === null){
     /*If the file reading failed, give an error message alert and disable further file reading.*/
     readSuccess = false;
-    before = false;
 
     /*Make an alert for the current environment*/
-    if(online){
+    if(ONLINE){
       webReadAlert();
     }
     else{
@@ -1057,10 +1068,15 @@ function readPartial(pName, target, addArray = []){
   }
   else{
     if(TESTING && addArray.length){
-      /*Unpack...*/
+      /*Unpack to be able to test the validity with constraint ABSENT*/
       let classArray = [];
 
       addArray.forEach(function(subArray) {
+        /*Test that the array has at least two elements*/
+        if(!(Array.isArray(subArray))){
+          console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
+          return false;
+        }
         classArray.push(subArray[1]);
       });
 
@@ -1078,6 +1094,11 @@ function readPartial(pName, target, addArray = []){
         return false;
       }
     }
+  }
+
+  /*No errors encountered. If the file read failed,
+  this should be apparent from the global var readSuccess.*/
+  return true;
 }
 
 /*** Generate additional html for the current site ***/
@@ -1090,7 +1111,7 @@ $(document).ready( () => {
 
 
   /***Test section***/
-  if(testing){
+  if(TESTING){
     /**Testing the test framework**/
     if(pageName === TESTPAGE){
       runAllTests();
@@ -1133,7 +1154,7 @@ $(document).ready( () => {
   /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
 
   /**Testing the absence of a test section.**/
-  if(testing){
+  if(TESTING){
     if(!(testValidity(ABSENT, [".test"]))){
       logProgress();
       return;
@@ -1145,7 +1166,7 @@ $(document).ready( () => {
   progress = "browser compatibility test";    /*No need to change the before variable this time*/
 
   /**Test that the test section was added.**/
-  if(testing){
+  if(TESTING){
     if(!(testValidity(UNIQUE, [["section", ".test"]]))){
       logProgress();
       return;
@@ -1164,7 +1185,7 @@ $(document).ready( () => {
   $(".test").remove();    /*Remove the test section*/
 
   /**Test that the test section was successfully removed.**/
-  if(testing){
+  if(TESTING){
     if(!(testValidity(ABSENT, [".test"]))){
       logProgress();
       return;
@@ -1178,50 +1199,22 @@ $(document).ready( () => {
   progress = "adding banner code";
   before = true;
 
-  /**Read banner file.**/
-  let bannerCode = readFile(PART_PATH + "banner" + PART_END);
+  /**Read banner file**/
 
-  if(bannerCode === null){
-    /*If the file reading failed, give an error message alert and disable further file reading.*/
-    readSuccess = false;
-    before = false;
-
-    /*Make an alert for the current environment*/
-    if(online){
-      webReadAlert();
-    }
-    else{
-      alert("Failed to load page banner. There might be browser restrictions on reading local files.");
-    }
+  /*If an error occurs while the banner is being populated, stop loading the page.*/
+  if(!(readPartial("banner", $banWrap, [["nav", ".nav-top"]]))){
+    return;
   }
   else{
-    /*Test that the document doesn't contain the class for the banner navbar.*/
-    if(testing){
-      if(!(testValidity(ABSENT, [".nav-top"]))){
-        logProgress();
-        return;
-      }
-    }
-
-    /*Add banner code.*/
-    $banWrap.append(bannerCode);
     before = false;
+  }
 
-    /*Test that the banner code added the banner nav bar.*/
-    if(testing){
-      if(!(testValidity(UNIQUE, [["nav", ".nav-top"]]))){
-        logProgress();
-        return;
-      }
-    }
-
-    let $bnav = $("nav.nav-top");
-
-    /*Add formatting to the nav links.
-    An idea for later is to add the links dynamically based on ALLPAGES
-    (make sure not to add links for pages that are not supposed to be in the navbar).
-    */
-    $bnav.children().each(function (){
+  /*If the last file read succeeded, add formatting to the nav links.
+  An idea for later is to add the links dynamically based on ALLPAGES
+  (make sure not to add links for pages that are not supposed to be in the navbar).
+  */
+  if(readSuccess){
+    $("nav.nav-top").children().each(function (){
       let target = $(this).attr("href");
 
       /*Give self-pointing links class unlink (not clickable).*/
@@ -1230,7 +1223,7 @@ $(document).ready( () => {
           $(this).addClass("unlink");
         }
       }
-      else if(testing){
+      else if(TESTING){
         console.log("Do not add anchors without a href attribute to the banner navbar.");
         logProgress();
         return;
@@ -1240,53 +1233,24 @@ $(document).ready( () => {
 
   /***Create top wrapper (for navigating through dynamic content)***/
   if(readSuccess && $topWrap.length){
-    progress = "adding general code to the top wrapper (navigation of dynamic content)";
+    progress = "adding structure to the top wrapper (navigation of dynamic content)";
     before = true;
 
     /**Read top-wrapper file**/
-    let topCode = readFile(PART_PATH + "tops" + PART_END);
-
-    if(topCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-
-      /*Make alert for current environment*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to load top wrapper structure. Unknown cause.");
-      }
+    if(!(readPartial("tops", $topWrap, [["div", ".scroll-menu"]]))){
+      return;
     }
     else{
-      /*Test that the DOM doesn't yet contain the scroll-menu wrapper*/
-      if(testing){
-        if(!(testValidity(ABSENT, [".scroll-menu"]))){
-          logProgress();
-          return;
-        }
-      }
-
-      /*Add top-wrapper code*/
-      $topWrap.append(topCode);
       before = false;
-
-      /*Test that the DOM has gotten a scroll-menu wrapper*/
-      if(testing){
-        if(!(testValidity(UNIQUE, [["div", ".scroll-menu"]]))){
-          logProgress();
-          return;
-        }
-      }
     }
 
+    /*If file read succeeded, add content inside the top wrapper structure*/
     if(readSuccess){
-      progress = "adding site-specific code to the top wrapper (navigation of dynamic content)";
+      progress = "adding page-specific code to the top wrapper (navigation of dynamic content)";
       before = true;
 
       /*Test that the page is one of the ones that is expected to have a top wrapper.
-      Find the file for the top wrapper content.*/
+      Find the file name for the top wrapper content.*/
       let buttonFile = "";
 
       if(pageName === JOBPAGE){
@@ -1296,91 +1260,43 @@ $(document).ready( () => {
         buttonFile = "top_emps";
       }
 
+      /*If there's no defined file for the top wrapper content of the current page, stop loading the page.*/
       if(!buttonFile){
         alert("Top wrapper exists on a page that doesn't have a defined buttonFile." + BUGALERT_POST);
         logProgress();
-        /*Since the page would presumably lose its main functionality,
-        it doesn't seem like continuing makes much sense.*/
         return;
       }
 
-      /**Read content file for top wrapper**/
-      let buttonCode = readFile(PART_PATH + buttonFile + PART_END);
-
-      if(buttonCode === null){
-        /*If the file reading failed, give an error message alert and disable further file reading.*/
-        readSuccess = false;
-        before = false;
-
-        /*Make alert for the current environment*/
-        if(online){
-          webReadAlert();
-        }
-        else{
-          alert("Failed to load top wrapper content. Unknown cause.");
-        }
+      /**Populate top wrapper from file**/
+      if(!(readPartial(buttonFile, $(".scroll-menu")))){
+        return;
       }
       else{
-        $(".scroll-menu").append(buttonCode);
         before = false;
-
-        /*Since there are no common classes for the buttonCode content, no tests are made.*/
       }
+
     }
   }
 
 
-  /***Create content (initially consists of an img section, an info section and a footer).***/
+  /***Create main content (initially consists of an img section, an info section and a footer).***/
   if(readSuccess && $mainWrap.length){
-    progress = "adding structural code to the wrapper for main content";
+    progress = "adding structural code to the main content wrapper";
     before = true;
 
-    /**Read content file**/
-    let mainCode = readFile(PART_PATH + "content" + PART_END);
-
-    if(mainCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-
-      /*Make alert for the current environment*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to load main content. Unknown cause.");
-      }
+    /**Read main content file**/
+    let mainElems = [["section", ".illustration"], ["section", ".info"],
+    ["section", ".footer"], ["div", ".ill-text"], ["div", ".ill-link"]];
+    if(!(readPartial("content", $mainWrap, mainElems))){
+      return;
     }
     else{
-      /*Test that the DOM doesn't yet contain the elements that are supposed to be in the content code.*/
-      if(testing){
-        let classes = [".illustration", ".info", ".footer", ".ill-text", ".ill-link"];
-        if(!(testValidity(ABSENT, classes))){
-          logProgress();
-          return;
-        }
-      }
-
-      /*Add content to the content wrapper*/
-      $mainWrap.append(mainCode);
       before = false;
-
-      if(testing){
-        const illWrap = ["section", ".illustration"];
-        const infoWrap = ["section", ".info"];
-        const foot = ["section", ".footer"];
-        const illText = ["div", ".ill-text"];
-        const illLink = ["div", ".ill-link"];
-
-        if(!(testValidity(UNIQUE, [illWrap, infoWrap, foot, illText, illLink]))){
-          logProgress();
-          return;
-        }
-      }
     }
 
+    /*If the file read succeeded, add page-specific content between the info and the footer.*/
     if(readSuccess){
-      progress = "adding site-specific content to subwrappers of the main content wrapper";
+      progress = "adding page-specific content to subwrappers of the main content wrapper";
       before = true;
 
       /*Test that the page is one of those that is expected to have a content wrapper.
@@ -1394,10 +1310,11 @@ $(document).ready( () => {
         contentFile = "jobs";
       }
 
+      /*Stop loading the page if it doesn't have a page-specific content file.*/
       if(!contentFile){
-        alert("Content wrapper exists on page that doesn't have a defined contentFile." + BUGALERT_POST);
+        alert("Content wrapper exists on a page that doesn't have a defined contentFile." + BUGALERT_POST);
         logProgress();
-        return;   /*Seems to be ok to stop processing.*/
+        return;
       }
 
       /**Read page-specific content file**/
