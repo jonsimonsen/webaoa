@@ -748,11 +748,13 @@ function runAllTests(){
 /*Function for reading main content and applying it to the document.
 Can be used during page loading or in response to events.
 Returns true if the reading and updating proceeded as expected.
+Returns true but sets readSuccess to false if a file read failed.
 Returns false otherwise.*/
 function readContent(fName){
   let errPre = "readContent" + ERR_POST;
 
-  /*Make variables for frequently used selections*/
+  /*Make variables for frequently used selections.
+  It's the job of the callee to ensure that the selections are unique.*/
   let $illWrap = $(".illustration");
   let $textWrap = $(".ill-text");
   let $linkWrap = $(".ill-link");
@@ -761,8 +763,19 @@ function readContent(fName){
 
   /*Read all paragraphs from the content file*/
   let paragraphs = readParas(INFO_PATH + fName + TXT_END);
+
   if(paragraphs === null){
-    return false;
+    /*If the file reading failed, disable further file reading.*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      webReadAlert();
+    }
+    else{
+      alert("Failed to load unit-specific content from " + fName + " file.");
+    }
+    return true;    /*readSuccess will signify that the file reading failed*/
   }
   else if(paragraphs.length !== 4){
     console.log(errPre + "The content file should contain exactly four of paragraphs.");
@@ -812,18 +825,15 @@ function readContent(fName){
     $infoWrap.children("p").append(line + "<br>");
   });
 
-  /*Read footer file*/
-  let footCode = readFile(PART_PATH + "footer.html");
+  /*Remove old footer content*/
+  $foot.children("h2").remove();
+  $foot.children(".socials").remove();
+  $foot.children(".contacts").remove();
 
-  if(footCode === null){
-    return false;
+  if(!(readPartial("footer", $foot))){
+    return true;
   }
   else{
-    /*Remove old footer content*/
-    $foot.children("h2").remove();
-    $foot.children(".socials").remove();
-    $foot.children(".contacts").remove();
-
     /*Add structure to the footer wrapper*/
     $foot.append(footCode);
   }
@@ -840,6 +850,7 @@ function readContent(fName){
       console.log(errPre + "The fourth (last) paragraph of the content file should contain at least five lines when the first line consists of something else than a single dash.");
       return false;
     }
+
     /*Update contact link in banner and illustration*/
     $foot.attr("id", footLines[0]);
     $("nav.nav-top").children(':contains("Kontakt")').remove();  /*Remove old link if any*/
@@ -1033,7 +1044,7 @@ function readServices(pName, workPlace = ""){
   return true;
 }
 
-function readPartial(pName, target, addArray = []){
+function readPartial(pName, target, part, addArray = []){
   let errPre = "readPartial" + ERR_POST;
 
   /*Test that the arguments are as expected*/
@@ -1047,15 +1058,20 @@ function readPartial(pName, target, addArray = []){
     return false;
   }
 
+  if(typeof(part) !== "string"){
+    console.log(errPre + "The third argument must be a string.");
+    return false;
+  }
+
   if(!(Array.isArray(addArray))){
-    console.log(errPre + "The third arguments must be an array.");
+    console.log(errPre + "The fourth arguments must be an array.");
     return false;
   }
 
   let partCode = readFile(PART_PATH + pName + PART_END);
 
   if(partCode === null){
-    /*If the file reading failed, give an error message alert and disable further file reading.*/
+    /*If the file reading failed, disable further file reading.*/
     readSuccess = false;
 
     /*Make an alert for the current environment*/
@@ -1063,7 +1079,7 @@ function readPartial(pName, target, addArray = []){
       webReadAlert();
     }
     else{
-      alert("Failed to load page banner. There might be browser restrictions on reading local files.");
+      alert("Failed to load " + part + " code.");
     }
   }
   else{
@@ -1074,7 +1090,7 @@ function readPartial(pName, target, addArray = []){
       addArray.forEach(function(subArray) {
         /*Test that the array has at least two elements*/
         if(!(Array.isArray(subArray))){
-          console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
+          console.log(errPre + "The fourth argument (array) must contain exclusively arrays as its elements.");
           return false;
         }
         classArray.push(subArray[1]);
@@ -1203,6 +1219,8 @@ $(document).ready( () => {
 
   /*If an error occurs while the banner is being populated, stop loading the page.*/
   if(!(readPartial("banner", $banWrap, [["nav", ".nav-top"]]))){
+    /*Since this should be the first file read attempt, give an alert with the probable cause of failure.*/
+    alert("There might be browser restrictions on reading local files.");
     return;
   }
   else{

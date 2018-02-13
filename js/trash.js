@@ -140,3 +140,11 @@ else{
     }
   }
 }
+
+/*In readContent:*/
+/*Read footer file*/
+let footCode = readFile(PART_PATH + "footer.html");
+
+if(footCode === null){
+  return false;
+}
