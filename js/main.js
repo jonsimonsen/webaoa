@@ -1,10 +1,14 @@
 /*** Main JS file for the website of "Arbeid og Aktivitet, Tromsø" (by Jon Simonsen). ***/
 
-/** Since importing seems to be a new feature in JS (perhaps not well supported yet), all used functions will be included in this file.
-Three star comments start a new section. Two star comments are for subsections or important information.
+/**Since importing seems to be a new feature in JS (perhaps not well supported yet),
+all used functions will be included in this file.
+Three star comments with newlines start a new section.
+Three star comments without newlines starts a major subsection.
+Two star comments are for minor subsections or important information.
 More trivial comments use one star.**/
 
-/*Sections (230118):
+/*Sections (130218):
+-Introductory comment section
 -Global constants
 -Global variables
 -Functions by others
@@ -99,8 +103,7 @@ let readSuccess = true; /*Stop trying to read files when this becomes false.*/
 
 /*** Functions made by others ***/
 
-/*Function for reading a file (Should use a different one/load when going live)*/
-
+/**Function for reading a file (Should use a different one/load when going live)**/
 /*Based on https://stackoverflow.com/questions/14446447/how-to-read-a-local-text-file*/
 function readFile(file){
   let rawFile = new XMLHttpRequest();
@@ -130,8 +133,7 @@ function readFile(file){
   return allText;
 }
 
-/*Function for capitalizing a string (Make the first letter uppercase)*/
-
+/**Function for capitalizing a string (Make the first letter uppercase)**/
 /*https://stackoverflow.com/questions/1026069/how-do-i-make-the-first-letter-of-a-string-uppercase-in-javascript
 */
 function capitalizeFirstLetter(string){
@@ -141,11 +143,13 @@ function capitalizeFirstLetter(string){
 
 /*** Functions made by Jon Simonsen ***/
 
-/*Function that takes a path (url with no attributes)
-and returns the name of the associated file (ending with .html)
-if that file is an element in ALLPAGES or an empty string if not found.
-Be aware that it assumes that it does not matter where the file is located (it ignores the folders in the url).
-*/
+/**Function that processes a path (url with no attributes).
+It returns the name of the associated file (ending with .html)
+if that file is an element in ALLPAGES.
+It returns an empty string if the associated file was not found.
+Be aware that it assumes that it does not matter where the file is located
+(it ignores the folders in the url).
+**/
 function findPageName(path){
   for(let i=0 ; i < ALLPAGES.length ; i++){
     if(path.endsWith("/" + ALLPAGES[i])){
@@ -157,10 +161,10 @@ function findPageName(path){
   return "";
 }
 
-/*Function for reading a file and returning an array of paragraphs using double newlines as separators.
+/**Function for reading a file and returning an array of paragraphs
+using double newlines as separators.
 Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
-If the file reading failed, the function returns null.
-*/
+If the file reading failed, the function returns null.**/
 function readParas(file){
   fileStr = readFile(file);
   if(fileStr === null){
@@ -171,22 +175,23 @@ function readParas(file){
   }
 }
 
-/*Function for giving an alert if local file reading was used in an online environment.
-When the current file reading gets disabled, the alert should instead be about a failed load (if this function is kept around).
-*/
+/**Function for giving an alert if local file reading was used in an online environment.
+When the current file reading gets disabled,
+the alert should instead be about a failed load (if this function is kept around).
+**/
 function webReadAlert(){
   /*Change file reading code and this message appropriately for online environment.*/
   alert("Web server file reading error." + BUGALERT_POST);
   return;
 }
 
-/*Function for extracting userid from url. Returns null if the url has no attributes.
+/**Function for extracting userid from url. Returns null if the url has no attributes.
 Returns null and displays an alert if there's something wrong with the attribute.
 Otherwise, the value of the attribute (as a number) is returned.
-Attributes other than userid is not allowed. Could have more detailed error checks and messages.
-*/
-
-/*For more advanced url extraction, check out https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+Attributes other than userid is not allowed.
+Could have more detailed error checks and messages.**/
+/*For more advanced url extraction, check out
+https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 */
 function getUserId(){
   let match = "userid=";
@@ -196,6 +201,7 @@ function getUserId(){
 
   /*Test that the string contains the separator and that it occurs early enough that there is room for the attribute name and value.*/
   if(start <= 0){
+    alert(errPrefix + "It contains no attribute.")
     return null;
   }
   else if(start > url.length - (match.length + 1)){ /*+1 since indices start at 0 while lengths start at 1.*/
@@ -212,7 +218,6 @@ function getUserId(){
   let candidate = url.slice(start + match.length);
 
   /*Test if the value of the candidate is a number.*/
-
   if(isNaN(candidate)){
     alert(errPrefix + "Either the userid is not a number or the url contains garbage otherwise.");
     return null;
@@ -222,24 +227,26 @@ function getUserId(){
   }
 }
 
-/*Function for counting number of true and false values in an array that is assumed to contain bool values.
-The function might work on other arguments than arrays, but its behavior is undefined for such arguments.
+/**Function for counting number of true and false values in an array.
+The function might work on other arguments than arrays,
+but its behavior is undefined for such arguments.
 boolArray is assumed to be an array of booleans.
-The function counts the number of values that equals true and assumes that all other values are false.
-It returns an array with the number of true as the first element and the number of false as the second element.
-*/
+The function counts the number of values that equals true.
+It assumes that all other values are false.
+It returns an array with the number of true as the first element
+and the number of false as the second element.**/
 function countBools(boolArray){
   let passes = (boolArray.filter(val => val === true)).length;
   let fails = boolArray.length - passes;
   return [passes, fails];
 }
 
-/*Function for logging the DOM-manipulation progress to the console.
+/**Function for logging the DOM-manipulation progress to the console.
 Uses values from the global variables before and progress in the logging.
 before should be a boolean telling if the message is logged before(true) or after(false) the step.
 progress should be a string saying what step was just finished or is just starting.
-If it is called incorrectly or the globals are undefined or have an unexpected type, this is logged instead.
-Returns nothing.*/
+If it is called incorrectly or the globals are undefined or have an unexpected type,
+this is logged instead. It returns nothing.**/
 function logProgress(){
   let errPre = "logProgress" + ERR_POST;
   /*Test arguments*/
@@ -270,8 +277,8 @@ function logProgress(){
   return;
 }
 
-/*Function that logs a description of the test, then number of passes,
-then number of fails followed by an empty line. Returns nothing.*/
+/**Function that logs a description of a test, then number of passes,
+then number of fails followed by an empty line. Returns nothing.**/
 function logTestRes(description, passes, fails){
   console.log("For " + description + ":");
   console.log("\t" + passes + " passes");
@@ -279,12 +286,14 @@ function logTestRes(description, passes, fails){
   return;
 }
 
-/*Function for testing that inputArray is an array. Also test that it contains at least minElems items.
+/**Function for testing that inputArray is an array.
+It also test that it contains at least minElems items.
 arrayText is used for describing the element (assumed array) that is being tested.
 Look at the function or returned error message for its value range.
 Returns a description of the error. If no error, it returns an empty string.
-If any of the arguments to the function does not have the expected type or is outside the value range,
-the error message will inform about this.*/
+If any of the arguments to the function does not have the expected type
+or is outside the value range,
+the returned error message will inform about this.**/
 function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
   let errPre = BTEST + "() expects ";
 
@@ -331,10 +340,12 @@ function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
   }
 }
 
-/*Function for testing inputs according to inputType. All legal inputTypes should be members of a global INPUTTYPES array.
+/**Function for testing inputs according to inputType.
+All legal inputTypes should be members of a global INPUTTYPES array.
 inputOne should be a string corresponding to a classname (starting with a dot).
-inputTwo should be a string containing an html tag (without the "<" and ">" chars) that is expected to be a member of a global TAGTYPES array.
-Returns an empty string if no error was found. Otherwise, returns an error message.*/
+inputTwo should be a string containing an html tag (without the "<" and ">" chars)
+that is expected to be a member of a global TAGTYPES array.
+Returns an error message if an error was found or an empty string otherwise.**/
 function testSelector(inputType, inputOne, inputTwo = ""){
   /*Test that the inputType has an expected value*/
   if(!(INPUTTYPES.includes(inputType))){
@@ -346,7 +357,8 @@ function testSelector(inputType, inputOne, inputTwo = ""){
     return ERR_SELERR + "Do not pass more than three arguments."
   }
 
-  /*Test that inputTwo has an expected value for the given inputType and that an accepted inputType is actually being processed by this function.*/
+  /*Test that inputTwo has an expected value for the given inputType
+  and that the inputType is actually included in this function.*/
   if(inputType === CLASS){
     if(inputTwo){
       return ERR_SELERR + "Do not pass more than two arguments for inputType CLASS.";
@@ -381,19 +393,22 @@ function testSelector(inputType, inputOne, inputTwo = ""){
   return "";    /*No error detected*/
 }
 
-/*Function for testing if the occurence of all elements are as specified by constraint.
+/**Function for testing if the occurence of all elements are as specified by constraint.
 If constraint is not included in CONSTRAINTS, this counts as a format error.
 The function also tests that the selectorArray is formatted according to constraint.
 ABSENT expects an array of strings (class names, each starting with a dot).
 The other constraint types expect an array of arrays of two strings
 (the first being a tag and the second being a class name).
 Each tag should be one of the tags in TAGTYPES.
-No element with other tag types should have the same class as any of those tags (counts as an occurence error).
+No element with other tag types should have the same class as any of those tags
+(counts as an occurence error).
 
-If the format is broken, a message for the first error is logged to the console. The function might or might not log further errors.
-Otherwise (constraint broken or tag restriction on classes broken), messages for all encountered errors are logged.
-Returns true if the constraints are met and no format errors occurred. Otherwise returns false.
-*/
+If the format is broken, a message for the first error is logged to the console.
+The function might or might not log further errors.
+Otherwise (constraint broken or tag restriction on classes broken),
+messages for all encountered errors are logged.
+Returns true if the constraints are met and no format errors occurred.
+Returns false otherwise.**/
 function testValidity(constraint, selectorArray){
   /*Test that constraint is included in CONSTRAINTS*/
   if(!(CONSTRAINTS.includes(constraint))){
@@ -478,14 +493,17 @@ function testValidity(constraint, selectorArray){
   return validity;
 }
 
-/*Function that acts as a helper for running test cases on functions corresponding to the names in ALLTESTS.
+/**Function that acts as a helper.
+It will run test cases on functions corresponding to the names in ALLTESTS.
 fName is a string that should match a function name in ALLTESTS.
-description should describe the kind of input to fName() that is given (focused on its flaws if any).
+description should describe the kind of input to fName() that is given
+(focused on its flaws if any).
 argArray is an array containing every argument to be passed to fName().
 passExpected is a boolean that tells if the test case is expected to pass.
 The function logs the given description and the output from fName().
 If this output suggests the same as passExpected, it logs "pass".
-Otherwise, it logs "fail". In both cases, it logs a newline to signify the end of this logging.
+Otherwise, it logs "fail".
+In both cases, it logs a newline to signify the end of this logging.
 Returns true if the test passed and false if it failed.*/
 function runTest(fName, description, argArray, passExpected = false){
   /*Test that the given fName is a function name in the global const ALLTESTS.*/
@@ -530,12 +548,12 @@ function runTest(fName, description, argArray, passExpected = false){
   }
 }
 
-/*Function for testing the testBundle() function.
+/**Function for testing the testBundle() function.
 Runs a number of test cases with different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console.
 Returns a bool array containing number of passed tests followed by number of failed tests.
-*/
+**/
 function test_testBundle(){
   const bTestPre = "When giving testBundle() ";
   const aString = TESTSUBPRE + BAD_INT + TESTSUBPOST;
@@ -576,12 +594,12 @@ function test_testBundle(){
   return countBools(resArray);
 }
 
-/*Function for testing the testSelector() function.
+/**Function for testing the testSelector() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console.
 Returns a bool array containing number of passed tests followed by number of failed tests.
-*/
+**/
 function test_testSelector(){
   const sTestPre = "When giving testSelector() ";
   let resArray = [];    /*Array used for logging the number of successful and failed tests*/
@@ -606,12 +624,12 @@ function test_testSelector(){
   return countBools(resArray);
 }
 
-/*Function for testing the testValidity() function.
+/**Function for testing the testValidity() function.
 Runs a number of tests on different kinds of input.
 Covers most kinds of input that should cause error messages along with some that shouldn't.
 Logs test output to the console.
 Returns a bool array containing number of passed tests followed by number of failed tests.
-*/
+**/
 function test_testValidity(){
   const vTestPre = "When giving testValidity() ";
   const tZero = ".test-zero";
@@ -724,8 +742,9 @@ function test_testValidity(){
   return countBools(resArray);
 }
 
-/*Function for running all test functions containing test cases for argument validation and element occurence (JQuery selections).
-Returns nothing.*/
+/**Function for running all test case functions
+(test cases for argument validation and element occurence on selections).
+Returns nothing.**/
 function runAllTests(){
   /*Test the argument validation tests*/
   let bundleRes = test_testBundle();
@@ -745,11 +764,11 @@ function runAllTests(){
   return;
 }
 
-/*Function for reading main content and applying it to the document.
+/**Function for reading main content and applying it to the document.
 Can be used during page loading or in response to events.
 Returns true if the reading and updating proceeded as expected.
 Returns true but sets readSuccess to false if a file read failed.
-Returns false otherwise.*/
+Returns false otherwise.**/
 function readContent(fName){
   let errPre = "readContent" + ERR_POST;
 
