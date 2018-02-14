@@ -98,7 +98,7 @@ const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 /*** Global variables (variables that needs to be accessible from several functions) ***/
 let progress = "any DOM-manipulation";    /*Update this to keep track of where errors occur*/
 let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
-let readSuccess = true; /*Stop trying to read files when this becomes false.*/
+let readSuccess = true;   /*Stop trying to read files when this becomes false.*/
 
 
 /*** Functions made by others ***/
@@ -201,7 +201,7 @@ function getUserId(){
 
   /*Test that the string contains the separator and that it occurs early enough that there is room for the attribute name and value.*/
   if(start <= 0){
-    alert(errPrefix + "It contains no attribute.")
+    /*Since an attribute isn't necessarily required, no kind of error message is given.*/
     return null;
   }
   else if(start > url.length - (match.length + 1)){ /*+1 since indices start at 0 while lengths start at 1.*/
@@ -764,6 +764,123 @@ function runAllTests(){
   return;
 }
 
+/**Function for reading an html file in the html folder
+and adding the code to a JQuery selection.
+pName is the name of the file (without path and ending) or
+an array with the name as the first element
+and a description of the file code as the second element.
+target is the JQuery selector where the code is appended.
+addArray is an array of arrays of strings that will (conditionally) be passed to testValidity
+(See that function for further specification of its format)
+or an empty array (default) if there are no constraints that need to be checked.
+If the global var TESTING is true, the validity of addArray will be tested.
+The elements are assumed to be ABSENT before the code is added, and UNIQUE afterwards.
+Returns false if one of the arguments is wrongly formatted or the constraint is broken.
+Returns true otherwise.
+Sets readSuccess to false if the file reading failed.**/
+function readPartial(pName, target, addArray = []){
+  let errPre = "readPartial" + ERR_POST;
+  let partName = "";
+  let partText = "";
+
+  /*Test that the arguments are as expected*/
+  if(typeof(pName) === "string"){
+    if(!pName){
+      console.log(errPre + "The first (string) argument must be non-empty.");
+      return false;
+    }
+    else{
+      partName = pName;
+      partText = pName;
+    }
+  }
+  else if(Array.isArray(pName)){
+    if(pName.length !== 2){
+      console.log(errPre + "The first (array) argument must contain exactly two elements.");
+      return false;
+    }
+    else if(typeof(pName[0]) !== "string" || typeof(pName[1]) !== "string"){
+      console.log(errPre + "The first (array) argument must contain two strings as its (first) elements.");
+      return false;
+    }
+
+    if(!pName[0].length || !pName[1].length){
+      console.log(errPre + "The first (array) argument must contain non-empty strings as its (first) elements.");
+      return false;
+    }
+
+    partName = pName[0];
+    partText = pName[1];
+  }
+  else{
+    console.log(errPre + "The first element must be either a string or an array.");
+    return false;
+  }
+
+  if(!(target instanceof jQuery)){
+    console.log(errPre + "The second argument must be a jQuery selection.");
+    return false;
+  }
+
+  if(!(Array.isArray(addArray))){
+    console.log(errPre + "The third argument must be an array.");
+    return false;
+  }
+
+  if(!partName || !partText){
+    console.log(errPre + "It seems like partName or partText still has its initial value.");
+    return false;
+  }
+
+  let partCode = readFile(PART_PATH + partName + PART_END);
+
+  if(partCode === null){
+    /*If the file reading failed, disable further file reading.*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      webReadAlert();
+    }
+    else{
+      alert("Failed to load " + partText + " code.");
+    }
+  }
+  else{
+    if(TESTING && addArray.length){
+      /*Unpack to be able to test the validity with constraint ABSENT*/
+      let classArray = [];
+
+      addArray.forEach(function(subArray) {
+        /*Test that the array has at least two elements*/
+        if(!(Array.isArray(subArray))){
+          console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
+          return false;
+        }
+        classArray.push(subArray[1]);
+      });
+
+      if(!(testValidity(ABSENT, classArray))){
+        logProgress();
+        return false;
+      }
+    }
+
+    target.append(partCode);
+
+    if(TESTING && addArray.length){
+      if(!(testValidity(UNIQUE, addArray))){
+        logProgress();
+        return false;
+      }
+    }
+  }
+
+  /*No errors encountered. If the file read failed,
+  this should be apparent from the global var readSuccess.*/
+  return true;
+}
+
 /**Function for reading main content and applying it to the document.
 Can be used during page loading or in response to events.
 Returns true if the reading and updating proceeded as expected.
@@ -849,12 +966,13 @@ function readContent(fName){
   $foot.children(".socials").remove();
   $foot.children(".contacts").remove();
 
-  if(!(readPartial("footer", $foot))){
+  /**Read footer structure file**/
+  if(!(readPartial(["footer", "footer structure"], $foot))){
+    readSuccess = false;    /*Make sure that the callee knows to stop loading the page*/
     return true;
   }
-  else{
-    /*Add structure to the footer wrapper*/
-    $foot.append(footCode);
+  else if(!readSuccess){
+    return true;
   }
 
   /*Add content to the footer*/
@@ -898,11 +1016,22 @@ function readContent(fName){
     $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
   }
 
-  /*Read file containing a separator for contact fields*/
+  /**Read file containing a separator for contact fields**/
   let sepCode = readFile(PART_PATH + "seps.html");
 
   if(sepCode === null){
-    return false;
+    /*If the file reading failed, disable further file reading*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      webReadAlert();
+    }
+    else{
+      alert("Failed to load contact field separator code.");
+    }
+
+    return true;
   }
 
   const seps = " " + sepCode;
@@ -927,9 +1056,9 @@ function readContent(fName){
   return true;
 }
 
-/*Function for reading content into the services section for workplaces or activities.
+/**Function for reading content into the services section for workplaces or activities.
 workPlace should only be given as an argument if pName is equal to JOBPAGE.
-*/
+**/
 function readServices(pName, workPlace = ""){
   progress = "reading service files";
   before = true;
@@ -1063,89 +1192,14 @@ function readServices(pName, workPlace = ""){
   return true;
 }
 
-function readPartial(pName, target, part, addArray = []){
-  let errPre = "readPartial" + ERR_POST;
-
-  /*Test that the arguments are as expected*/
-  if(typeof(pName) !== "string"){
-    console.log(errPre + "The first argument must be a string.");
-    return false;
-  }
-
-  if(!(target instanceof jQuery)){
-    console.log(errPre + "The second argument must be a jQuery selection.");
-    return false;
-  }
-
-  if(typeof(part) !== "string"){
-    console.log(errPre + "The third argument must be a string.");
-    return false;
-  }
-
-  if(!(Array.isArray(addArray))){
-    console.log(errPre + "The fourth arguments must be an array.");
-    return false;
-  }
-
-  let partCode = readFile(PART_PATH + pName + PART_END);
-
-  if(partCode === null){
-    /*If the file reading failed, disable further file reading.*/
-    readSuccess = false;
-
-    /*Make an alert for the current environment*/
-    if(ONLINE){
-      webReadAlert();
-    }
-    else{
-      alert("Failed to load " + part + " code.");
-    }
-  }
-  else{
-    if(TESTING && addArray.length){
-      /*Unpack to be able to test the validity with constraint ABSENT*/
-      let classArray = [];
-
-      addArray.forEach(function(subArray) {
-        /*Test that the array has at least two elements*/
-        if(!(Array.isArray(subArray))){
-          console.log(errPre + "The fourth argument (array) must contain exclusively arrays as its elements.");
-          return false;
-        }
-        classArray.push(subArray[1]);
-      });
-
-      if(!(testValidity(ABSENT, classArray))){
-        logProgress();
-        return false;
-      }
-    }
-
-    target.append(partCode);
-
-    if(TESTING && addArray.length){
-      if(!(testValidity(UNIQUE, addArray))){
-        logProgress();
-        return false;
-      }
-    }
-  }
-
-  /*No errors encountered. If the file read failed,
-  this should be apparent from the global var readSuccess.*/
-  return true;
-}
 
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
-
-  /**Flow controlling variables**/
-
   /**Find out what page is being readied**/
   let pageName = findPageName(window.location.pathname);
 
 
-  /***Test section***/
+  /***Initial test section***/
   if(TESTING){
     /**Testing the test framework**/
     if(pageName === TESTPAGE){
@@ -1185,8 +1239,8 @@ $(document).ready( () => {
 
 
   /***Browser compatibility testing (custom properties).***/
-  /*The code is more complex than ideal since the css method doesn't specify the format of the return value (it is assumed that the browser does it in  the same way every time, though)*/
-  /*Note that non-careful modifications to the test (in its current form) might break the site layout.*/
+  /*The code is more complex than ideal since the css method doesn't specify the format of the return value
+  (it is assumed that the browser does it in the same way every time, though).*/
 
   /**Testing the absence of a test section.**/
   if(TESTING){
@@ -1208,10 +1262,11 @@ $(document).ready( () => {
     }
   }
 
-  /**Test that an element (basebody) using custom properties has the same colors as an element using direct assignment (.test)**/
   let realCol = $(".test").css("background-color");
   let browserCol = $baseBody.css("background-color");
 
+  /**Test that an element (basebody) using custom properties
+  has the same colors as an element using direct assignment (.test)**/
   if(browserCol !== realCol){
     alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
   }
@@ -1274,7 +1329,7 @@ $(document).ready( () => {
     before = true;
 
     /**Read top-wrapper file**/
-    if(!(readPartial("tops", $topWrap, [["div", ".scroll-menu"]]))){
+    if(!(readPartial(["tops", "top wrapper structure"], $topWrap, [["div", ".scroll-menu"]]))){
       return;
     }
     else{
@@ -1289,23 +1344,26 @@ $(document).ready( () => {
       /*Test that the page is one of the ones that is expected to have a top wrapper.
       Find the file name for the top wrapper content.*/
       let buttonFile = "";
+      let fileText = "";
 
       if(pageName === JOBPAGE){
         buttonFile = "top_jobs";
+        fileText = "jobs top wrapper content";
       }
       else if(pageName === EMPPAGE){
         buttonFile = "top_emps";
+        fileText = "employees top wrapper content";
       }
 
       /*If there's no defined file for the top wrapper content of the current page, stop loading the page.*/
-      if(!buttonFile){
-        alert("Top wrapper exists on a page that doesn't have a defined buttonFile." + BUGALERT_POST);
+      if(!buttonFile || !fileText){
+        alert("Top wrapper exists on a page that doesn't have a defined buttonFile or doesn't have corresponding fileText." + BUGALERT_POST);
         logProgress();
         return;
       }
 
       /**Populate top wrapper from file**/
-      if(!(readPartial(buttonFile, $(".scroll-menu")))){
+      if(!(readPartial([buttonFile, fileText], $(".scroll-menu")))){
         return;
       }
       else{
@@ -1324,14 +1382,14 @@ $(document).ready( () => {
     /**Read main content file**/
     let mainElems = [["section", ".illustration"], ["section", ".info"],
     ["section", ".footer"], ["div", ".ill-text"], ["div", ".ill-link"]];
-    if(!(readPartial("content", $mainWrap, mainElems))){
+    if(!(readPartial(["content", "main content"], $mainWrap, mainElems))){
       return;
     }
     else{
       before = false;
     }
 
-    /*If the file read succeeded, add page-specific content between the info and the footer.*/
+    /*If the file read succeeded, add page-specific content to the current content structure.*/
     if(readSuccess){
       progress = "adding page-specific content to subwrappers of the main content wrapper";
       before = true;
@@ -1339,6 +1397,7 @@ $(document).ready( () => {
       /*Test that the page is one of those that is expected to have a content wrapper.
       Find the file for the content wrapper content.*/
       let contentFile = "";
+      let contentText = "";
 
       if(pageName === HOMEPAGE){
         contentFile = "index";
@@ -1355,132 +1414,87 @@ $(document).ready( () => {
       }
 
       /**Read page-specific content file**/
-      let newContent = readContent(contentFile);   /*Made a function, since reading the content could happen as an onclick event too.*/
-
-      if(!newContent){
+      if(!(readContent(contentFile))){    /*Since reading content can also be part of event handling, a function was made for it.*/
         logProgress();
         return;
       }
+
+      before = false;
     }
 
     /**Create additional home page content**/
     if(readSuccess && pageName === HOMEPAGE){
       /*Make options section*/
-      progress = "adding options section to home page";
+      progress = "adding options and storygrid sections to home page";
       before = true;
 
       /*Test that the DOM doesn't yet contain the elements that are supposed to get added.*/
-      if(testing){
+      if(TESTING){
         if(!(testValidity(ABSENT, [".options", ".storygrid"]))){
           logProgress();
           return;
         }
       }
 
-      let optCode = readFile(PART_PATH + "opts.html");
+      /*Add options and storygrid sections directly before the footer element*/
+      $(".footer").before('<section class="options"></section><section class="storygrid"></section>');
 
-      if(optCode === null){
-        /*If the file reading failed, give an error message alert and disable further file reading.*/
-        readSuccess = false;
-        before = false;
-
-        /*Make alert for the current environment*/
-        if(online){
-          webReadAlert();
-        }
-        else{
-          alert("Failed to load options section for home page. Unknown cause.");
-        }
+      if(!(readPartial(["opts", "options"], $(".options")))){
+        return;
       }
       else{
-        /*Insert the option code directly before the footer element*/
-        $(".footer").before(optCode);
-        before = false;
-      }
-
-      /*Make storygrid section*/
-
-      progress = "adding storygrid section to home page";
-      before = true;
-
-      let gridCode = readFile(PART_PATH + "storygrid.html");
-
-      if(gridCode === null){
-        /*If the file reading failed, give an error message alert and disable further file reading.*/
-        readSuccess = false;
-        before = false;
-
-        if(online){
-          webReadAlert();
-        }
-        else{
-          alert("Failed to load storygrid structure for home page. Unknown cause.");
-        }
-      }
-      else{
-        /*Insert the storygrid code directly before the footer element*/
-        $(".footer").before(gridCode);
         before = false;
       }
 
       /**Populate employee storygrid**/
-
-      $sGrid = $(".storygrid");
-
-      if(readSuccess && $sGrid.length){
+      if(readSuccess){
         progress = "populating storygrid";
         before = true;
+        $sGrid = $(".storygrid");
 
         /*Add storyboxes*/
-        let boxCode = readFile(PART_PATH + "empboxes.html");
-
-        if(boxCode === null){
-          /*If the file reading failed, give an error message alert and disable further file reading.*/
-          readSuccess = false;
-          before = false;
-
-          if(online){
-            webReadAlert();
-          }
-          else{
-            alert("Failed to load storybox structure for home page. Unknown cause.");
-          }
+        if(!(readPartial(["empboxes", "employee storybox structure"], $sGrid))){
+          return;
         }
-        else{
-          /*Populate the story grid with boxes for each employee story*/
-          for(let i = 0; i < EMPS.length - 1; i++){
-            $sGrid.append(boxCode);
-          }
+
+        /*Copy the storybox structure for each additional employee*/
+        let boxCode = $sGrid.html();
+
+        for(let i = 1; i < EMPS.length - 1; i++){
+          $sGrid.append(boxCode);
         }
+
+        /*Add a header*/
+        $sGrid.prepend("<h2>Innspill fra de ansatte</h2>");
 
         if(readSuccess){
-          /*Add storylinks to each storybox*/
-          let linkCode = readFile(PART_PATH + "storylink.html");
-
-          if(linkCode === null){
-            /*If the file reading failed, give an error message alert and disable further file reading.*/
-            readSuccess = false;
-            before = false;
-
-            if(online){
-              webReadAlert();
-            }
-            else{
-              alert("Failed to load storylink content for storyboxes on the home page. Unknown cause.");
-            }
-          }
-          else{
-            $sGrid.find(".storylink").append(linkCode);
+          /**Read storylink file and update all storylink**/
+          if(!(readPartial("storylink", $(".storylink")))){
+            return;
           }
 
           /*Update paragraphs and signature for each employee box*/
           if($(".employee").length !== EMPS.length - 1){
-            alert("Home page has the wrong number of employee boxes.");
+            alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
           }
           else{
             for(let j = 0; j < EMPS.length - 1; j++ ){
               let $empbox = $(".employee").eq(j);
               let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
+
+              if(paragraphs === null){
+                /*If the file reading failed, disable further file reading.*/
+                readSuccess = false;
+
+                /*Make an alert for the current environment*/
+                if(ONLINE){
+                  webReadAlert();
+                }
+                else{
+                  alert("Failed to load employee-specific content from its file.");
+                }
+                break;
+              }
 
               $empbox.find("p.excerpt").append(paragraphs[0]);
               $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
@@ -1496,7 +1510,7 @@ $(document).ready( () => {
     }
   }
 
-  /*** Create services content for job page or activity page. ***/
+  /***Create services content for job page or activity page.***/
   if(readSuccess && (pageName === JOBPAGE || pageName === ACTPAGE)){
     progress = "adding service section to JOBPAGE or ACTPAGE";
     before = true;

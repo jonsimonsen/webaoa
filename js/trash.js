@@ -148,3 +148,93 @@ let footCode = readFile(PART_PATH + "footer.html");
 if(footCode === null){
   return false;
 }
+
+/*Read file containing a separator for contact fields*/
+let sepCode = readFile(PART_PATH + "seps.html");
+
+if(sepCode === null){
+  return false;
+}
+
+/*Read options file*/
+let optCode = readFile(PART_PATH + "opts.html");
+
+if(optCode === null){
+  /*If the file reading failed, give an error message alert and disable further file reading.*/
+  readSuccess = false;
+  before = false;
+
+  /*Make alert for the current environment*/
+  if(online){
+    webReadAlert();
+  }
+  else{
+    alert("Failed to load options section for home page. Unknown cause.");
+  }
+}
+else{
+  /*Insert the option code directly before the footer element*/
+  $(".footer").before(optCode);
+  before = false;
+}
+
+
+/*Make storygrid section*/
+progress = "adding storygrid section to home page";
+before = true;
+
+let gridCode = readFile(PART_PATH + "storygrid.html");
+
+if(gridCode === null){
+  /*If the file reading failed, give an error message alert and disable further file reading.*/
+  readSuccess = false;
+  before = false;
+
+  if(online){
+    webReadAlert();
+  }
+  else{
+    alert("Failed to load storygrid structure for home page. Unknown cause.");
+  }
+}
+else{
+  /*Insert the storygrid code directly before the footer element*/
+  $(".footer").before(gridCode);
+  before = false;
+}
+
+
+/*Add storyboxes*/
+let boxCode = readFile(PART_PATH + "empboxes.html");
+
+if(boxCode === null){
+  /*If the file reading failed, give an error message alert and disable further file reading.*/
+  readSuccess = false;
+  before = false;
+
+  if(online){
+    webReadAlert();
+  }
+  else{
+    alert("Failed to load storybox structure for home page. Unknown cause.");
+  }
+}
+
+/*Add storylinks to each storybox*/
+let linkCode = readFile(PART_PATH + "storylink.html");
+
+if(linkCode === null){
+  /*If the file reading failed, give an error message alert and disable further file reading.*/
+  readSuccess = false;
+  before = false;
+
+  if(online){
+    webReadAlert();
+  }
+  else{
+    alert("Failed to load storylink content for storyboxes on the home page. Unknown cause.");
+  }
+}
+else{
+  $sGrid.find(".storylink").append(linkCode);
+}
