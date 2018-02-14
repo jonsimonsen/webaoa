@@ -1001,7 +1001,7 @@ function readContent(fName){
       console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
       return false;
     }
-    /*Hide contact link from image text and remove hide the footer*/
+    /*Hide contact link from image text and hide the footer*/
     $illWrap.find("a").addClass("usynlig");
     $foot.addClass("inactive");
   }
@@ -1336,7 +1336,7 @@ $(document).ready( () => {
       before = false;
     }
 
-    /*If file read succeeded, add content inside the top wrapper structure*/
+    /**If file read succeeded, add content inside the top wrapper structure**/
     if(readSuccess){
       progress = "adding page-specific code to the top wrapper (navigation of dynamic content)";
       before = true;
@@ -1369,7 +1369,6 @@ $(document).ready( () => {
       else{
         before = false;
       }
-
     }
   }
 
@@ -1389,7 +1388,7 @@ $(document).ready( () => {
       before = false;
     }
 
-    /*If the file read succeeded, add page-specific content to the current content structure.*/
+    /**If the file read succeeded, add page-specific content to the current content structure.**/
     if(readSuccess){
       progress = "adding page-specific content to subwrappers of the main content wrapper";
       before = true;
@@ -1439,74 +1438,75 @@ $(document).ready( () => {
       /*Add options and storygrid sections directly before the footer element*/
       $(".footer").before('<section class="options"></section><section class="storygrid"></section>');
 
+      /**Read options content from file**/
       if(!(readPartial(["opts", "options"], $(".options")))){
         return;
       }
       else{
         before = false;
       }
+    }
 
-      /**Populate employee storygrid**/
-      if(readSuccess){
-        progress = "populating storygrid";
-        before = true;
-        $sGrid = $(".storygrid");
+    /**Populate employee storygrid**/
+    if(readSuccess){
+      progress = "populating storygrid";
+      before = true;
+      $sGrid = $(".storygrid");
 
-        /*Add storyboxes*/
-        if(!(readPartial(["empboxes", "employee storybox structure"], $sGrid))){
-          return;
-        }
+      /*Add storyboxes*/
+      if(!(readPartial(["empboxes", "employee storybox structure"], $sGrid))){
+        return;
+      }
 
-        /*Copy the storybox structure for each additional employee*/
-        let boxCode = $sGrid.html();
+      /*Copy the storybox structure for each additional employee*/
+      let boxCode = $sGrid.html();
 
-        for(let i = 1; i < EMPS.length - 1; i++){
-          $sGrid.append(boxCode);
-        }
+      for(let i = 1; i < EMPS.length - 1; i++){
+        $sGrid.append(boxCode);
+      }
 
-        /*Add a header*/
-        $sGrid.prepend("<h2>Innspill fra de ansatte</h2>");
+      /*Add a header*/
+      $sGrid.prepend("<h2>Innspill fra de ansatte</h2>");
+    }
 
-        if(readSuccess){
-          /**Read storylink file and update all storylink**/
-          if(!(readPartial("storylink", $(".storylink")))){
-            return;
-          }
+    /**Read storylink file and update all storylinks**/
+    if(readSuccess){
+      if(!(readPartial("storylink", $(".storylink")))){
+        return;
+      }
 
-          /*Update paragraphs and signature for each employee box*/
-          if($(".employee").length !== EMPS.length - 1){
-            alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
-          }
-          else{
-            for(let j = 0; j < EMPS.length - 1; j++ ){
-              let $empbox = $(".employee").eq(j);
-              let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
+      /*Update paragraphs and signature for each employee box*/
+      if($(".employee").length !== EMPS.length - 1){
+        alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
+      }
+      else{
+        for(let j = 0; j < EMPS.length - 1; j++ ){
+          let $empbox = $(".employee").eq(j);
+          let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
 
-              if(paragraphs === null){
-                /*If the file reading failed, disable further file reading.*/
-                readSuccess = false;
+          if(paragraphs === null){
+            /*If the file reading failed, disable further file reading.*/
+            readSuccess = false;
 
-                /*Make an alert for the current environment*/
-                if(ONLINE){
-                  webReadAlert();
-                }
-                else{
-                  alert("Failed to load employee-specific content from its file.");
-                }
-                break;
-              }
-
-              $empbox.find("p.excerpt").append(paragraphs[0]);
-              $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
-
-              /*Update the address of the storylink*/
-              $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+            /*Make an alert for the current environment*/
+            if(ONLINE){
+              webReadAlert();
             }
+            else{
+              alert("Failed to load employee-specific content from its file.");
+            }
+            break;
           }
 
-          before = false;
+          $empbox.find("p.excerpt").append(paragraphs[0]);
+          $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+
+          /*Update the address of the storylink*/
+          $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
         }
       }
+
+      before = false;
     }
   }
 
@@ -1516,12 +1516,17 @@ $(document).ready( () => {
     before = true;
 
     /*Test that the DOM doesn't yet contain a service section.*/
-    if(testing){
+    if(TESTING){
       if(!(testValidity(ABSENT, [".services"]))){
         logProgress();
         return;
       }
     }
+
+    /*Add a service section (placement depends on the kind of page)*/
+    /*if(pageName === JOBPAGE){
+      $(".footer").before('<section class="services"></section>');
+    }*/
 
     /*Read structure file*/
     let servCode = readFile(PART_PATH + "service.html");

@@ -1,8 +1,0 @@
-TODOS:
-
--Refactoring code (banner, footer, storylinks etc.).
--Consider looking more closely at fonts.
--Consider looking more closely at scss.
--possibly making a dynamic div that can alternate between DREIS and DagsJobben.
-
--Refactor JS/Jquery.

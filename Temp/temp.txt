@@ -1,0 +1,6 @@
+TODOS:
+
+-Consider looking more closely at fonts.
+-Consider looking more closely at scss.
+
+-Refactor JS/Jquery.
