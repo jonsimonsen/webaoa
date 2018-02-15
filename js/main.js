@@ -43,7 +43,7 @@ const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consi
 const DREIS = ["dreis/", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
 const DJOB = ["djob/", "djob"];
 const ACTIVITIES = ["akts/", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
-const JOBS = ["DREIS", "DagsJobben", "Jobs"];
+const JOBS = ["DREIS", "DagsJobben", "Jobs"]; /*Precise name of workplace. Except for the last one, these can be used to find the corresponding entry in SERVICES (the indexes should match).*/
 const SERVICES = [DREIS, DJOB, ACTIVITIES];   /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
 
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
@@ -1060,9 +1060,6 @@ function readContent(fName){
 workPlace should only be given as an argument if pName is equal to JOBPAGE.
 **/
 function readServices(pName, workPlace = ""){
-  progress = "reading service files";
-  before = true;
-
   let errPre = "readServices()" + ERR_POST;
   let servArray = [];
   let i = undefined;    /*iterator for the JOBPAGES array*/
@@ -1110,20 +1107,28 @@ function readServices(pName, workPlace = ""){
   let servFolder = servArray[0];
 
   /*Remove existing storyboxes and paragraphs from the services content*/
-  $servWrap.children(".storybox").remove();
-  $servWrap.children("p").remove();
+  /*$servWrap.children(".storybox").remove();
+  $servWrap.children("p").remove();*/
+  $servWrap.empty();
+
+  /**Read service storybox structure**/
+  if(!(readPartial(["serv_story", "service storybox structure"], $servWrap, [["div", ".imgcell"], ["div", ".infocell"], ["div", ".infotext"]]))){
+    readSuccess = false;
+    return true;
+  }
+  else if(!readSuccess){
+    return true;
+  }
 
   /*Test that the divs that are about to be added and updated does not yet exist in the DOM*/
   if(!(testValidity(ABSENT, [".imgcell", ".infotext"]))){
     return false;
   }
 
-  /*Read service box structure*/
-  let sBoxCode = readFile(PART_PATH + "serv_story.html");
-
-  if(sBoxCode === null){
-    return false;
-  }
+  /*Define structure code for a single service.*/
+  let sBoxCode = $servWrap.html();
+  $servWrap.empty();    /*So that sBoxCode can be added for each service.*/
+  $servWrap.append("<h2>Tjenester</h2>");
 
   /*For each service, read the service's file, add a service box structure, and update the service box content*/
   servArray.slice(1).forEach(function(sName) {
@@ -1131,12 +1136,21 @@ function readServices(pName, workPlace = ""){
     let paragraphs = readParas(fPath);
 
     if(paragraphs === null){
-      console.log("bad file path " + fPath);
-      return false;
+      /*If the file reading failed, disable further file reading.*/
+      readSuccess = false;
+
+      /*Make an alert for the current environment*/
+      if(ONLINE){
+        webReadAlert();
+      }
+      else{
+        alert(`Failed to load service-specific content from ${fPath} path.`);
+      }
+      return true;    /*readSuccess will signify that the file reading failed*/
     }
     else{
       if(paragraphs.length !== 3){
-        console.log(errPre + "The file " + fPath + " must contain exactly three paragraphs.");
+        console.log(`${errPre}The file ${fPath} must contain exactly three paragraphs.`);
         return false;
       }
 
@@ -1147,7 +1161,7 @@ function readServices(pName, workPlace = ""){
       let imgParas = paragraphs[0].split("\r\n");
 
       if(imgParas.length > 2){
-        console.log(errPre + "The first paragraph in " + fPath + " must contain at most two lines.");
+        console.log(`${errPre}The first paragraph in ${fPath} must contain at most two lines.`);
         return false;
       }
       else{
@@ -1180,8 +1194,9 @@ function readServices(pName, workPlace = ""){
           lines = lines.slice(0, lines.length - 1);
         }
 
+        /*Add list elements for each line in the paragraph*/
         lines.forEach(function(line) {
-          $currTextbox.children("ul").append("<li>" + line + "</li>");
+          $currTextbox.children("ul").append(`<li>${line}</li>`);
         });
 
       }
@@ -1322,6 +1337,7 @@ $(document).ready( () => {
       }
     });
   }
+
 
   /***Create top wrapper (for navigating through dynamic content)***/
   if(readSuccess && $topWrap.length){
@@ -1510,6 +1526,7 @@ $(document).ready( () => {
     }
   }
 
+
   /***Create services content for job page or activity page.***/
   if(readSuccess && (pageName === JOBPAGE || pageName === ACTPAGE)){
     progress = "adding service section to JOBPAGE or ACTPAGE";
@@ -1552,9 +1569,7 @@ $(document).ready( () => {
       before = false;
     }
     else if(pageName === ACTPAGE){
-      let serviceUpdate = readServices(ACTPAGE);
-
-      if(!serviceUpdate){
+      if(!(readServices(ACTPAGE))){
         logProgress();
         return;
       }
@@ -1568,7 +1583,50 @@ $(document).ready( () => {
     }
   }
 
-  /*** Create employee window with content inside the employee wrapper ***/
+
+  /***Event handling for workplaces***/
+  if(readSuccess && pageName === JOBPAGE){
+    progress = "adding event handling to the job page"
+    before = true;
+
+    /*Confirm that the page has the expected wrappers*/
+    if(!(testValidity(UNIQUE, [["section", ".illustration"], ["div", ".ill-text"], ["div", ".ill-link"], ["section", ".info"], ["section", ".footer"], ["section", ".services"], ["div", ".scroll-menu"]]))){
+      logProgress();
+      return;
+    }
+    else{
+      const $wbuttons = $(".scroll-menu").find("a");
+
+      for(let j=0; j < $wbuttons.length; j++){
+        $wbuttons.eq(j).on("click", () => {
+          /*Make the clicked button the only active one*/
+          $wbuttons.removeClass("active");
+          $wbuttons.eq(j).addClass("active");
+
+          /*Update initial content sections*/
+          let fileName = $wbuttons.eq(j).text().toLowerCase();
+
+          if(!(readContent(fileName))){
+            logProgress();
+            return;
+          }
+
+          /*Update serviceboxes*/
+          if(readSuccess){
+            if(!(readServices(JOBPAGE, $wbuttons.eq(j).text()))){
+              logProgress();
+              return;
+            }
+          }
+        });
+      }
+    }
+
+    before = false;
+  }
+
+
+  /***Create employee window with content inside the employee wrapper***/
   if(readSuccess && $empWrap.length){
     progress = "adding structural code to the employee wrapper";
     before = true;
@@ -1668,98 +1726,5 @@ $(document).ready( () => {
 
   }
 
-  /***Event handling for workplaces***/
-  if(readSuccess && pageName === JOBPAGE){
-    progress = "adding event handling to the job page"
-    before = true;
-    /*Confirm that the page has the expected wrappers*/
-    if(!(testValidity(UNIQUE, [["section", ".illustration"], ["div", ".ill-text"], ["div", ".ill-link"], ["section", ".info"], ["section", ".footer"], ["section", ".services"], ["div", ".scroll-menu"]]))){
-      logProgress();
-      return;
-    }
-    else{
-      const $wbuttons = $(".scroll-menu").find("a");
-
-      for(let j=0; j < $wbuttons.length; j++){
-        $wbuttons.eq(j).on("click", () => {
-          /*Make the clicked button the only active one*/
-          $wbuttons.removeClass("active");
-          $wbuttons.eq(j).addClass("active");
-
-          /*Update initial content sections*/
-          let fileName = $wbuttons.eq(j).text().toLowerCase();
-          let updateContent = readContent(fileName);
-
-          if(!updateContent){
-            logProgress();
-            return;
-          }
-
-          /*Update serviceboxes*/
-          let updateServices = readServices(JOBPAGE, $wbuttons.eq(j).text());
-
-          if(!updateContent){
-            logProgress();
-            return;
-          }
-        });
-      }
-    }
-
-    before = false;
-  }
-
   return;
-
-  /***Add content to the JOBPAGE***/
-  if(readSuccess)
-
-  /***Workplace creation***/
-  if(readSuccess && $jobwindow[0]){
-    let jobWinCode = readFile("./jobwindow.html"); /*Can probably delete this file...*/
-    $jobwindow.append(jobWinCode);
-
-    let paragraphs = readParas(storyPath + workPlaces[workPlaces.length - 1] + textEnding);
-
-    $(".info").append("<h2>" + paragraphs[0] + "</h2>");
-
-    for(let i=1; i < paragraphs.length - 1; i++){
-      $(".info").append("<p>" + paragraphs[i] + "</p>");
-    }
-  }
-
-
-  /***Event handling for workplaces***/
-  const $wbuttons = $(".scroll-menu").find("a");
-
-  for(let j=0; j < $wbuttons.length; j++){
-    $wbuttons.eq(j).on("click", () => {
-      /*Make the clicked button the only active one*/
-      $wbuttons.removeClass("active");
-      $wbuttons.eq(j).addClass("active");
-
-      /*Read workplace content from file*/
-      let paragraphs = readParas(storyPath + workPlaces[j] + textEnding);
-
-      /*Remove old info text and add new*/
-      $(".info").empty();
-      $(".info").append("<h2>" + paragraphs[0] + "</h2>");
-
-      for(let k=1; k < paragraphs.length - 1; k++){
-        $(".info").append("<p>" + paragraphs[k] + "</p>");
-      }
-    });
-  }
-  /*$wbuttons.each(function (){
-    $(this).on("click", () => {
-      $wbuttons.removeClass("active");
-      $(this).addClass("active");
-    });
-  });*/
-
-  /***Home link creation***/
-  if(readSuccess === true && $homeLink[0]){
-    $hlink.append(readFile("./homelink.html"));
-  }
-
 });
