@@ -1631,25 +1631,12 @@ $(document).ready( () => {
     progress = "adding structural code to the employee wrapper";
     before = true;
 
-    /*Read structure file*/
-    let empCode = readFile(PART_PATH + "empwindow.html");
-
-    if(empCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-
-      /*Make alert for the current environment*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to load employee window. Unknown cause.");
-      }
+    /**Read employee structure file**/
+    if(!(readPartial(["empwindow", "employee window structure"], $empWrap))){
+      return;
     }
     else{
-      /*Add content to the employee wrapper*/
-      $empWrap.append(empCode);
+      before = false;
     }
 
     /*Find out what user to display based on url attribute*/
@@ -1658,7 +1645,7 @@ $(document).ready( () => {
       current = EMPS.length - 1; /*Start at intro page*/
     }
     else if (current < 0 || current >= EMPS.length - 1) {
-      alert("userid attribute in url is outside the range of valid userids");
+      alert("userid attribute in url is outside the range of valid userids.");
       current = EMPS.length - 1;
     }
 
@@ -1677,7 +1664,7 @@ $(document).ready( () => {
     $empButtons = $(".stealthy");
     /*Test that the correct number of navigation objects (buttons with class stealthy) exists.*/
     if($empButtons.length !== 2){
-      alert("Default employee navigation is broken. Site admins have to update the code.");
+      alert("Employee navigation is broken." + BUGALERT_POST);
     }
     else{
       $(".stealthy").eq(0).attr("href", "./ansatte.html?userid=" + (prev));
@@ -1687,43 +1674,44 @@ $(document).ready( () => {
     /*Add the storybox class to the employee wrapper*/
     $empWrap.addClass("storybox");
 
-    /*Append employee window code to the employee window*/
-    progress = "adding employee-specific content to the employee window"
-    before = true;
+    /**Append employee window code to the employee window**/
+    if(readSuccess){
+      progress = "adding employee-specific content to the employee window"
+      before = true;
 
-    let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[current] + TXT_END);
+      let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[current] + TXT_END);
 
-    if(paragraphs === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
+      if(paragraphs === null){
+        /*If the file reading failed, give an error message alert and disable further file reading.*/
+        readSuccess = false;
+        before = false;
 
-      /*Make alert for the current environment*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to read employee content. Unknown cause.");
-      }
-    }
-    else{
-      /*Add img to the html*/
-      $empWrap.children("img").attr("src", IMG_PATH + "ansatte/" + EMPS[current] + IMG_END);
-      $empWrap.children("img").attr("alt", paragraphs[paragraphs.length - 1]);
-
-      /*Add paragraphs to the html code*/
-      for(let i=0; i < paragraphs.length - 1; i++){
-        if($.trim(paragraphs[i]).length > 0){
-          $("<p>" + paragraphs[i] + "</p>").insertBefore($empWrap.children("p.sign"));
+        /*Make alert for the current environment*/
+        if(online){
+          webReadAlert();
+        }
+        else{
+          alert("Failed to read employee content. Unknown cause.");
         }
       }
+      else{
+        /*Add img to the html*/
+        $empWrap.children("img").attr("src", IMG_PATH + "ansatte/" + EMPS[current] + IMG_END);
+        $empWrap.children("img").attr("alt", paragraphs[paragraphs.length - 1]);
 
-      /*Add signature*/
-      $empWrap.children("p.sign").append("-" + capitalizeFirstLetter(EMPS[current]));
+        /*Add paragraphs to the html code*/
+        for(let i=0; i < paragraphs.length - 1; i++){
+          if($.trim(paragraphs[i]).length > 0){
+            $("<p>" + paragraphs[i] + "</p>").insertBefore($empWrap.children("p.sign"));
+          }
+        }
 
-      before = false;
+        /*Add signature*/
+        $empWrap.children("p.sign").append("-" + capitalizeFirstLetter(EMPS[current]));
+
+        before = false;
+      }
     }
-
   }
 
   return;
