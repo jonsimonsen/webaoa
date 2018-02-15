@@ -333,7 +333,7 @@ function testBundle(inputArray, arrayText = TESTMAIN, minElems = 1){
     return arrayText + " is expected to be an array.";
   }
   else if(inputArray.length < minElems){
-    return `${arrayText} is expected to contain at least ${minElems} elements`;
+    return `${arrayText} (array) is expected to contain at least ${minElems} elements`;
   }
   else{
     return "";
@@ -371,7 +371,7 @@ function testSelector(inputType, inputOne, inputTwo = ""){
     }
     else{
       if(!(TAGTYPES.includes(inputTwo))){
-        return `"${JSON.stringify(inputTwo)}" is not in the list of allowed tags (TAGTYPES).`;
+        return `${JSON.stringify(inputTwo)} is not in the list of allowed tags (TAGTYPES).`;
       }
     }
   }
@@ -1085,7 +1085,7 @@ function readServices(pName, workPlace = ""){
       return false;
     }
     else{
-      servArray = SERVICES[SERVICES.length - 1];
+      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERICES*/
     }
 
   }
@@ -1445,68 +1445,68 @@ $(document).ready( () => {
       else{
         before = false;
       }
-    }
 
-    /**Populate employee storygrid**/
-    if(readSuccess){
-      progress = "populating storygrid";
-      before = true;
-      $sGrid = $(".storygrid");
+      /**Populate employee storygrid**/
+      if(readSuccess){
+        progress = "populating storygrid";
+        before = true;
+        $sGrid = $(".storygrid");
 
-      /*Add storyboxes*/
-      if(!(readPartial(["empboxes", "employee storybox structure"], $sGrid))){
-        return;
-      }
-
-      /*Copy the storybox structure for each additional employee*/
-      let boxCode = $sGrid.html();
-
-      for(let i = 1; i < EMPS.length - 1; i++){
-        $sGrid.append(boxCode);
-      }
-
-      /*Add a header*/
-      $sGrid.prepend("<h2>Innspill fra de ansatte</h2>");
-    }
-
-    /**Read storylink file and update all storylinks**/
-    if(readSuccess){
-      if(!(readPartial("storylink", $(".storylink")))){
-        return;
-      }
-
-      /*Update paragraphs and signature for each employee box*/
-      if($(".employee").length !== EMPS.length - 1){
-        alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
-      }
-      else{
-        for(let j = 0; j < EMPS.length - 1; j++ ){
-          let $empbox = $(".employee").eq(j);
-          let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
-
-          if(paragraphs === null){
-            /*If the file reading failed, disable further file reading.*/
-            readSuccess = false;
-
-            /*Make an alert for the current environment*/
-            if(ONLINE){
-              webReadAlert();
-            }
-            else{
-              alert("Failed to load employee-specific content from its file.");
-            }
-            break;
-          }
-
-          $empbox.find("p.excerpt").append(paragraphs[0]);
-          $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
-
-          /*Update the address of the storylink*/
-          $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+        /*Add storyboxes*/
+        if(!(readPartial(["empboxes", "employee storybox structure"], $sGrid))){
+          return;
         }
+
+        /*Copy the storybox structure for each additional employee*/
+        let boxCode = $sGrid.html();
+
+        for(let i = 1; i < EMPS.length - 1; i++){
+          $sGrid.append(boxCode);
+        }
+
+        /*Add a header*/
+        $sGrid.prepend("<h2>Innspill fra de ansatte</h2>");
       }
 
-      before = false;
+      /**Read storylink file and update all storylinks**/
+      if(readSuccess){
+        if(!(readPartial("storylink", $(".storylink")))){
+          return;
+        }
+
+        /*Update paragraphs and signature for each employee box*/
+        if($(".employee").length !== EMPS.length - 1){
+          alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
+        }
+        else{
+          for(let j = 0; j < EMPS.length - 1; j++ ){
+            let $empbox = $(".employee").eq(j);
+            let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
+
+            if(paragraphs === null){
+              /*If the file reading failed, disable further file reading.*/
+              readSuccess = false;
+
+              /*Make an alert for the current environment*/
+              if(ONLINE){
+                webReadAlert();
+              }
+              else{
+                alert("Failed to load employee-specific content from its file.");
+              }
+              break;
+            }
+
+            $empbox.find("p.excerpt").append(paragraphs[0]);
+            $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+
+            /*Update the address of the storylink*/
+            $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+          }
+        }
+
+        before = false;
+      }
     }
   }
 
@@ -1524,79 +1524,47 @@ $(document).ready( () => {
     }
 
     /*Add a service section (placement depends on the kind of page)*/
-    /*if(pageName === JOBPAGE){
-      $(".footer").before('<section class="services"></section>');
-    }*/
-
-    /*Read structure file*/
-    let servCode = readFile(PART_PATH + "service.html");
-
-    if(servCode === null){
-      /*If the file reading failed, give an error message alert and disable further file reading.*/
-      readSuccess = false;
-      before = false;
-
-      /*Make alert for the current environment*/
-      if(online){
-        webReadAlert();
-      }
-      else{
-        alert("Failed to load service structure for job page. Unknown cause.");
-      }
-    }
-    else if(pageName === JOBPAGE){
-      /*Insert the service code directly before the footer element*/
-      $(".footer").before(servCode);
-      before = false;
+    let servText = '<hr /><section class="services"><h2>Tjenester</h2></section>';
+    if(pageName === JOBPAGE){
+      $(".footer").before(servText);
     }
     else if(pageName === ACTPAGE){
-      /*Insert the service code directly after the banner element*/
-      $banWrap.after(servCode);
-      before = false;
+      $banWrap.after(servText);
     }
     else{
-      alert("Service section was attempted to be loaded from a page that isn't defined as having services. Site admins have to fix this.");
+      alert("Handling of services on this page is missing." + BUGALERT_POST);
       logProgress();
       return;
     }
 
-    /*Test that exactly one service section now exists*/
-    if(testing){
-      if(!(testValidity(UNIQUE, [["section", ".services"]]))){
-        logProgress();
-        return;
-      }
+    /*Add content to the service section*/
+    progress = "populating service section on JOBPAGE or ACTPAGE";
+    before = true;
+
+    let $servWrap = $(".services");
+
+    /*Update service section based on page*/
+    if(pageName === JOBPAGE){
+      /*Since no button should be active yet, the user is told that the section is empty for now.
+      The empty paragraph is there to push the text to the next grid position to prevent a small column width.
+      It is not an optimal solution, but it isn't straightforward to get something better within the grid.*/
+      $servWrap.append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
+      before = false;
     }
+    else if(pageName === ACTPAGE){
+      let serviceUpdate = readServices(ACTPAGE);
 
-    if(readSuccess){
-      progress = "populating service section on JOBPAGE or ACTPAGE";
-      before = true;
-
-      let $servWrap = $(".services");
-
-      /*Update service section based on page*/
-      if(pageName === JOBPAGE){
-        /*Since no button should be active yet, the user is told that the section is empty for now.
-        The empty paragraph is there to push the text to the next grid position to prevent a small column width.
-        It is not an optimal solution, but it isn't straightforward to get something better within the grid.*/
-        $servWrap.append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
-        before = false;
-      }
-      else if(pageName === ACTPAGE){
-        let serviceUpdate = readServices(ACTPAGE);
-
-        if(!serviceUpdate){
-          logProgress();
-          return;
-        }
-
-        before = false;
-      }
-      else{
-        alert("Service section was attempted to be updated from a page that isn't defined as having services. Site admins have to fix this.");
+      if(!serviceUpdate){
         logProgress();
         return;
       }
+
+      before = false;
+    }
+    else{
+      alert("Handling of services on this page is missing." + BUGALERT_POST);
+      logProgress();
+      return;
     }
   }
 
