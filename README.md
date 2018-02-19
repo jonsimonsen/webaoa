@@ -130,4 +130,7 @@ v0.63: Planning to look more closely into combining DREIS and DagsJobben into a 
 
 v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desirable. The agenda of this version will therefore be to clean up after 0.63.  
 -Under development...  
--The variable online (and perhaps testing) should probably be made global since there are functions that would greatly benefit from having access to its value.  
+-The constants online and testing have been made global since there are functions that would greatly benefit from having access to their values.  The variable readSuccess has also been made global.  
+-TODO: Consider writing a function for handling null returns from file reading functions (to reduce code duplication).  
+-TODO: Consider finding a way to handle ABSENT elements using the tag- and class-approach to
+simplify testValidity() and functions like readPartial().  

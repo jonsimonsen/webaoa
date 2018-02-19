@@ -79,7 +79,6 @@ const ERR_POST = "() error: "
 const ERR_BUNDERR = BTEST + ERR_POST;
 const ERR_SELERR = STEST + ERR_POST;
 const ERR_VALIDERR = VTEST + ERR_POST;
-const ERR_RUNTESTERR = "runTest" + ERR_POST;
 const BUGALERT_POST = " Site admins have to update JS code.";
 
 /**Constraints that are allowed as arguments to testValidity().
@@ -179,7 +178,7 @@ function readParas(file){
 When the current file reading gets disabled,
 the alert should instead be about a failed load (if this function is kept around).
 **/
-function webReadAlert(){
+function alertWebReadError(){
   /*Change file reading code and this message appropriately for online environment.*/
   alert("Web server file reading error." + BUGALERT_POST);
   return;
@@ -188,14 +187,13 @@ function webReadAlert(){
 /**Function for extracting userid from url. Returns null if the url has no attributes.
 Returns null and displays an alert if there's something wrong with the attribute.
 Otherwise, the value of the attribute (as a number) is returned.
-Attributes other than userid is not allowed.
-Could have more detailed error checks and messages.**/
+Attributes other than userid is not allowed.**/
 /*For more advanced url extraction, check out
 https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
 */
 function getUserId(){
   let match = "userid=";
-  let errPrefix = "Incorrect url. ";
+  let errPre = "Incorrect url. ";
   let url = window.location.href;
   let start = url.indexOf("?") + 1;
 
@@ -205,13 +203,13 @@ function getUserId(){
     return null;
   }
   else if(start > url.length - (match.length + 1)){ /*+1 since indices start at 0 while lengths start at 1.*/
-    alert(errPrefix + "Wrongly named attribute or no value.");
+    alert(errPre + "Wrongly named or formatted attribute (too short).");
     return null;
   }
 
   /*Test that the expected attribute string occurs directly after the separator.*/
   if(!(url.slice(start,(start + match.length)) === match)){
-    alert(errPrefix + "Wrongly named attribute.");
+    alert(errPre + "Wrongly named attribute (should be userid).");
     return null;
   }
 
@@ -219,7 +217,7 @@ function getUserId(){
 
   /*Test if the value of the candidate is a number.*/
   if(isNaN(candidate)){
-    alert(errPrefix + "Either the userid is not a number or the url contains garbage otherwise.");
+    alert(errPre + "Either the userid is not a number or the url contains unexpected symbols after the userid.");
     return null;
   }
   else{
@@ -289,7 +287,8 @@ function logTestRes(description, passes, fails){
 /**Function for testing that inputArray is an array.
 It also test that it contains at least minElems items.
 arrayText is used for describing the element (assumed array) that is being tested.
-Look at the function or returned error message for its value range.
+Its value should either equal TESTMAIN
+or TESTSUBPRE followed by an integer followed by TESTSUBPOST.
 Returns a description of the error. If no error, it returns an empty string.
 If any of the arguments to the function does not have the expected type
 or is outside the value range,
@@ -354,7 +353,7 @@ function testSelector(inputType, inputOne, inputTwo = ""){
 
   /*Test that the callee doesn't give too many arguments*/
   if(arguments.length > 3){
-    return ERR_SELERR + "Do not pass more than three arguments."
+    return ERR_SELERR + "Do not pass more than three arguments.";
   }
 
   /*Test that inputTwo has an expected value for the given inputType
@@ -506,15 +505,22 @@ Otherwise, it logs "fail".
 In both cases, it logs a newline to signify the end of this logging.
 Returns true if the test passed and false if it failed.*/
 function runTest(fName, description, argArray, passExpected = false){
+  let errPre = "runTest" + ERR_POST;
   /*Test that the given fName is a function name in the global const ALLTESTS.*/
   if(!(ALLTESTS.includes(fName))){
-    console.log(`${ERR_RUNTESTERR}fName is not in the ALLTESTS array.`);
+    console.log(errPre + fName + " is not in the ALLTESTS array.");
+    return false;
+  }
+
+  /*Test that the description is a string*/
+  if(typeof(description) !== "string"){
+    console.log(errPre + "Its second argument should be a string.");
     return false;
   }
 
   /*Test that the final element is a boolean*/
   if(typeof(passExpected) !== "boolean"){
-    console.log(ERR_RUNTESTERR + "Its fourth argument should be a boolean.");
+    console.log(errPre + "Its fourth argument should be a boolean.");
     return false;
   }
 
@@ -828,10 +834,11 @@ function readPartial(pName, target, addArray = []){
   }
 
   if(!partName || !partText){
-    console.log(errPre + "It seems like partName or partText still has its initial value.");
+    console.log(errPre + "It seems like partName or partText still has the initial value.");
     return false;
   }
 
+  /*Read partial code from file*/
   let partCode = readFile(PART_PATH + partName + PART_END);
 
   if(partCode === null){
@@ -840,13 +847,14 @@ function readPartial(pName, target, addArray = []){
 
     /*Make an alert for the current environment*/
     if(ONLINE){
-      webReadAlert();
+      alertWebReadError();
     }
     else{
       alert(`Failed to load ${partText} code.`);
     }
   }
   else{
+    /*Test absence of elements that should get added from the partial*/
     if(TESTING && addArray.length){
       /*Unpack to be able to test the validity with constraint ABSENT*/
       let classArray = [];
@@ -866,8 +874,10 @@ function readPartial(pName, target, addArray = []){
       }
     }
 
+    /*Add partial code*/
     target.append(partCode);
 
+    /*Test uniqueness of elements that should have been added.*/
     if(TESTING && addArray.length){
       if(!(testValidity(UNIQUE, addArray))){
         logProgress();
@@ -893,7 +903,6 @@ function readContent(fName){
   It's the job of the callee to ensure that the selections are unique.*/
   let $illWrap = $(".illustration");
   let $textWrap = $(".ill-text");
-  let $linkWrap = $(".ill-link");
   let $infoWrap = $(".info");
   let $foot = $(".footer");
 
@@ -906,7 +915,7 @@ function readContent(fName){
 
     /*Make an alert for the current environment*/
     if(ONLINE){
-      webReadAlert();
+      alertWebReadError();
     }
     else{
       alert(`Failed to load unit-specific content from ${fName} file.`);
@@ -1025,7 +1034,7 @@ function readContent(fName){
 
     /*Make an alert for the current environment*/
     if(ONLINE){
-      webReadAlert();
+      alertWebReadError();
     }
     else{
       alert("Failed to load contact field separator code.");
@@ -1057,8 +1066,11 @@ function readContent(fName){
 }
 
 /**Function for reading content into the services section for workplaces or activities.
+Can be used during page loading or in response to events.
 workPlace should only be given as an argument if pName is equal to JOBPAGE.
-**/
+Returns true if the reading and updating proceeded as expected.
+Returns true but sets readSuccess to false if a file read failed.
+Returns false otherwise.**/
 function readServices(pName, workPlace = ""){
   let errPre = "readServices()" + ERR_POST;
   let servArray = [];
@@ -1082,7 +1094,7 @@ function readServices(pName, workPlace = ""){
       return false;
     }
     else{
-      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERICES*/
+      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERVICES*/
     }
 
   }
@@ -1106,9 +1118,7 @@ function readServices(pName, workPlace = ""){
   let $servWrap = $(".services");
   let servFolder = servArray[0];
 
-  /*Remove existing storyboxes and paragraphs from the services content*/
-  /*$servWrap.children(".storybox").remove();
-  $servWrap.children("p").remove();*/
+  /*Remove existing content from the services*/
   $servWrap.empty();
 
   /**Read service storybox structure**/
@@ -1118,11 +1128,6 @@ function readServices(pName, workPlace = ""){
   }
   else if(!readSuccess){
     return true;
-  }
-
-  /*Test that the divs that are about to be added and updated does not yet exist in the DOM*/
-  if(!(testValidity(ABSENT, [".imgcell", ".infotext"]))){
-    return false;
   }
 
   /*Define structure code for a single service.*/
@@ -1141,7 +1146,7 @@ function readServices(pName, workPlace = ""){
 
       /*Make an alert for the current environment*/
       if(ONLINE){
-        webReadAlert();
+        alertWebReadError();
       }
       else{
         alert(`Failed to load service-specific content from ${fPath} path.`);
@@ -1326,7 +1331,7 @@ $(document).ready( () => {
 
       /*Give self-pointing links class unlink (not clickable).*/
       if(typeof target !== typeof undefined){
-        if(pageName === target.slice(2)){
+        if(pageName === target.slice(2)){   /*Could consider checking if target endsWith pageName instead.*/
           $(this).addClass("unlink");
         }
       }
@@ -1505,7 +1510,7 @@ $(document).ready( () => {
 
               /*Make an alert for the current environment*/
               if(ONLINE){
-                webReadAlert();
+                alertWebReadError();
               }
               else{
                 alert("Failed to load employee-specific content from its file.");
@@ -1688,7 +1693,7 @@ $(document).ready( () => {
 
         /*Make alert for the current environment*/
         if(online){
-          webReadAlert();
+          alertWebReadError();
         }
         else{
           alert("Failed to read employee content. Unknown cause.");
@@ -1713,6 +1718,4 @@ $(document).ready( () => {
       }
     }
   }
-
-  return;
 });
