@@ -23,10 +23,11 @@ Version 0.7
 -All pages for the web site are located directly under the root folder.  
 -All content on the pages (with a few exceptions) are organized in sections.  
 -The pages initially contain a few sections that will wrap most content.  
--These sections have classes named banner-wrapper, content-wrapper, top-wrapper and employee-wrapper. There should be only one section of each class.  
+-All pages have a section named banner-wrapper that is used to navigate to the other pages (and sometimes within the current page).  
+-The other initial sections have classes named banner-wrapper, content-wrapper, top-wrapper and employee-wrapper. There should be only one section of each class.  
 -The sections are populated by reading html partials from the "html" folder.  
 
--The home page (index.html) contains a description of the unit including a picture and contact info.  
+-The home page (index.html) contains a description of the unit including a picture and contact info. It also contains excerpts of histories from the employees.  
 -The job page (arbeid.html) contains descriptions of each sub-unit
 (that focuses on regular work) with a description of each service provided in addition to its picture and contact info. A default page with instructions is shown until the user selects one of the sub-units.  
 -The service description contains an image, a general info text and a list of specifics.  
@@ -39,6 +40,19 @@ Version 0.7
 -Error messages from tests are logged to the console.  
 -If the error would cause the site to stop loading, an alert might be printed for the user.  
 -An alert might also be used to give the user other info (for example if an unsupported browser is being used).  
+-A class named debug is available for debugging some elements on the pages.
+When doing this, comment out the line that sets display to none from the css file.
+Set display back to none before making the site publicly available.  
+
+-The current version uses global attributes, causing it to not be compatible with all browsers
+(IE and old versions of Edge does not handle this). Some kind of fallback should probably be considered in later versions.  
+-The current version reads html partials and text files using synchronous XMLHttpRequests.
+This is not supported in many browsers (only Firefox of the ones that have been tested).
+Loading from server should be used when going live (need to redefine the readFile function).  
+-The JavaScript onload function proceeds sequentially adding content based on the page and its sections.
+The global variable readSuccess starts off as true and becomes false when/if a file read fails.
+Any additional content (except possibly stuff that doesn't require more file reads) will not be added.
+If event handling was added, certain on-click events will cause a page to modify its content.  
 
 # pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
@@ -153,7 +167,6 @@ v0.63: Planning to look more closely into combining DREIS and DagsJobben into a 
 -It seems like the home link will not be used anymore.  
 
 v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desirable. The agenda of this version will therefore be to clean up after 0.63.  
--Under development...  
 -The constants online and testing have been made global since there are functions that would greatly benefit from having access to their values.  The variable readSuccess has also been made global.  
 -Refactored so that most string concatenation combining more than two elements use
 string interpolation (template literals).  
@@ -162,10 +175,16 @@ and append the code to an element defined by a JQuery selection.
 It can also check that new elements that are supposed to be unique
 are not already in the document and that only one is added.  
 -To avoid browser warnings complaining about XML parsing,
-all textfiles have had their content placed inside txt tags (`<txt>`...`</txt>`).  
+all textfiles have had their content placed inside txt tags (`<txt>...</txt>`).  
 -Updated readParas() to remove txt tags and anything outside them.  
+-Deleted everything that has to do with the home link.  
+-Deleted other deprecated stuff, and reorganized some files and folders.  
+-Made some changes to the formatting of JS comments.  
 -Tested that everything seems to work as intended.  
 
 -TODO: Consider writing a function for handling null returns from file reading functions (to reduce code duplication).  
 -TODO: Consider finding a way to handle ABSENT elements using the tag- and class-approach to
 simplify testValidity() and functions like readPartial().  
+
+v0.71: Refactor the css file to get rid of more old stuff that is now deprecated.  
+-Under development...  
