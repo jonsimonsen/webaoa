@@ -156,13 +156,13 @@ v0.7: Being able to reach the goal of version 0.63 actually "required" a substan
 -Under development...  
 -The constants online and testing have been made global since there are functions that would greatly benefit from having access to their values.  The variable readSuccess has also been made global.  
 -Refactored so that most string concatenation combining more than two elements use
-string interpolation (with ` ` to start and end the string).  
+string interpolation (template literals).  
 -To reduce code duplication significantly, readPartial() was written to read an html file
 and append the code to an element defined by a JQuery selection.
 It can also check that new elements that are supposed to be unique
 are not already in the document and that only one is added.  
 -To avoid browser warnings complaining about XML parsing,
-all textfiles have had their content placed inside txt tags (<txt>...</txt>).  
+all textfiles have had their content placed inside txt tags (`<txt>`...`</txt>`).  
 -Updated readParas() to remove txt tags and anything outside them.  
 -Tested that everything seems to work as intended.  
 
