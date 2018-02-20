@@ -16,6 +16,30 @@ Around version 0.5, the project started using JavaScript and JQuery to prevent u
 -Early versions of Edge yields poor layout. Should presumably be fixable (for pre-v0.55) by updating Windows. For the later versions, it seems like Edge will have the same kinds of issues as Chrome.  
 -Internet Explorer does not support the CSS syntax used, and there is no current plans to make the site compatible with IE.  
 
+# Summary of major versions
+Version 0.7  
+-----------  
+
+-All pages for the web site are located directly under the root folder.  
+-All content on the pages (with a few exceptions) are organized in sections.  
+-The pages initially contain a few sections that will wrap most content.  
+-These sections have classes named banner-wrapper, content-wrapper, top-wrapper and employee-wrapper. There should be only one section of each class.  
+-The sections are populated by reading html partials from the "html" folder.  
+
+-The home page (index.html) contains a description of the unit including a picture and contact info.  
+-The job page (arbeid.html) contains descriptions of each sub-unit
+(that focuses on regular work) with a description of each service provided in addition to its picture and contact info. A default page with instructions is shown until the user selects one of the sub-units.  
+-The service description contains an image, a general info text and a list of specifics.  
+-The activity page (aktiv.html) contains a grid that looks the same as the service description grid for sub-units. Instead of services, each line in the grid corresponds to an activity center.  
+-The employee page (ansatte.html) will contain a picture and a history from all employees that have provided such. For now, it contains default stories. Until the user starts to navigate within the page, a default page with instructions is shown (unless a user-id was given in the url).  
+-Text files in the folder Info/ are used to populate unit- or person-specific parts of pages.  
+
+-A test framework is provided so a developer can test that things have not been broken.  
+-A global constant names TESTING determines if tests are run while browsing the site.  
+-Error messages from tests are logged to the console.  
+-If the error would cause the site to stop loading, an alert might be printed for the user.  
+-An alert might also be used to give the user other info (for example if an unsupported browser is being used).  
+
 # pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
 -Website files will be added, but no particular setup is currently planned.  
@@ -131,6 +155,17 @@ v0.63: Planning to look more closely into combining DREIS and DagsJobben into a 
 v0.7: Being able to reach the goal of version 0.63 actually "required" a substantial amount of refactoring of code and reorganization of the file system. As a result, the information about 0.63 could probably be assumed to be part of 0.7 instead. 0.63 was pushed with some unsatisfactory code. It seems to behave as intended, but the error testing and messaging is unsatisfactory enough that major cleanup, and probably a bit of more refactoring is desirable. The agenda of this version will therefore be to clean up after 0.63.  
 -Under development...  
 -The constants online and testing have been made global since there are functions that would greatly benefit from having access to their values.  The variable readSuccess has also been made global.  
+-Refactored so that most string concatenation combining more than two elements use
+string interpolation (with ` ` to start and end the string).  
+-To reduce code duplication significantly, readPartial() was written to read an html file
+and append the code to an element defined by a JQuery selection.
+It can also check that new elements that are supposed to be unique
+are not already in the document and that only one is added.  
+-To avoid browser warnings complaining about XML parsing,
+all textfiles have had their content placed inside txt tags (<txt>...</txt>).  
+-Updated readParas() to remove txt tags and anything outside them.  
+-Tested that everything seems to work as intended.  
+
 -TODO: Consider writing a function for handling null returns from file reading functions (to reduce code duplication).  
 -TODO: Consider finding a way to handle ABSENT elements using the tag- and class-approach to
 simplify testValidity() and functions like readPartial().  

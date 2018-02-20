@@ -41,7 +41,7 @@ const IMG_END = ".jpg";
 /**Employees, activities and workplaces**/
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
 const DREIS = ["dreis/", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
-const DJOB = ["djob/", "djob"];
+const DJOB = ["djob/", "dags"];
 const ACTIVITIES = ["akts/", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
 const JOBS = ["DREIS", "DagsJobben", "Jobs"]; /*Precise name of workplace. Except for the last one, these can be used to find the corresponding entry in SERVICES (the indexes should match).*/
 const SERVICES = [DREIS, DJOB, ACTIVITIES];   /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
@@ -129,7 +129,6 @@ function readFile(file){
     console.log("XMLHttpRequest error.");
     return null;
   }
-  console.log(allText);
   return allText;
 }
 
@@ -163,6 +162,8 @@ function findPageName(path){
 
 /**Function for reading a file and returning an array of paragraphs
 using double newlines as separators.
+The file must start with <txt> and end with </txt>
+(it can have other content before and after, but this will be ignored).
 Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
 If the file reading failed, the function returns null.**/
 function readParas(file){
@@ -171,8 +172,11 @@ function readParas(file){
     return null;
   }
   else{
-    let text = fileStr.match(/<txt>[\s*]([^<]*)<\/txt>/)[1];
-    return text.split("\r\n\r\n");
+    let text = fileStr.match(/<txt>[\s]*([^<]*)<\/txt>/);    /*remove the tags (including trailing whitespace) and anything before or after*/
+    if(!text || text.length < 2){
+      return null;
+    }
+    return text[1].split("\r\n\r\n");
   }
 }
 
@@ -931,7 +935,6 @@ function readContent(fName){
 
   /*Update picture*/
   let imgParas = paragraphs[0].split("\r\n");
-  console.log(imgParas);
 
   if(imgParas.length !== 2){
     console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
