@@ -1,3 +1,4 @@
+<txt>
 Værftet aktivitetssenter
 
 Værftet er et lavterskeltilbud innen Rus- og psykiatritjenesten i Tromsø kommune.
@@ -7,3 +8,4 @@ Tilbud til voksne som har eller har hatt psykiske lidelser.
 Adgang via henvisning eller ved at brukere oppsøker oss.
 Tlf: 777 91 090 / 777 91 091 / 913 47 492
 Adresse: Skippergata 1C, 9008 TROMSØ
+</txt>

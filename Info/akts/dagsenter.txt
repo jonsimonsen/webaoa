@@ -1,3 +1,4 @@
+<txt>
 Tromsø dagsenter
 
 Dagsenteret er en sosial arena med et aktuelt, tidsriktig og samfunnsengasjert aktivitetstilbud
@@ -10,3 +11,4 @@ Hjelp til praktiske gjøremål.
 Åpent 09-15.
 Tlf: 777 92 185 / 777 92 186
 Adresse: Vestregata 15, 9008 TROMSØ
+</txt>

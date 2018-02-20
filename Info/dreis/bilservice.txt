@@ -1,3 +1,4 @@
+<txt>
 DREIS bilservice
 
 Avdelingen driver med service av kommunale biler.
@@ -9,3 +10,4 @@ Veghjelp. Kan benyttes ved uhell, motorstopp, punkteringer o.l.
 Butikk m. vindusviskere, spylervæske, lyspærer etc.
 Bilvask.
 Seks ansatte.
+</txt>

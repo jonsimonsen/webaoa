@@ -1,3 +1,4 @@
+<txt>
 job_select
 Viser ulike jobber
 
@@ -8,3 +9,4 @@ Trykk på en knapp over for å se informasjon om den arbeidsplassen.
 
 -
 Våre arbeidsplasser
+</txt>

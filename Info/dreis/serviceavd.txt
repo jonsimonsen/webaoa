@@ -1,3 +1,4 @@
+<txt>
 DREIS transport og logistikk
 
 Transport- og logistikkavdelingen supplerer varer til de som trenger det rundt om i kommunen.
@@ -9,3 +10,4 @@ Levering av strøsand.
 130 kommunale leveringspunkt. Alt fra Straumsbukta til Lakselvbukt.
 Noe levering til eksterne aktører der det trenges (for eksempel innenfor maritim sektor).
 Fire ansatte.
+</txt>

@@ -1,3 +1,4 @@
+<txt>
 Tindfoten dagtilbud
 -
 
@@ -10,3 +11,4 @@ Sanserom.
 Åpent 09-15.
 Tlf: 777 91 443 / 476 03 151
 Adresse: Tindfoten dagtilbud, Nansenvegen 59, 9007 TROMSØ
+</txt>

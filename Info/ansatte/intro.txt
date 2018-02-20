@@ -1,3 +1,4 @@
+<txt>
 Hei,
 
 Arbeid og Aktivitet har en rekke tilrettelagte tilbud innen både arbeid og aktivitet.
@@ -8,3 +9,4 @@ Noen av dem har bidratt med å fortelle om sine opplevelser.
 Bruk knapperaden over her til å bla igjennom historiene deres.
 
 Introduksjon av ansatte
+</txt>

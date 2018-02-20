@@ -1,3 +1,4 @@
+<txt>
 djob/djob
 DagsJobben sine lokaler
 
@@ -12,3 +13,4 @@ DagsJobben
 Grønnegata 103
 9008 TROMSØ
 902 39 202 / 902 16 832
+</txt>

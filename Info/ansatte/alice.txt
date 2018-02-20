@@ -1,3 +1,4 @@
+<txt>
 There was a table set out under a tree in front of the house,
 and the March Hare and the Hatter were having tea at it:
 a Dormouse was sitting between them, fast asleep,
@@ -31,3 +32,4 @@ she added aloud. `Do you mean that you think you can find out the answer to it?â
 said the March Hare. `Exactly so,â€™
 
 Alice at tea party
+</txt>

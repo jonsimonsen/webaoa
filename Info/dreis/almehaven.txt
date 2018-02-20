@@ -1,3 +1,4 @@
+<txt>
 Almehaven Cafè
 
 Almehaven Cafè holder til på Seminaret i kort avstand fra Tromsøbrua.
@@ -7,3 +8,4 @@ Vi serverer middag til 30 beboere.
 Ordinær cafèdrift.
 Hospiteringsplasser for restaurant- og matfag.
 To ansatte.
+</txt>

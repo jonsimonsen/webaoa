@@ -1,3 +1,4 @@
+<txt>
 DagsJobben
 
 Vi tar på oss en rekke typer jobber
@@ -8,3 +9,4 @@ Vedlikehold og rydding av hager og grøntarealer.
 Reparere gjerder og liknende snekkeroppdrag.
 Holder åpent fra tirsdag til torsdag.
 Opptil X antall bemanning pr. dag
+</txt>

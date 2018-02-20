@@ -1,3 +1,4 @@
+<txt>
 prisf
 Demobilde for A og A
 
@@ -12,3 +13,4 @@ Arbeid og Aktivitet
 Grønnegata 83
 9008 TROMSØ
 47 45 44 88
+</txt>

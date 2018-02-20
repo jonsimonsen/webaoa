@@ -129,6 +129,7 @@ function readFile(file){
     console.log("XMLHttpRequest error.");
     return null;
   }
+  console.log(allText);
   return allText;
 }
 
@@ -165,12 +166,13 @@ using double newlines as separators.
 Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
 If the file reading failed, the function returns null.**/
 function readParas(file){
-  fileStr = readFile(file);
+  let fileStr = readFile(file);
   if(fileStr === null){
     return null;
   }
   else{
-    return fileStr.split("\r\n\r\n");
+    let text = fileStr.match(/<txt>[\s*]([^<]*)<\/txt>/)[1];
+    return text.split("\r\n\r\n");
   }
 }
 
@@ -929,6 +931,7 @@ function readContent(fName){
 
   /*Update picture*/
   let imgParas = paragraphs[0].split("\r\n");
+  console.log(imgParas);
 
   if(imgParas.length !== 2){
     console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
@@ -1331,7 +1334,7 @@ $(document).ready( () => {
 
       /*Give self-pointing links class unlink (not clickable).*/
       if(typeof target !== typeof undefined){
-        if(pageName === target.slice(2)){   /*Could consider checking if target endsWith pageName instead.*/
+        if(target.endsWith(pageName)){
           $(this).addClass("unlink");
         }
       }
@@ -1417,7 +1420,6 @@ $(document).ready( () => {
       /*Test that the page is one of those that is expected to have a content wrapper.
       Find the file for the content wrapper content.*/
       let contentFile = "";
-      let contentText = "";
 
       if(pageName === HOMEPAGE){
         contentFile = "index";
@@ -1501,7 +1503,6 @@ $(document).ready( () => {
         }
         else{
           for(let j = 0; j < EMPS.length - 1; j++ ){
-            let $empbox = $(".employee").eq(j);
             let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
 
             if(paragraphs === null){
@@ -1518,6 +1519,7 @@ $(document).ready( () => {
               break;
             }
 
+            let $empbox = $(".employee").eq(j);
             $empbox.find("p.excerpt").append(paragraphs[0]);
             $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
 

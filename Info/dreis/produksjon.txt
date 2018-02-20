@@ -1,3 +1,4 @@
+<txt>
 DREIS produksjonsavdeling
 
 Produksjonsavdelingen har et variert tilbud og tett kontakt med folk og natur.
@@ -9,3 +10,4 @@ Diverse transportoppdrag inkludert flytting.
 Gressklipping og annet vedlikehold av Tromsømarka og byparker (inkl. Telegrafbukta og Charlottenlund).
 Vedproduksjon.
 Åtte ansatte.
+</txt>
