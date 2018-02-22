@@ -224,6 +224,9 @@ span.newline {
   }
 }
 
+
+/***Content section styling***/
+
 /**Footer**/
 /*150118: Tested and seems ok at browser widths (320, 1360) in Chrome.*/
 .footer {

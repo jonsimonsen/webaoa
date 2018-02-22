@@ -15,6 +15,24 @@ More trivial comments use one star.**/
 -Functions by me
 -html generation (when document is ready)*/
 
+/*Broadly scoped variables:
+-globals
+--------
+progress
+before
+readSuccess
+
+-inside ready function parameter scope
+--------
+pageName
+realCol
+browserCol
+(the last two should probably only be used for the browser compatibility test)*/
+
+/*The ready-function has an anonymous arrow function parameter.
+All other functions are defined using the function key word with curly brackets
+(no arrow functions).*/
+
 
 /*** Global consts ***/
 
@@ -203,7 +221,8 @@ function getUserId(){
   let url = window.location.href;
   let start = url.indexOf("?") + 1;
 
-  /*Test that the string contains the separator and that it occurs early enough that there is room for the attribute name and value.*/
+  /*Test that the string contains the separator
+  and that it occurs early enough that there is room for the attribute name and value.*/
   if(start <= 0){
     /*Since an attribute isn't necessarily required, no kind of error message is given.*/
     return null;
@@ -469,6 +488,7 @@ function testValidity(constraint, selectorArray){
           let classCount = ($(subElem[1])).length;              /*Matches the class*/
 
           if(classCount < tagCount){
+            /*This should never happen unless there is something wrong with the JQuery selections.*/
             validity = false;
             console.log(ERR_VALIDERR + "The function suggests that the specified selector has more elements than the number of elements of its class.");
           }
@@ -991,7 +1011,7 @@ function readContent(fName){
   }
 
   /*Add content to the footer*/
-  footLines = paragraphs[3].split("\r\n");
+  let footLines = paragraphs[3].split("\r\n");
   if(footLines[footLines.length - 1] === ""){
     /*In case the final newline has been included in the paragraph, remove the last element*/
     footLines = footLines.slice(0, footLines.length - 1);
@@ -1122,6 +1142,13 @@ function readServices(pName, workPlace = ""){
   }
 
   let $servWrap = $(".services");
+
+  /*Confirm that the service array has been initialized*/
+  if(!servArray.length){
+    alert(errPre + "The list of services is empty." + BUGALERT_POST);
+    return false;
+  }
+
   let servFolder = servArray[0];
 
   /*Remove existing content from the services*/
@@ -1139,7 +1166,7 @@ function readServices(pName, workPlace = ""){
   /*Define structure code for a single service.*/
   let sBoxCode = $servWrap.html();
   $servWrap.empty();    /*So that sBoxCode can be added for each service.*/
-  $servWrap.append("<h2>Tjenester</h2>");
+  $servWrap.append("<h2>Tjenester</h2>");   /*Could consider a different header for activities*/
 
   /*For each service, read the service's file, add a service box structure, and update the service box content*/
   servArray.slice(1).forEach(function(sName) {
@@ -1176,8 +1203,8 @@ function readServices(pName, workPlace = ""){
         return false;
       }
       else{
-        let $currImg = $(".imgcell").last().children("img");
         let iPath = "";
+
         if(imgParas.length === 1){
           iPath = IMG_PATH + servArray[0] + sName + IMG_END;
         }
@@ -1190,6 +1217,8 @@ function readServices(pName, workPlace = ""){
           $(".infocell").last().addClass("debug");
           $(".infotext").last().addClass("debug");
         }
+
+        let $currImg = $(".imgcell").last().children("img");
         $currImg.attr("src", iPath);
         $currImg.attr("alt", imgParas[0]);
 
@@ -1568,14 +1597,12 @@ $(document).ready( () => {
     progress = "populating service section on JOBPAGE or ACTPAGE";
     before = true;
 
-    let $servWrap = $(".services");
-
     /*Update service section based on page*/
     if(pageName === JOBPAGE){
       /*Since no button should be active yet, the user is told that the section is empty for now.
       The empty paragraph is there to push the text to the next grid position to prevent a small column width.
       It is not an optimal solution, but it isn't straightforward to get something better within the grid.*/
-      $servWrap.append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
+      $(".services").append("<p></p><p>Ingen tjenester blir vist før du velger en arbeidsplass fra knapperaden.</p>");
       before = false;
     }
     else if(pageName === ACTPAGE){
@@ -1596,7 +1623,7 @@ $(document).ready( () => {
 
   /***Event handling for workplaces***/
   if(readSuccess && pageName === JOBPAGE){
-    progress = "adding event handling to the job page"
+    progress = "adding event handling to the job page";
     before = true;
 
     /*Confirm that the page has the expected wrappers*/
@@ -1607,14 +1634,14 @@ $(document).ready( () => {
     else{
       const $wbuttons = $(".scroll-menu").find("a");
 
-      for(let j=0; j < $wbuttons.length; j++){
-        $wbuttons.eq(j).on("click", () => {
+      for(let i=0; i < $wbuttons.length; i++){
+        $wbuttons.eq(i).on("click", () => {
           /*Make the clicked button the only active one*/
           $wbuttons.removeClass("active");
-          $wbuttons.eq(j).addClass("active");
+          $wbuttons.eq(i).addClass("active");
 
           /*Update initial content sections*/
-          let fileName = $wbuttons.eq(j).text().toLowerCase();
+          let fileName = $wbuttons.eq(i).text().toLowerCase();
 
           if(!(readContent(fileName))){
             logProgress();
@@ -1623,7 +1650,7 @@ $(document).ready( () => {
 
           /*Update serviceboxes*/
           if(readSuccess){
-            if(!(readServices(JOBPAGE, $wbuttons.eq(j).text()))){
+            if(!(readServices(JOBPAGE, $wbuttons.eq(i).text()))){
               logProgress();
               return;
             }
@@ -1677,8 +1704,8 @@ $(document).ready( () => {
       alert("Employee navigation is broken." + BUGALERT_POST);
     }
     else{
-      $(".stealthy").eq(0).attr("href", "./ansatte.html?userid=" + (prev));
-      $(".stealthy").eq(1).attr("href", "./ansatte.html?userid=" + (next));
+      $empButtons.eq(0).attr("href", "./ansatte.html?userid=" + (prev));
+      $empButtons.eq(1).attr("href", "./ansatte.html?userid=" + (next));
     }
 
     /*Add the storybox class to the employee wrapper*/

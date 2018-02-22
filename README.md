@@ -54,6 +54,16 @@ The global variable readSuccess starts off as true and becomes false when/if a f
 Any additional content (except possibly stuff that doesn't require more file reads) will not be added.
 If event handling was added, certain on-click events will cause a page to modify its content.  
 
+# Feature suggestions
+There are certain features that have been considered but not implemented so far. For each, it is still uncertain if they will be implemented later. These are listed here:  
+
+-Write a function that handles null returns from the file reading functions (DRY).  
+-Handle ABSENT constraint using the tag- and class-approach. This would be especially useful for readPartial() to avoid having to reformat its arguments before passing them to testValidity().  
+-Consider a global variable for error prefixes instead of defining an errPre variable in
+several functions. Not sure how to handle this elegantly. Perhaps some kind of inheritance for functions or maybe it is possible to use a prototype (haven't studied those yet). A potential issue is that there is no standard format for the error prefixes so far.  
+-Find some fallback for browsers that can't handle global attributes in css.  
+-It should be strongly considered to make a separate function for the browser compatibility test, since this would solve several issues.  
+
 # pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
 -Website files will be added, but no particular setup is currently planned.  
