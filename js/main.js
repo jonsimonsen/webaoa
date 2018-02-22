@@ -589,7 +589,7 @@ Returns a bool array containing number of passed tests followed by number of fai
 function test_testBundle(){
   const bTestPre = "When giving testBundle() ";
   const aString = TESTSUBPRE + BAD_INT + TESTSUBPOST;
-  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
+  const resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing bundleTest()*/
   console.log("---Testing testBundle() expecting error messages.---");
@@ -634,7 +634,7 @@ Returns a bool array containing number of passed tests followed by number of fai
 **/
 function test_testSelector(){
   const sTestPre = "When giving testSelector() ";
-  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
+  const resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing selectorTest()*/
   console.log("---Testing testSelector() expecting error messages.---");
@@ -670,7 +670,7 @@ function test_testValidity(){
   const tMiss = ".test-missing";
   const tUno = ".test-unique";
   const tBody = ".test-body";
-  let resArray = [];    /*Array used for logging the number of successful and failed tests*/
+  const resArray = [];    /*Array used for logging the number of successful and failed tests*/
 
   /*Testing first argument (constraint)*/
   console.log("---Testing testValidity() without a valid constraint---");
@@ -880,20 +880,26 @@ function readPartial(pName, target, addArray = []){
     }
   }
   else{
-    /*Test absence of elements that should get added from the partial*/
     if(TESTING && addArray.length){
-      /*Unpack to be able to test the validity with constraint ABSENT*/
-      let classArray = [];
+      /*Unpack to be able to test the validity with constraint ABSENT.
+      It is possible that the shift method could be used instead, but that's also messy.*/
+      const classArray = [];
 
       addArray.forEach(function(subArray) {
-        /*Test that the array has at least two elements*/
+        /*Test that the subelement is an array and has at least two elements*/
         if(!(Array.isArray(subArray))){
           console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
           return false;
         }
+        else if(subArray.length < 2){
+          console.log(errPre + "The subarrays of the third argument (array) must contain at least two elements.");
+          return false;
+        }
+
         classArray.push(subArray[1]);
       });
 
+      /*Test absence of elements that should get added from the partial*/
       if(!(testValidity(ABSENT, classArray))){
         logProgress();
         return false;
@@ -933,7 +939,7 @@ function readContent(fName){
   let $foot = $(".footer");
 
   /*Read all paragraphs from the content file*/
-  let paragraphs = readParas(INFO_PATH + fName + TXT_END);
+  const paragraphs = readParas(INFO_PATH + fName + TXT_END);
 
   if(paragraphs === null){
     /*If the file reading failed, disable further file reading.*/
@@ -954,7 +960,7 @@ function readContent(fName){
   }
 
   /*Update picture*/
-  let imgParas = paragraphs[0].split("\r\n");
+  const imgParas = paragraphs[0].split("\r\n");
 
   if(imgParas.length !== 2){
     console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
@@ -966,7 +972,7 @@ function readContent(fName){
   }
 
   /*Update picture text(step one)*/
-  let imgText = paragraphs[1].split("\r\n");
+  const imgText = paragraphs[1].split("\r\n");
 
   if(imgText.length > 1){
     console.log(errPre + "The second paragraph of the content file should contain a single line.");
@@ -983,7 +989,7 @@ function readContent(fName){
   }
 
   /*Update info section*/
-  let infoText = paragraphs[2].split("\r\n");
+  const infoText = paragraphs[2].split("\r\n");
 
   /*Remove old heading and paragraph*/
   $infoWrap.children("h2").remove();
@@ -1011,11 +1017,21 @@ function readContent(fName){
   }
 
   /*Add content to the footer*/
-  let footLines = paragraphs[3].split("\r\n");
-  if(footLines[footLines.length - 1] === ""){
+  const footLines = paragraphs[3].split("\r\n");
+
+  if(footLines.length && footLines[footLines.length - 1] === ""){
     /*In case the final newline has been included in the paragraph, remove the last element*/
-    footLines = footLines.slice(0, footLines.length - 1);
+    footLines.pop();
   }
+
+  if(footLines.length < 2){
+    console.log(errPre + "The fourth (last) paragraph of the content file must contain at least two lines.");
+    return false;
+  }
+
+  /*Update image text with the name of the unit/workplace*/
+  $textWrap.children("h2").remove();                    /*Remove old header*/
+  $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
 
   if(footLines[0] !== "-"){
     if(footLines.length < 5){
@@ -1032,23 +1048,16 @@ function readContent(fName){
     $foot.removeClass("inactive");    /*Make sure the footer is displayed*/
   }
   else{
-    if(footLines.length > 2){
+    if(footLines.length !== 2){
       console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
       return false;
     }
     /*Hide contact link from image text and hide the footer*/
     $illWrap.find("a").addClass("usynlig");
     $foot.addClass("inactive");
-  }
 
-  if(!footLines[1]){
-    console.log(errPre + "The fourth (last) paragraph of the content file should contain at least two lines.");
-    return false;
-  }
-  else{
-    /*Update image text with the name of the unit/workplace*/
-    $textWrap.children("h2").remove();                    /*Remove old header*/
-    $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
+    /*No need to manage the footer, so return from the function*/
+    return true;
   }
 
   /**Read file containing a separator for contact fields**/
@@ -1143,7 +1152,7 @@ function readServices(pName, workPlace = ""){
 
   let $servWrap = $(".services");
 
-  /*Confirm that the service array has been initialized*/
+  /*Confirm that the service array has been initialized (is not empty)*/
   if(!servArray.length){
     alert(errPre + "The list of services is empty." + BUGALERT_POST);
     return false;
@@ -1198,7 +1207,11 @@ function readServices(pName, workPlace = ""){
       /*Process first paragraph (img and heading)*/
       let imgParas = paragraphs[0].split("\r\n");
 
-      if(imgParas.length > 2){
+      if(!imgParas.length){
+        console.log(`${errPre}The first paragraph in ${fPath} must contain text (non-empty lines).`);
+        return false;
+      }
+      else if(imgParas.length > 2){
         console.log(`${errPre}The first paragraph in ${fPath} must contain at most two lines.`);
         return false;
       }
@@ -1229,9 +1242,9 @@ function readServices(pName, workPlace = ""){
         $currTextbox.children("p").append(paragraphs[1]);   /*Not bothering testing that the input is correctly formatted*/
 
         /*Process third paragraph*/
-        let lines = paragraphs[2].split("\r\n");
-        if(!(lines[lines.length - 1])){
-          lines = lines.slice(0, lines.length - 1);
+        const lines = paragraphs[2].split("\r\n");
+        if(lines.length && !(lines[lines.length - 1])){
+          lines.pop();
         }
 
         /*Add list elements for each line in the paragraph*/
@@ -1435,7 +1448,7 @@ $(document).ready( () => {
     before = true;
 
     /**Read main content file**/
-    let mainElems = [["section", ".illustration"], ["section", ".info"],
+    const mainElems = [["section", ".illustration"], ["section", ".info"],
     ["section", ".footer"], ["div", ".ill-text"], ["div", ".ill-link"]];
     if(!(readPartial(["content", "main content"], $mainWrap, mainElems))){
       return;
@@ -1716,7 +1729,7 @@ $(document).ready( () => {
       progress = "adding employee-specific content to the employee window"
       before = true;
 
-      let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[current] + TXT_END);
+      const paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[current] + TXT_END);
 
       if(paragraphs === null){
         /*If the file reading failed, give an error message alert and disable further file reading.*/
@@ -1730,6 +1743,11 @@ $(document).ready( () => {
         else{
           alert("Failed to read employee content. Unknown cause.");
         }
+      }
+      else if(!paragraphs.length){
+        console.log("The employee text file seems to be empty.");
+        logProgress();
+        return;
       }
       else{
         /*Add img to the html*/
