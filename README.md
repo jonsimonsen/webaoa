@@ -62,7 +62,6 @@ There are certain features that have been considered but not implemented so far.
 -Consider a global variable for error prefixes instead of defining an errPre variable in
 several functions. Not sure how to handle this elegantly. Perhaps some kind of inheritance for functions or maybe it is possible to use a prototype (haven't studied those yet). A potential issue is that there is no standard format for the error prefixes so far.  
 -Find some fallback for browsers that can't handle global attributes in css.  
--It should be strongly considered to make a separate function for the browser compatibility test, since this would solve several issues.  
 
 # pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
@@ -197,4 +196,10 @@ all textfiles have had their content placed inside txt tags (`<txt>...</txt>`).
 simplify testValidity() and functions like readPartial().  
 
 v0.71: Refactor the css file to get rid of more old stuff that is now deprecated.  
+-Removed old stuff and fixed some comments in the css file.  
+-Made some updates to the JS file. Fixed some bugs/errors and cleaned up some code.  
+-Made a separate function for the browser compatibility testing.  
+-Reordered the functions to have them grouped in a more intuitive way.  
+
+v0.72: Unclear agenda. Probably more cleanup.  
 -Under development...  

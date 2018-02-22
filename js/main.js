@@ -24,10 +24,7 @@ readSuccess
 
 -inside ready function parameter scope
 --------
-pageName
-realCol
-browserCol
-(the last two should probably only be used for the browser compatibility test)*/
+pageName*/
 
 /*The ready-function has an anonymous arrow function parameter.
 All other functions are defined using the function key word with curly brackets
@@ -178,36 +175,6 @@ function findPageName(path){
   return "";
 }
 
-/**Function for reading a file and returning an array of paragraphs
-using double newlines as separators.
-The file must start with <txt> and end with </txt>
-(it can have other content before and after, but this will be ignored).
-Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
-If the file reading failed, the function returns null.**/
-function readParas(file){
-  let fileStr = readFile(file);
-  if(fileStr === null){
-    return null;
-  }
-  else{
-    let text = fileStr.match(/<txt>[\s]*([^<]*)<\/txt>/);    /*remove the tags (including trailing whitespace) and anything before or after*/
-    if(!text || text.length < 2){
-      return null;
-    }
-    return text[1].split("\r\n\r\n");
-  }
-}
-
-/**Function for giving an alert if local file reading was used in an online environment.
-When the current file reading gets disabled,
-the alert should instead be about a failed load (if this function is kept around).
-**/
-function alertWebReadError(){
-  /*Change file reading code and this message appropriately for online environment.*/
-  alert("Web server file reading error." + BUGALERT_POST);
-  return;
-}
-
 /**Function for extracting userid from url. Returns null if the url has no attributes.
 Returns null and displays an alert if there's something wrong with the attribute.
 Otherwise, the value of the attribute (as a number) is returned.
@@ -250,20 +217,6 @@ function getUserId(){
   }
 }
 
-/**Function for counting number of true and false values in an array.
-The function might work on other arguments than arrays,
-but its behavior is undefined for such arguments.
-boolArray is assumed to be an array of booleans.
-The function counts the number of values that equals true.
-It assumes that all other values are false.
-It returns an array with the number of true as the first element
-and the number of false as the second element.**/
-function countBools(boolArray){
-  let passes = (boolArray.filter(val => val === true)).length;
-  let fails = boolArray.length - passes;
-  return [passes, fails];
-}
-
 /**Function for logging the DOM-manipulation progress to the console.
 Uses values from the global variables before and progress in the logging.
 before should be a boolean telling if the message is logged before(true) or after(false) the step.
@@ -298,6 +251,504 @@ function logProgress(){
 
   console.log(timing + progress);
   return;
+}
+
+/**Function for reading a file and returning an array of paragraphs
+using double newlines as separators.
+The file must start with <txt> and end with </txt>
+(it can have other content before and after, but this will be ignored).
+Note that the function currently assumes that XMLHttpRequest interprets a newline as "\r\n".
+If the file reading failed, the function returns null.**/
+function readParas(file){
+  let fileStr = readFile(file);
+  if(fileStr === null){
+    return null;
+  }
+  else{
+    let text = fileStr.match(/<txt>[\s]*([^<]*)<\/txt>/);    /*remove the tags (including trailing whitespace) and anything before or after*/
+    if(!text || text.length < 2){
+      return null;
+    }
+    return text[1].split("\r\n\r\n");
+  }
+}
+
+/**Function for reading an html file in the html folder
+and adding the code to a JQuery selection.
+pName is the name of the file (without path and ending) or
+an array with the name as the first element
+and a description of the file code as the second element.
+target is the JQuery selector where the code is appended.
+addArray is an array of arrays of strings that will (conditionally) be passed to testValidity
+(See that function for further specification of its format)
+or an empty array (default) if there are no constraints that need to be checked.
+If the global var TESTING is true, the validity of addArray will be tested.
+The elements are assumed to be ABSENT before the code is added, and UNIQUE afterwards.
+Returns false if one of the arguments is wrongly formatted or the constraint is broken.
+Returns true otherwise.
+Sets readSuccess to false if the file reading failed.**/
+function readPartial(pName, target, addArray = []){
+  let errPre = "readPartial" + ERR_POST;
+  let partName = "";
+  let partText = "";
+
+  /*Test that the arguments are as expected*/
+  if(typeof(pName) === "string"){
+    if(!pName){
+      console.log(errPre + "The first (string) argument must be non-empty.");
+      return false;
+    }
+    else{
+      partName = pName;
+      partText = pName;
+    }
+  }
+  else if(Array.isArray(pName)){
+    if(pName.length !== 2){
+      console.log(errPre + "The first (array) argument must contain exactly two elements.");
+      return false;
+    }
+    else if(typeof(pName[0]) !== "string" || typeof(pName[1]) !== "string"){
+      console.log(errPre + "The first (array) argument must contain two strings as its (first) elements.");
+      return false;
+    }
+
+    if(!pName[0].length || !pName[1].length){
+      console.log(errPre + "The first (array) argument must contain non-empty strings as its (first) elements.");
+      return false;
+    }
+
+    partName = pName[0];
+    partText = pName[1];
+  }
+  else{
+    console.log(errPre + "The first element must be either a string or an array.");
+    return false;
+  }
+
+  if(!(target instanceof jQuery)){
+    console.log(errPre + "The second argument must be a jQuery selection.");
+    return false;
+  }
+
+  if(!(Array.isArray(addArray))){
+    console.log(errPre + "The third argument must be an array.");
+    return false;
+  }
+
+  if(!partName || !partText){
+    console.log(errPre + "It seems like partName or partText still has the initial value.");
+    return false;
+  }
+
+  /*Read partial code from file*/
+  let partCode = readFile(PART_PATH + partName + PART_END);
+
+  if(partCode === null){
+    /*If the file reading failed, disable further file reading.*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      alertWebReadError();
+    }
+    else{
+      alert(`Failed to load ${partText} code.`);
+    }
+  }
+  else{
+    if(TESTING && addArray.length){
+      /*Unpack to be able to test the validity with constraint ABSENT.
+      It is possible that the shift method could be used instead, but that's also messy.*/
+      const classArray = [];
+
+      addArray.forEach(function(subArray) {
+        /*Test that the subelement is an array and has at least two elements*/
+        if(!(Array.isArray(subArray))){
+          console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
+          return false;
+        }
+        else if(subArray.length < 2){
+          console.log(errPre + "The subarrays of the third argument (array) must contain at least two elements.");
+          return false;
+        }
+
+        classArray.push(subArray[1]);
+      });
+
+      /*Test absence of elements that should get added from the partial*/
+      if(!(testValidity(ABSENT, classArray))){
+        logProgress();
+        return false;
+      }
+    }
+
+    /*Add partial code*/
+    target.append(partCode);
+
+    /*Test uniqueness of elements that should have been added.*/
+    if(TESTING && addArray.length){
+      if(!(testValidity(UNIQUE, addArray))){
+        logProgress();
+        return false;
+      }
+    }
+  }
+
+  /*No errors encountered. If the file read failed,
+  this should be apparent from the global var readSuccess.*/
+  return true;
+}
+
+/**Function for reading main content and applying it to the document.
+Can be used during page loading or in response to events.
+Returns true if the reading and updating proceeded as expected.
+Returns true but sets readSuccess to false if a file read failed.
+Returns false otherwise.**/
+function readContent(fName){
+  let errPre = "readContent" + ERR_POST;
+
+  /*Make variables for frequently used selections.
+  It's the job of the callee to ensure that the selections are unique.*/
+  let $illWrap = $(".illustration");
+  let $textWrap = $(".ill-text");
+  let $infoWrap = $(".info");
+  let $foot = $(".footer");
+
+  /*Read all paragraphs from the content file*/
+  const paragraphs = readParas(INFO_PATH + fName + TXT_END);
+
+  if(paragraphs === null){
+    /*If the file reading failed, disable further file reading.*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      alertWebReadError();
+    }
+    else{
+      alert(`Failed to load unit-specific content from ${fName} file.`);
+    }
+    return true;    /*readSuccess will signify that the file reading failed*/
+  }
+  else if(paragraphs.length !== 4){
+    console.log(errPre + "The content file should contain exactly four of paragraphs.");
+    return false;
+  }
+
+  /*Update picture*/
+  const imgParas = paragraphs[0].split("\r\n");
+
+  if(imgParas.length !== 2){
+    console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
+    return false;
+  }
+  else{
+    $illWrap.children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
+    $illWrap.children("img").attr("alt", imgParas[1]);
+  }
+
+  /*Update picture text(step one)*/
+  const imgText = paragraphs[1].split("\r\n");
+
+  if(imgText.length > 1){
+    console.log(errPre + "The second paragraph of the content file should contain a single line.");
+    return false;
+  }
+
+  /*Remove old heading*/
+  $textWrap.children("h3").remove();
+
+  /*Add a new one*/
+  $textWrap.append("<h3>" + imgText[0] + "</h3>");
+  if(imgText[0] === "-"){
+    $textWrap.children("h3").addClass("usynlig");
+  }
+
+  /*Update info section*/
+  const infoText = paragraphs[2].split("\r\n");
+
+  /*Remove old heading and paragraph*/
+  $infoWrap.children("h2").remove();
+  $infoWrap.children("p").remove();
+
+  /*Add new ones*/
+  $infoWrap.append("<h2>" + infoText[0] + "</h2>");
+  $infoWrap.append("<p></p>");
+  infoText.slice(1).forEach(function(line) {
+    $infoWrap.children("p").append(line + "<br>");
+  });
+
+  /*Remove old footer content*/
+  $foot.children("h2").remove();
+  $foot.children(".socials").remove();
+  $foot.children(".contacts").remove();
+
+  /**Read footer structure file**/
+  if(!(readPartial(["footer", "footer structure"], $foot))){
+    readSuccess = false;    /*Make sure that the callee knows to stop loading the page*/
+    return true;
+  }
+  else if(!readSuccess){
+    return true;
+  }
+
+  /*Add content to the footer*/
+  const footLines = paragraphs[3].split("\r\n");
+
+  if(footLines.length && footLines[footLines.length - 1] === ""){
+    /*In case the final newline has been included in the paragraph, remove the last element*/
+    footLines.pop();
+  }
+
+  if(footLines.length < 2){
+    console.log(errPre + "The fourth (last) paragraph of the content file must contain at least two lines.");
+    return false;
+  }
+
+  /*Update image text with the name of the unit/workplace*/
+  $textWrap.children("h2").remove();                    /*Remove old header*/
+  $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
+
+  if(footLines[0] !== "-"){
+    if(footLines.length < 5){
+      console.log(errPre + "The fourth (last) paragraph of the content file should contain at least five lines when the first line consists of something else than a single dash.");
+      return false;
+    }
+
+    /*Update contact link in banner and illustration*/
+    $foot.attr("id", footLines[0]);
+    $("nav.nav-top").children(':contains("Kontakt")').remove();  /*Remove old link if any*/
+    $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
+    $illWrap.find("a").attr("href", "#" + footLines[0]);
+    $illWrap.find("a").removeClass("usynlig");    /*Make sure the contact link is displayed*/
+    $foot.removeClass("inactive");    /*Make sure the footer is displayed*/
+  }
+  else{
+    if(footLines.length !== 2){
+      console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
+      return false;
+    }
+    /*Hide contact link from image text and hide the footer*/
+    $illWrap.find("a").addClass("usynlig");
+    $foot.addClass("inactive");
+
+    /*No need to manage the footer, so return from the function*/
+    return true;
+  }
+
+  /**Read file containing a separator for contact fields**/
+  let sepCode = readFile(PART_PATH + "seps.html");
+
+  if(sepCode === null){
+    /*If the file reading failed, disable further file reading*/
+    readSuccess = false;
+
+    /*Make an alert for the current environment*/
+    if(ONLINE){
+      alertWebReadError();
+    }
+    else{
+      alert("Failed to load contact field separator code.");
+    }
+
+    return true;
+  }
+
+  const seps = " " + sepCode;
+
+  $(".adr").append(footLines[2] + seps);
+  $(".padr").append(footLines[3] + seps);
+  $(".tlf").append(footLines[4]);
+
+  /*Add address to facebook link if it's given. Otherwise, hide the link.*/
+  if(footLines[5]){
+    $(".fb-link").attr("href", footLines[5]);
+  }
+  else{
+    $(".fb-link").addClass("usynlig");
+  }
+
+  if(footLines[6]){
+    console.log(errPre + "The fourth (last) paragraph of the content file should not contain more than six lines.");
+    return false;
+  }
+
+  return true;
+}
+
+/**Function for reading content into the services section for workplaces or activities.
+Can be used during page loading or in response to events.
+workPlace should only be given as an argument if pName is equal to JOBPAGE.
+Returns true if the reading and updating proceeded as expected.
+Returns true but sets readSuccess to false if a file read failed.
+Returns false otherwise.**/
+function readServices(pName, workPlace = ""){
+  let errPre = "readServices()" + ERR_POST;
+  let servArray = [];
+  let i = undefined;    /*iterator for the JOBPAGES array*/
+
+  /*Test that the arrays for jobs and services match*/
+  if(JOBS.length !== SERVICES.length){
+    console.log(errPre + "The global const arrays JOBS and SERVICES should have equal length.");
+    return false;
+  }
+
+  /*Test arguments. Initialize servArray if arguments are ok.*/
+  if(pName !== JOBPAGE && pName !== ACTPAGE){
+    console.log(errPre + "Its first argument doesn't equal JOBPAGE or ACTPAGE.");
+    return false;
+  }
+
+  if(pName === ACTPAGE){
+    if(workPlace){
+      console.log(errPre + "Its second argument should not be given when the first equals ACTPAGE.");
+      return false;
+    }
+    else{
+      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERVICES*/
+    }
+
+  }
+  else if(pName === JOBPAGE){
+    for(i = 0 ; i < JOBS.length - 1 ; i++){
+      if(workPlace === JOBS[i]){
+        break;
+      }
+    }
+
+    if(i >= JOBS.length - 1){
+      console.log(errPre + "Its second argument should equal an element in JOBS (but not the last) when the first equals JOBPAGE.");
+      return false;
+    }
+    else{
+      servArray = SERVICES[i];
+    }
+
+  }
+
+  let $servWrap = $(".services");
+
+  /*Confirm that the service array has been initialized (is not empty)*/
+  if(!servArray.length){
+    alert(errPre + "The list of services is empty." + BUGALERT_POST);
+    return false;
+  }
+
+  let servFolder = servArray[0];
+
+  /*Remove existing content from the services*/
+  $servWrap.empty();
+
+  /**Read service storybox structure**/
+  if(!(readPartial(["serv_story", "service storybox structure"], $servWrap, [["div", ".imgcell"], ["div", ".infocell"], ["div", ".infotext"]]))){
+    readSuccess = false;
+    return true;
+  }
+  else if(!readSuccess){
+    return true;
+  }
+
+  /*Define structure code for a single service.*/
+  let sBoxCode = $servWrap.html();
+  $servWrap.empty();    /*So that sBoxCode can be added for each service.*/
+  $servWrap.append("<h2>Tjenester</h2>");   /*Could consider a different header for activities*/
+
+  /*For each service, read the service's file, add a service box structure, and update the service box content*/
+  servArray.slice(1).forEach(function(sName) {
+    let fPath = INFO_PATH + servFolder + sName + TXT_END;
+    let paragraphs = readParas(fPath);
+
+    if(paragraphs === null){
+      /*If the file reading failed, disable further file reading.*/
+      readSuccess = false;
+
+      /*Make an alert for the current environment*/
+      if(ONLINE){
+        alertWebReadError();
+      }
+      else{
+        alert(`Failed to load service-specific content from ${fPath} path.`);
+      }
+      return true;    /*readSuccess will signify that the file reading failed*/
+    }
+    else{
+      if(paragraphs.length !== 3){
+        console.log(`${errPre}The file ${fPath} must contain exactly three paragraphs.`);
+        return false;
+      }
+
+      /*Add structure*/
+      $servWrap.append(sBoxCode);
+
+      /*Process first paragraph (img and heading)*/
+      let imgParas = paragraphs[0].split("\r\n");
+
+      if(!imgParas.length){
+        console.log(`${errPre}The first paragraph in ${fPath} must contain text (non-empty lines).`);
+        return false;
+      }
+      else if(imgParas.length > 2){
+        console.log(`${errPre}The first paragraph in ${fPath} must contain at most two lines.`);
+        return false;
+      }
+      else{
+        let iPath = "";
+
+        if(imgParas.length === 1){
+          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+        }
+        else if(imgParas[1] === "-"){
+          iPath = IMG_PATH + "no_img" + IMG_END;
+        }
+        else{
+          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+          $(".imgcell").last().addClass("debug");
+          $(".infocell").last().addClass("debug");
+          $(".infotext").last().addClass("debug");
+        }
+
+        let $currImg = $(".imgcell").last().children("img");
+        $currImg.attr("src", iPath);
+        $currImg.attr("alt", imgParas[0]);
+
+        let $currTextbox = $(".infotext").last();
+        $currTextbox.children("h4").append(imgParas[0]);
+
+        /*Process second paragraph (treat is as a single html paragraph)*/
+        $currTextbox.children("p").append(paragraphs[1]);   /*Not bothering testing that the input is correctly formatted*/
+
+        /*Process third paragraph*/
+        const lines = paragraphs[2].split("\r\n");
+        if(lines.length && !(lines[lines.length - 1])){
+          lines.pop();
+        }
+
+        /*Add list elements for each line in the paragraph*/
+        lines.forEach(function(line) {
+          $currTextbox.children("ul").append(`<li>${line}</li>`);
+        });
+
+      }
+    }
+
+  });
+
+  return true;
+}
+
+/**Function for counting number of true and false values in an array.
+The function might work on other arguments than arrays,
+but its behavior is undefined for such arguments.
+boolArray is assumed to be an array of booleans.
+The function counts the number of values that equals true.
+It assumes that all other values are false.
+It returns an array with the number of true as the first element
+and the number of false as the second element.**/
+function countBools(boolArray){
+  let passes = (boolArray.filter(val => val === true)).length;
+  let fails = boolArray.length - passes;
+  return [passes, fails];
 }
 
 /**Function that logs a description of a test, then number of passes,
@@ -796,468 +1247,71 @@ function runAllTests(){
   return;
 }
 
-/**Function for reading an html file in the html folder
-and adding the code to a JQuery selection.
-pName is the name of the file (without path and ending) or
-an array with the name as the first element
-and a description of the file code as the second element.
-target is the JQuery selector where the code is appended.
-addArray is an array of arrays of strings that will (conditionally) be passed to testValidity
-(See that function for further specification of its format)
-or an empty array (default) if there are no constraints that need to be checked.
-If the global var TESTING is true, the validity of addArray will be tested.
-The elements are assumed to be ABSENT before the code is added, and UNIQUE afterwards.
-Returns false if one of the arguments is wrongly formatted or the constraint is broken.
-Returns true otherwise.
-Sets readSuccess to false if the file reading failed.**/
-function readPartial(pName, target, addArray = []){
-  let errPre = "readPartial" + ERR_POST;
-  let partName = "";
-  let partText = "";
+/**Function for testing if the browser handles custom properties.
+It will display an alert if the test failed.
+The code is more complex than ideal since the css method doesn't specify the format of the return value
+(it is assumed that the browser does it in the same way every time, though).
+The argument should always be $baseBody from the ready function
+(at least if the callee doesn't know the specifics of the function, the html and the css).
+Returns false if the argument is not a jQuery selection or the constraint for the test section is broken
+(should be ABSENT before and after the compatibility check, UNIQUE during the check).
+Otherwise it returns true.**/
+function testBrowser(selection){
+  /*Test that the argument is actually a selection*/
+  if(!(selection instanceof jQuery)){
+    console.log(`testBrowser${ERR_POST}The argument must be a jQuery selection.`);
+    return false;
+  }
 
-  /*Test that the arguments are as expected*/
-  if(typeof(pName) === "string"){
-    if(!pName){
-      console.log(errPre + "The first (string) argument must be non-empty.");
+  /**Test that there is no test section**/
+  if(TESTING){
+    if(!(testValidity(ABSENT, [".test"]))){
       return false;
     }
-    else{
-      partName = pName;
-      partText = pName;
-    }
   }
-  else if(Array.isArray(pName)){
-    if(pName.length !== 2){
-      console.log(errPre + "The first (array) argument must contain exactly two elements.");
+
+  /*Add test section at the start of the body*/
+  progress = "browser compatibility test";
+  before = true;
+  selection.prepend('<section class="test"></section>');
+
+  /**Test that the test section was added.**/
+  if(TESTING){
+    if(!(testValidity(UNIQUE, [["section", ".test"]]))){
       return false;
     }
-    else if(typeof(pName[0]) !== "string" || typeof(pName[1]) !== "string"){
-      console.log(errPre + "The first (array) argument must contain two strings as its (first) elements.");
+  }
+
+  let realCol = $(".test").css("background-color");
+  let browserCol = selection.css("background-color");
+
+  /**Test that an element (selection) using custom properties
+  has the same colors as an element using direct assignment (.test)**/
+  if(browserCol !== realCol){
+    alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
+  }
+
+  $(".test").remove();    /*Remove the test section*/
+  before = false;         /*Test completed*/
+
+  /**Test that the test section was successfully removed.**/
+  if(TESTING){
+    if(!(testValidity(ABSENT, [".test"]))){
       return false;
     }
-
-    if(!pName[0].length || !pName[1].length){
-      console.log(errPre + "The first (array) argument must contain non-empty strings as its (first) elements.");
-      return false;
-    }
-
-    partName = pName[0];
-    partText = pName[1];
-  }
-  else{
-    console.log(errPre + "The first element must be either a string or an array.");
-    return false;
-  }
-
-  if(!(target instanceof jQuery)){
-    console.log(errPre + "The second argument must be a jQuery selection.");
-    return false;
-  }
-
-  if(!(Array.isArray(addArray))){
-    console.log(errPre + "The third argument must be an array.");
-    return false;
-  }
-
-  if(!partName || !partText){
-    console.log(errPre + "It seems like partName or partText still has the initial value.");
-    return false;
-  }
-
-  /*Read partial code from file*/
-  let partCode = readFile(PART_PATH + partName + PART_END);
-
-  if(partCode === null){
-    /*If the file reading failed, disable further file reading.*/
-    readSuccess = false;
-
-    /*Make an alert for the current environment*/
-    if(ONLINE){
-      alertWebReadError();
-    }
-    else{
-      alert(`Failed to load ${partText} code.`);
-    }
-  }
-  else{
-    if(TESTING && addArray.length){
-      /*Unpack to be able to test the validity with constraint ABSENT.
-      It is possible that the shift method could be used instead, but that's also messy.*/
-      const classArray = [];
-
-      addArray.forEach(function(subArray) {
-        /*Test that the subelement is an array and has at least two elements*/
-        if(!(Array.isArray(subArray))){
-          console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
-          return false;
-        }
-        else if(subArray.length < 2){
-          console.log(errPre + "The subarrays of the third argument (array) must contain at least two elements.");
-          return false;
-        }
-
-        classArray.push(subArray[1]);
-      });
-
-      /*Test absence of elements that should get added from the partial*/
-      if(!(testValidity(ABSENT, classArray))){
-        logProgress();
-        return false;
-      }
-    }
-
-    /*Add partial code*/
-    target.append(partCode);
-
-    /*Test uniqueness of elements that should have been added.*/
-    if(TESTING && addArray.length){
-      if(!(testValidity(UNIQUE, addArray))){
-        logProgress();
-        return false;
-      }
-    }
-  }
-
-  /*No errors encountered. If the file read failed,
-  this should be apparent from the global var readSuccess.*/
-  return true;
-}
-
-/**Function for reading main content and applying it to the document.
-Can be used during page loading or in response to events.
-Returns true if the reading and updating proceeded as expected.
-Returns true but sets readSuccess to false if a file read failed.
-Returns false otherwise.**/
-function readContent(fName){
-  let errPre = "readContent" + ERR_POST;
-
-  /*Make variables for frequently used selections.
-  It's the job of the callee to ensure that the selections are unique.*/
-  let $illWrap = $(".illustration");
-  let $textWrap = $(".ill-text");
-  let $infoWrap = $(".info");
-  let $foot = $(".footer");
-
-  /*Read all paragraphs from the content file*/
-  const paragraphs = readParas(INFO_PATH + fName + TXT_END);
-
-  if(paragraphs === null){
-    /*If the file reading failed, disable further file reading.*/
-    readSuccess = false;
-
-    /*Make an alert for the current environment*/
-    if(ONLINE){
-      alertWebReadError();
-    }
-    else{
-      alert(`Failed to load unit-specific content from ${fName} file.`);
-    }
-    return true;    /*readSuccess will signify that the file reading failed*/
-  }
-  else if(paragraphs.length !== 4){
-    console.log(errPre + "The content file should contain exactly four of paragraphs.");
-    return false;
-  }
-
-  /*Update picture*/
-  const imgParas = paragraphs[0].split("\r\n");
-
-  if(imgParas.length !== 2){
-    console.log(errPre + "The first paragraph of the content file should contain exactly two lines.");
-    return false;
-  }
-  else{
-    $illWrap.children("img").attr("src", IMG_PATH + imgParas[0] + IMG_END);
-    $illWrap.children("img").attr("alt", imgParas[1]);
-  }
-
-  /*Update picture text(step one)*/
-  const imgText = paragraphs[1].split("\r\n");
-
-  if(imgText.length > 1){
-    console.log(errPre + "The second paragraph of the content file should contain a single line.");
-    return false;
-  }
-
-  /*Remove old heading*/
-  $textWrap.children("h3").remove();
-
-  /*Add a new one*/
-  $textWrap.append("<h3>" + imgText[0] + "</h3>");
-  if(imgText[0] === "-"){
-    $textWrap.children("h3").addClass("usynlig");
-  }
-
-  /*Update info section*/
-  const infoText = paragraphs[2].split("\r\n");
-
-  /*Remove old heading and paragraph*/
-  $infoWrap.children("h2").remove();
-  $infoWrap.children("p").remove();
-
-  /*Add new ones*/
-  $infoWrap.append("<h2>" + infoText[0] + "</h2>");
-  $infoWrap.append("<p></p>");
-  infoText.slice(1).forEach(function(line) {
-    $infoWrap.children("p").append(line + "<br>");
-  });
-
-  /*Remove old footer content*/
-  $foot.children("h2").remove();
-  $foot.children(".socials").remove();
-  $foot.children(".contacts").remove();
-
-  /**Read footer structure file**/
-  if(!(readPartial(["footer", "footer structure"], $foot))){
-    readSuccess = false;    /*Make sure that the callee knows to stop loading the page*/
-    return true;
-  }
-  else if(!readSuccess){
-    return true;
-  }
-
-  /*Add content to the footer*/
-  const footLines = paragraphs[3].split("\r\n");
-
-  if(footLines.length && footLines[footLines.length - 1] === ""){
-    /*In case the final newline has been included in the paragraph, remove the last element*/
-    footLines.pop();
-  }
-
-  if(footLines.length < 2){
-    console.log(errPre + "The fourth (last) paragraph of the content file must contain at least two lines.");
-    return false;
-  }
-
-  /*Update image text with the name of the unit/workplace*/
-  $textWrap.children("h2").remove();                    /*Remove old header*/
-  $textWrap.prepend("<h2>" + footLines[1] + "</h2>");   /*Add a new one*/
-
-  if(footLines[0] !== "-"){
-    if(footLines.length < 5){
-      console.log(errPre + "The fourth (last) paragraph of the content file should contain at least five lines when the first line consists of something else than a single dash.");
-      return false;
-    }
-
-    /*Update contact link in banner and illustration*/
-    $foot.attr("id", footLines[0]);
-    $("nav.nav-top").children(':contains("Kontakt")').remove();  /*Remove old link if any*/
-    $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
-    $illWrap.find("a").attr("href", "#" + footLines[0]);
-    $illWrap.find("a").removeClass("usynlig");    /*Make sure the contact link is displayed*/
-    $foot.removeClass("inactive");    /*Make sure the footer is displayed*/
-  }
-  else{
-    if(footLines.length !== 2){
-      console.log(errPre + "The fourth (last) paragraph of the content file should contain exactly two lines when the first line consists of a single dash.");
-      return false;
-    }
-    /*Hide contact link from image text and hide the footer*/
-    $illWrap.find("a").addClass("usynlig");
-    $foot.addClass("inactive");
-
-    /*No need to manage the footer, so return from the function*/
-    return true;
-  }
-
-  /**Read file containing a separator for contact fields**/
-  let sepCode = readFile(PART_PATH + "seps.html");
-
-  if(sepCode === null){
-    /*If the file reading failed, disable further file reading*/
-    readSuccess = false;
-
-    /*Make an alert for the current environment*/
-    if(ONLINE){
-      alertWebReadError();
-    }
-    else{
-      alert("Failed to load contact field separator code.");
-    }
-
-    return true;
-  }
-
-  const seps = " " + sepCode;
-
-  $(".adr").append(footLines[2] + seps);
-  $(".padr").append(footLines[3] + seps);
-  $(".tlf").append(footLines[4]);
-
-  /*Add address to facebook link if it's given. Otherwise, hide the link.*/
-  if(footLines[5]){
-    $(".fb-link").attr("href", footLines[5]);
-  }
-  else{
-    $(".fb-link").addClass("usynlig");
-  }
-
-  if(footLines[6]){
-    console.log(errPre + "The fourth (last) paragraph of the content file should not contain more than six lines.");
-    return false;
   }
 
   return true;
 }
 
-/**Function for reading content into the services section for workplaces or activities.
-Can be used during page loading or in response to events.
-workPlace should only be given as an argument if pName is equal to JOBPAGE.
-Returns true if the reading and updating proceeded as expected.
-Returns true but sets readSuccess to false if a file read failed.
-Returns false otherwise.**/
-function readServices(pName, workPlace = ""){
-  let errPre = "readServices()" + ERR_POST;
-  let servArray = [];
-  let i = undefined;    /*iterator for the JOBPAGES array*/
-
-  /*Test that the arrays for jobs and services match*/
-  if(JOBS.length !== SERVICES.length){
-    console.log(errPre + "The global const arrays JOBS and SERVICES should have equal length.");
-    return false;
-  }
-
-  /*Test arguments. Initialize servArray if arguments are ok.*/
-  if(pName !== JOBPAGE && pName !== ACTPAGE){
-    console.log(errPre + "Its first argument doesn't equal JOBPAGE or ACTPAGE.");
-    return false;
-  }
-
-  if(pName === ACTPAGE){
-    if(workPlace){
-      console.log(errPre + "Its second argument should not be given when the first equals ACTPAGE.");
-      return false;
-    }
-    else{
-      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERVICES*/
-    }
-
-  }
-  else if(pName === JOBPAGE){
-    for(i = 0 ; i < JOBS.length - 1 ; i++){
-      if(workPlace === JOBS[i]){
-        break;
-      }
-    }
-
-    if(i >= JOBS.length - 1){
-      console.log(errPre + "Its second argument should equal an element in JOBS (but not the last) when the first equals JOBPAGE.");
-      return false;
-    }
-    else{
-      servArray = SERVICES[i];
-    }
-
-  }
-
-  let $servWrap = $(".services");
-
-  /*Confirm that the service array has been initialized (is not empty)*/
-  if(!servArray.length){
-    alert(errPre + "The list of services is empty." + BUGALERT_POST);
-    return false;
-  }
-
-  let servFolder = servArray[0];
-
-  /*Remove existing content from the services*/
-  $servWrap.empty();
-
-  /**Read service storybox structure**/
-  if(!(readPartial(["serv_story", "service storybox structure"], $servWrap, [["div", ".imgcell"], ["div", ".infocell"], ["div", ".infotext"]]))){
-    readSuccess = false;
-    return true;
-  }
-  else if(!readSuccess){
-    return true;
-  }
-
-  /*Define structure code for a single service.*/
-  let sBoxCode = $servWrap.html();
-  $servWrap.empty();    /*So that sBoxCode can be added for each service.*/
-  $servWrap.append("<h2>Tjenester</h2>");   /*Could consider a different header for activities*/
-
-  /*For each service, read the service's file, add a service box structure, and update the service box content*/
-  servArray.slice(1).forEach(function(sName) {
-    let fPath = INFO_PATH + servFolder + sName + TXT_END;
-    let paragraphs = readParas(fPath);
-
-    if(paragraphs === null){
-      /*If the file reading failed, disable further file reading.*/
-      readSuccess = false;
-
-      /*Make an alert for the current environment*/
-      if(ONLINE){
-        alertWebReadError();
-      }
-      else{
-        alert(`Failed to load service-specific content from ${fPath} path.`);
-      }
-      return true;    /*readSuccess will signify that the file reading failed*/
-    }
-    else{
-      if(paragraphs.length !== 3){
-        console.log(`${errPre}The file ${fPath} must contain exactly three paragraphs.`);
-        return false;
-      }
-
-      /*Add structure*/
-      $servWrap.append(sBoxCode);
-
-      /*Process first paragraph (img and heading)*/
-      let imgParas = paragraphs[0].split("\r\n");
-
-      if(!imgParas.length){
-        console.log(`${errPre}The first paragraph in ${fPath} must contain text (non-empty lines).`);
-        return false;
-      }
-      else if(imgParas.length > 2){
-        console.log(`${errPre}The first paragraph in ${fPath} must contain at most two lines.`);
-        return false;
-      }
-      else{
-        let iPath = "";
-
-        if(imgParas.length === 1){
-          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
-        }
-        else if(imgParas[1] === "-"){
-          iPath = IMG_PATH + "no_img" + IMG_END;
-        }
-        else{
-          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
-          $(".imgcell").last().addClass("debug");
-          $(".infocell").last().addClass("debug");
-          $(".infotext").last().addClass("debug");
-        }
-
-        let $currImg = $(".imgcell").last().children("img");
-        $currImg.attr("src", iPath);
-        $currImg.attr("alt", imgParas[0]);
-
-        let $currTextbox = $(".infotext").last();
-        $currTextbox.children("h4").append(imgParas[0]);
-
-        /*Process second paragraph (treat is as a single html paragraph)*/
-        $currTextbox.children("p").append(paragraphs[1]);   /*Not bothering testing that the input is correctly formatted*/
-
-        /*Process third paragraph*/
-        const lines = paragraphs[2].split("\r\n");
-        if(lines.length && !(lines[lines.length - 1])){
-          lines.pop();
-        }
-
-        /*Add list elements for each line in the paragraph*/
-        lines.forEach(function(line) {
-          $currTextbox.children("ul").append(`<li>${line}</li>`);
-        });
-
-      }
-    }
-
-  });
-
-  return true;
+/**Function for giving an alert if local file reading was used in an online environment.
+When the current file reading gets disabled,
+the alert should instead be about a failed load (if this function is kept around).
+**/
+function alertWebReadError(){
+  /*Change file reading code and this message appropriately for online environment.*/
+  alert("Web server file reading error." + BUGALERT_POST);
+  return;
 }
 
 
@@ -1307,47 +1361,9 @@ $(document).ready( () => {
 
 
   /***Browser compatibility testing (custom properties).***/
-  /*The code is more complex than ideal since the css method doesn't specify the format of the return value
-  (it is assumed that the browser does it in the same way every time, though).*/
-
-  /**Testing the absence of a test section.**/
-  if(TESTING){
-    if(!(testValidity(ABSENT, [".test"]))){
-      logProgress();
-      return;
-    }
-  }
-
-  /*Add test section at the start of the body*/
-  $baseBody.prepend('<section class="test"></section>');
-  progress = "browser compatibility test";    /*No need to change the before variable this time*/
-
-  /**Test that the test section was added.**/
-  if(TESTING){
-    if(!(testValidity(UNIQUE, [["section", ".test"]]))){
-      logProgress();
-      return;
-    }
-  }
-
-  let realCol = $(".test").css("background-color");
-  let browserCol = $baseBody.css("background-color");
-
-  /**Test that an element (basebody) using custom properties
-  has the same colors as an element using direct assignment (.test)**/
-  if(browserCol !== realCol){
-    alert("Your browser doesn't support custom properties in the layout. The layout will not look as intended. See https://developer.mozilla.org/en-US/docs/Web/CSS/--*");
-  }
-
-  before = false;         /*Test completed*/
-  $(".test").remove();    /*Remove the test section*/
-
-  /**Test that the test section was successfully removed.**/
-  if(TESTING){
-    if(!(testValidity(ABSENT, [".test"]))){
-      logProgress();
-      return;
-    }
+  if(!(testBrowser($baseBody))){
+    logProgress();
+    return;
   }
 
 
