@@ -26,7 +26,7 @@ readSuccess
 --------
 pageName*/
 
-/*The ready-function has an anonymous arrow function parameter.
+/*The ready-function and the filtering in countBools() have anonymous arrow function parameters.
 All other functions are defined using the function key word with curly brackets
 (no arrow functions).*/
 
@@ -362,7 +362,7 @@ function readPartial(pName, target, addArray = []){
       It is possible that the shift method could be used instead, but that's also messy.*/
       const classArray = [];
 
-      addArray.forEach(function(subArray) {
+      let isValid = addArray.every(function(subArray) {
         /*Test that the subelement is an array and has at least two elements*/
         if(!(Array.isArray(subArray))){
           console.log(errPre + "The third argument (array) must contain exclusively arrays as its elements.");
@@ -374,7 +374,13 @@ function readPartial(pName, target, addArray = []){
         }
 
         classArray.push(subArray[1]);
+        return true;
       });
+
+      /*Return false if the addArray isn't correctly formatted*/
+      if(!isValid){
+        return false;
+      }
 
       /*Test absence of elements that should get added from the partial*/
       if(!(testValidity(ABSENT, classArray))){
