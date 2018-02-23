@@ -202,4 +202,7 @@ v0.71: Refactor the css file to get rid of more old stuff that is now deprecated
 -Reordered the functions to have them grouped in a more intuitive way.  
 
 v0.72: Unclear agenda. Probably more cleanup.  
+-Fixed some newly discovered bugs caused by not knowing exactly how forEach() works. Now using every() instead if there is a chance that there are elements that doesn't need to be processed.  
+
+v0.73: More of the same as for 0.72.  
 -Under development...  
