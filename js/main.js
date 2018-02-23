@@ -660,8 +660,11 @@ function readServices(pName, workPlace = ""){
   $servWrap.empty();    /*So that sBoxCode can be added for each service.*/
   $servWrap.append("<h2>Tjenester</h2>");   /*Could consider a different header for activities*/
 
+  /*Becomes false if any subarray is not correctly formatted. The function will return this value before it ends.*/
+  let validFormat = true;
+
   /*For each service, read the service's file, add a service box structure, and update the service box content*/
-  servArray.slice(1).forEach(function(sName) {
+  servArray.slice(1).every(function(sName) {
     let fPath = INFO_PATH + servFolder + sName + TXT_END;
     let paragraphs = readParas(fPath);
 
@@ -676,11 +679,12 @@ function readServices(pName, workPlace = ""){
       else{
         alert(`Failed to load service-specific content from ${fPath} path.`);
       }
-      return true;    /*readSuccess will signify that the file reading failed*/
+      return false;    /*readSuccess will signify that the file reading failed*/
     }
     else{
       if(paragraphs.length !== 3){
         console.log(`${errPre}The file ${fPath} must contain exactly three paragraphs.`);
+        validFormat = false;
         return false;
       }
 
@@ -692,10 +696,12 @@ function readServices(pName, workPlace = ""){
 
       if(!imgParas.length){
         console.log(`${errPre}The first paragraph in ${fPath} must contain text (non-empty lines).`);
+        validFormat = false;
         return false;
       }
       else if(imgParas.length > 2){
         console.log(`${errPre}The first paragraph in ${fPath} must contain at most two lines.`);
+        validFormat = false;
         return false;
       }
       else{
@@ -738,9 +744,10 @@ function readServices(pName, workPlace = ""){
       }
     }
 
+    return true;    /*Make every() process the next element if any*/
   });
 
-  return true;
+  return validFormat;
 }
 
 /**Function for counting number of true and false values in an array.
@@ -908,6 +915,8 @@ function testValidity(constraint, selectorArray){
   let validity = true;    /*Assume that the argument is of the correct type and otherwise valid until otherwise has been determined.*/
   let counter = 0;        /*Used for the index of subelements of selectorArray*/
 
+  /*Iterate over each element in selectorArray looking for format errors and constraint errors.
+  Could probably use an ordinary for-loop instead of forEach().*/
   selectorArray.forEach(function(subElem) {
     if(constraint === ABSENT){
       errorMsg = testSelector(CLASS, subElem);
@@ -1569,8 +1578,8 @@ $(document).ready( () => {
           alert("Home page has the wrong number of employee boxes." + BUGALERT_POST);
         }
         else{
-          for(let j = 0; j < EMPS.length - 1; j++ ){
-            let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[j] + TXT_END);
+          for(let i = 0; i < EMPS.length - 1; i++ ){
+            let paragraphs = readParas(INFO_PATH + "ansatte/" + EMPS[i] + TXT_END);
 
             if(paragraphs === null){
               /*If the file reading failed, disable further file reading.*/
@@ -1586,12 +1595,12 @@ $(document).ready( () => {
               break;
             }
 
-            let $empbox = $(".employee").eq(j);
+            let $empbox = $(".employee").eq(i);
             $empbox.find("p.excerpt").append(paragraphs[0]);
-            $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[j]));
+            $empbox.find("p.sign").append("-" + capitalizeFirstLetter(EMPS[i]));
 
             /*Update the address of the storylink*/
-            $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + j);
+            $empbox.find(".storylink").children("a").attr("href", "./ansatte.html?userid=" + i);
           }
         }
 
