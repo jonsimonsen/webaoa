@@ -62,6 +62,7 @@ There are certain features that have been considered but not implemented so far.
 -Consider a global variable for error prefixes instead of defining an errPre variable in
 several functions. Not sure how to handle this elegantly. Perhaps some kind of inheritance for functions or maybe it is possible to use a prototype (haven't studied those yet). A potential issue is that there is no standard format for the error prefixes so far.  
 -Find some fallback for browsers that can't handle global attributes in css.  
+-Find a way to ignore global constants that are not used for the current page.  
 
 # pre-versions:
 -Note that the Author of commits is not always correct, since git wasn't correctly configured on the client at the start of the project.  
@@ -205,4 +206,6 @@ v0.72: Unclear agenda. Probably more cleanup.
 -Fixed some newly discovered bugs caused by not knowing exactly how forEach() works. Now using every() instead if there is a chance that there are elements that doesn't need to be processed.  
 
 v0.73: More of the same as for 0.72.  
+-Made a class for units that have connected services. So far, it's mostly just for testing using classes. Tested and seems to work fine.  
+-Should look into reducing the number of global constants in the main JS file (perhaps using imports or something similiar).  
 -Under development...  

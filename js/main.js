@@ -55,11 +55,7 @@ const IMG_END = ".jpg";
 
 /**Employees, activities and workplaces**/
 const EMPS = ["alice", "charlie", "espen", "hallstein", "intro"]; /*Should consider reading in the users in some way (possibly by filename)*/
-const DREIS = ["dreis/", "almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"];
-const DJOB = ["djob/", "dags"];
-const ACTIVITIES = ["akts/", "værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"];
 const JOBS = ["DREIS", "DagsJobben", "Jobs"]; /*Precise name of workplace. Except for the last one, these can be used to find the corresponding entry in SERVICES (the indexes should match).*/
-const SERVICES = [DREIS, DJOB, ACTIVITIES];   /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
 
 /**Input types (used in testSelector to differentiate between differently formatted input).**/
 const BAD_INPUT = -1      /*Used for testing. Do not include this value in INPUTTYPES.*/
@@ -113,6 +109,39 @@ const CONSTRAINTS = [ABSENT, PRESENT, UNIQUE, NON_PLURAL, FREE];
 let progress = "any DOM-manipulation";    /*Update this to keep track of where errors occur*/
 let before = true;    /*Tells if an error occured before or after reaching the stage determined by progress.*/
 let readSuccess = true;   /*Stop trying to read files when this becomes false.*/
+
+
+/*** Classes and instances of them ***/
+class ServiceProvider{
+  constructor(path, services){
+    /*It will assumed that the callee provides valid parameters (string, Array)*/
+    this._path = path;
+    this._services = services;
+    this._length = this._services.length;
+  }
+
+  get path() {
+    return this._path;
+  }
+
+  service(index) {
+    if(index >= this._length){
+      return "";
+    }
+    else{
+      return this._services[index];
+    }
+  }
+
+  get length() {
+    return this._length;
+  }
+}
+
+const DREIS = new ServiceProvider("dreis/", ["almehaven", "kurskonf", "bilservice", "produksjon", "serviceavd", "admin"]);
+const DJOB = new ServiceProvider("djob/", ["dags"]);
+const ACTS = new ServiceProvider("akts/", ["værftet", "tindfoten", "gimle", "kvaløya", "dagsenter"]);
+const SERVICES = [DREIS, DJOB, ACTS];    /*Except for the last item, these should correspond to the item with the same index in JOBS.*/
 
 
 /*** Functions made by others ***/
@@ -438,7 +467,7 @@ function readContent(fName){
     return true;    /*readSuccess will signify that the file reading failed*/
   }
   else if(paragraphs.length !== 4){
-    console.log(errPre + "The content file should contain exactly four of paragraphs.");
+    console.log(errPre + "The content file should contain exactly four paragraphs.");
     return false;
   }
 
@@ -591,7 +620,7 @@ Returns true but sets readSuccess to false if a file read failed.
 Returns false otherwise.**/
 function readServices(pName, workPlace = ""){
   let errPre = "readServices()" + ERR_POST;
-  let servArray = [];
+  let servUnit = {};
   let i = undefined;    /*iterator for the JOBPAGES array*/
 
   /*Test that the arrays for jobs and services match*/
@@ -612,7 +641,7 @@ function readServices(pName, workPlace = ""){
       return false;
     }
     else{
-      servArray = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERVICES*/
+      servUnit = SERVICES[SERVICES.length - 1];    /*ACTPAGE is connected to the last element in SERVICES*/
     }
 
   }
@@ -628,7 +657,7 @@ function readServices(pName, workPlace = ""){
       return false;
     }
     else{
-      servArray = SERVICES[i];
+      servUnit = SERVICES[i];
     }
 
   }
@@ -636,12 +665,10 @@ function readServices(pName, workPlace = ""){
   let $servWrap = $(".services");
 
   /*Confirm that the service array has been initialized (is not empty)*/
-  if(!servArray.length){
+  if(!servUnit.length){
     alert(errPre + "The list of services is empty." + BUGALERT_POST);
     return false;
   }
-
-  let servFolder = servArray[0];
 
   /*Remove existing content from the services*/
   $servWrap.empty();
@@ -664,8 +691,8 @@ function readServices(pName, workPlace = ""){
   let validFormat = true;
 
   /*For each service, read the service's file, add a service box structure, and update the service box content*/
-  servArray.slice(1).every(function(sName) {
-    let fPath = INFO_PATH + servFolder + sName + TXT_END;
+  for(let j = 0 ; j < servUnit.length ; j++){
+    let fPath = INFO_PATH + servUnit.path + servUnit.service(j) + TXT_END;
     let paragraphs = readParas(fPath);
 
     if(paragraphs === null){
@@ -679,7 +706,7 @@ function readServices(pName, workPlace = ""){
       else{
         alert(`Failed to load service-specific content from ${fPath} path.`);
       }
-      return false;    /*readSuccess will signify that the file reading failed*/
+      return true;    /*readSuccess will signify that the file reading failed*/
     }
     else{
       if(paragraphs.length !== 3){
@@ -708,13 +735,13 @@ function readServices(pName, workPlace = ""){
         let iPath = "";
 
         if(imgParas.length === 1){
-          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+          iPath = IMG_PATH + servUnit.path + servUnit.service(j) + IMG_END;
         }
         else if(imgParas[1] === "-"){
           iPath = IMG_PATH + "no_img" + IMG_END;
         }
         else{
-          iPath = IMG_PATH + servArray[0] + sName + IMG_END;
+          iPath = IMG_PATH + servUnit.path + servUnit.service(j) + IMG_END;
           $(".imgcell").last().addClass("debug");
           $(".infocell").last().addClass("debug");
           $(".infotext").last().addClass("debug");
@@ -743,9 +770,7 @@ function readServices(pName, workPlace = ""){
 
       }
     }
-
-    return true;    /*Make every() process the next element if any*/
-  });
+  }
 
   return validFormat;
 }
