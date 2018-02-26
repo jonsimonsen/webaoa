@@ -557,7 +557,7 @@ function readContent(fName){
     $("nav.nav-top").append('<a href="#' + footLines[0] + '">Kontakt</a>');
     $illWrap.find("a").attr("href", "#" + footLines[0]);
     $illWrap.find("a").removeClass("usynlig");    /*Make sure the contact link is displayed*/
-    $foot.removeClass("inactive");    /*Make sure the footer is displayed*/
+    $foot.show();    /*Make sure the footer is displayed*/
   }
   else{
     if(footLines.length !== 2){
@@ -566,7 +566,8 @@ function readContent(fName){
     }
     /*Hide contact link from image text and hide the footer*/
     $illWrap.find("a").addClass("usynlig");
-    $foot.addClass("inactive");
+    //$foot.addClass("inactive");
+    $foot.hide();
 
     /*No need to manage the footer, so return from the function*/
     return true;

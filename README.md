@@ -61,7 +61,7 @@ There are certain features that have been considered but not implemented so far.
 -Handle ABSENT constraint using the tag- and class-approach. This would be especially useful for readPartial() to avoid having to reformat its arguments before passing them to testValidity().  
 -Consider a global variable for error prefixes instead of defining an errPre variable in
 several functions. Not sure how to handle this elegantly. Perhaps some kind of inheritance for functions or maybe it is possible to use a prototype (haven't studied those yet). A potential issue is that there is no standard format for the error prefixes so far.  
--Find some fallback for browsers that can't handle global attributes in css.  
+-Find some fallback for browsers that can't handle global attributes in css. There is probably code for transpiling that can be downloaded somewhere.  
 -Find a way to ignore global constants that are not used for the current page.  
 
 # pre-versions:
@@ -207,5 +207,6 @@ v0.72: Unclear agenda. Probably more cleanup.
 
 v0.73: More of the same as for 0.72.  
 -Made a class for units that have connected services. So far, it's mostly just for testing using classes. Tested and seems to work fine.  
+-Started using JQueary for effects like showing and hiding content instead of changing the css.  
 -Should look into reducing the number of global constants in the main JS file (perhaps using imports or something similiar).  
 -Under development...  
