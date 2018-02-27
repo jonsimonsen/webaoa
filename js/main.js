@@ -31,6 +31,10 @@ All other functions are defined using the function key word with curly brackets
 (no arrow functions).*/
 
 
+/*** Imports ***/
+//import TestError from './js/errors';
+
+
 /*** Global consts ***/
 
 /**Environments**/
@@ -204,7 +208,7 @@ function findPageName(path){
   }
 
   /*If the page was not found, return an empty string*/
-  throw new Error("The page was not found.");
+  throw new TestError("The page was not found.", "findPageName");
   return "";
 }
 
@@ -1362,12 +1366,14 @@ function alertWebReadError(){
 
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
+  console.log("aaaaaaaaaaaaaaaaa");
+  //import TestError from './js/errors';
   let pageName = "";
   /**Find out what page is being readied**/
   try{
     pageName = findPageName(window.location.pathname);
   }
-  catch(e if e instanceof Error){
+  catch(e if e instanceof TestError){
     console.log(e.message);
     return;
   }
