@@ -208,5 +208,8 @@ v0.72: Unclear agenda. Probably more cleanup.
 v0.73: More of the same as for 0.72.  
 -Made a class for units that have connected services. So far, it's mostly just for testing using classes. Tested and seems to work fine.  
 -Started using JQueary for effects like showing and hiding content instead of changing the css.  
--Should look into reducing the number of global constants in the main JS file (perhaps using imports or something similiar).  
+-TODO: look into reducing the number of global constants in the main JS file (perhaps using imports or something similiar).  
+
+v0.74: Looking into more advanced error handling in JS.  
 -Under development...  
+-Throwing exceptions  
