@@ -169,11 +169,14 @@ function readFile(file){
   try{
     rawFile.send(null);
   }
-  catch (error){
-    console.log("XMLHttpRequest error.");
-    return null;
+  catch (exception){
+    /*console.log("XMLHttpRequest error.");
+    return null;*/
+    throw new Error("XMLHttpRequest error.");
   }
-  return allText;
+  finally{
+    return allText;
+  }
 }
 
 /**Function for capitalizing a string (Make the first letter uppercase)**/
@@ -201,6 +204,7 @@ function findPageName(path){
   }
 
   /*If the page was not found, return an empty string*/
+  throw new Error("The page was not found.");
   return "";
 }
 
@@ -1358,8 +1362,21 @@ function alertWebReadError(){
 
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
+  let pageName = "";
   /**Find out what page is being readied**/
-  let pageName = findPageName(window.location.pathname);
+  try{
+    pageName = findPageName(window.location.pathname);
+  }
+  catch(e if e instanceof Error){
+    console.log(e.message);
+    return;
+  }
+  catch(e){
+    console.log("Exception of unexpected type was thrown");
+    return;
+  }
+
+  console.log("control has reached here.");
 
 
   /***Initial test section***/
