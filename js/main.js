@@ -32,7 +32,7 @@ All other functions are defined using the function key word with curly brackets
 
 
 /*** Imports ***/
-//import TestError from './js/errors';
+import TestError from './js/errors.js';
 
 
 /*** Global consts ***/
@@ -208,6 +208,7 @@ function findPageName(path){
   }
 
   /*If the page was not found, return an empty string*/
+  console.log("findPageName logging.")
   throw new TestError("The page was not found.", "findPageName");
   return "";
 }
@@ -1364,21 +1365,73 @@ function alertWebReadError(){
 }
 
 
+/*window.addEventListener('load', function () {
+  function appendModule(code) {
+    console.log("apped");
+    let url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' })); // create url from code
+
+    let script = document.createElement('script');
+    script.type = 'module';
+    script.src = url;
+    document.head.appendChild(script);
+  }
+
+  let scripts = document.querySelectorAll('script');
+  console.log(scripts);
+  for (let script of scripts) {
+    script.parentElement.removeChild(script);
+    if (script.getAttribute('type') !== 'module') continue; // found normal script
+    if (script.getAttribute('src') !== null) {
+      console.log("loadin");
+      // load a file
+      var request = new XMLHttpRequest();
+      console.log("loadin2");
+      request.open('GET', script.getAttribute('src'), false); //+ '?_=' + Date.now(), true);
+      console.log("loadin3");
+      request.onload = function () {
+        if (this.status >= 200 && this.status < 400) {
+          // file loaded
+          console.log("processing");
+          appendModule(this.response);
+          console.log("processing2");
+        } else {
+          // error loading file
+          console.log("error " + this.status);
+          console.error('Not able to load module:', script.getAttribute('src'));
+          console.log("error2");
+        }
+      };
+      console.log("loadin4");
+      request.onerror = function () {
+        // error loading file
+        console.error('Not able to load module:', script.getAttribute('src'));
+      };
+      request.send();
+    }
+  }
+  console.log(scripts);
+});*/
+
+
 /*** Generate additional html for the current site ***/
 $(document).ready( () => {
   console.log("aaaaaaaaaaaaaaaaa");
+  /*import TestError from './js/errors.js';*/
+  //appendModule("./js/errors.js");
+  console.log("bbbbbbbbbbbbbbbbbb");
   //import TestError from './js/errors';
   let pageName = "";
   /**Find out what page is being readied**/
   try{
     pageName = findPageName(window.location.pathname);
   }
-  catch(e if e instanceof TestError){
-    console.log(e.message);
-    return;
-  }
   catch(e){
-    console.log("Exception of unexpected type was thrown");
+    if(e instanceof TestError){
+      console.log("TestError" + e.message);
+    }
+    else{
+      console.log("Exception of unexpected type was thrown");
+    }
     return;
   }
 

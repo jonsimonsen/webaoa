@@ -13,4 +13,4 @@ class TestError extends Error{
   }
 }
 
-export default TestError;
+export default class TestError {}

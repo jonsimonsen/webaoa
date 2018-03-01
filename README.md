@@ -213,3 +213,5 @@ v0.73: More of the same as for 0.72.
 v0.74: Looking into more advanced error handling in JS.  
 -Under development...  
 -Throwing exceptions  
+-Looking at importing error object from a module. To be able to import locally, use --disable-web-security --user-data-dir  
+-Seems like support for ES6 modules are not great, so might look into the other ways of importing.  
