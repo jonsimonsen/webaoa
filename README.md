@@ -1,6 +1,6 @@
 # webaoa
-Using my repo for these files for now. The project owner is Tromsø kommune.  
-A different solution for version control should probably be implemented before the scope of the project becomes too large.  
+Using my repo for these files for now. The project owner is Tromsø kommune. It does not seem like they are going to implement the project, so I'll rewrite the project to use it as a part of my portfolio (partially because the original version might contain some material that is not actually publishable).
+A different solution for version control should probably be implemented for this kind of project before the scope of it becomes too large.  
 
 At the start of the project, it was based on just html and css (scss was attempted, but is not being used anymore).  
 
@@ -36,7 +36,7 @@ Version 0.7
 -Text files in the folder Info/ are used to populate unit- or person-specific parts of pages.  
 
 -A test framework is provided so a developer can test that things have not been broken.  
--A global constant names TESTING determines if tests are run while browsing the site.  
+-A global constant named TESTING determines if tests are run while browsing the site.  
 -Error messages from tests are logged to the console.  
 -If the error would cause the site to stop loading, an alert might be printed for the user.  
 -An alert might also be used to give the user other info (for example if an unsupported browser is being used).  
