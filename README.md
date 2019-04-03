@@ -1,6 +1,8 @@
 # webaoa
-Using my repo for these files for now. The project owner is Tromsø kommune. It does not seem like they are going to implement the project, so I'll rewrite the project to use it as a part of my portfolio (partially because the original version might contain some material that is not actually publishable).
+Using my repo for these files for now. The project owner is Tromsø kommune. It does not seem like they are going to implement the project, so I'll rewrite the project to use it as a part of my portfolio (partially because the original version might contain some material that is not actually publishable).  
 A different solution for version control should probably be implemented for this kind of project before the scope of it becomes too large.  
+
+There is currently something wrong with the latest versions, possibly due to changes in browsers. I'm planning to check if version 0.54 (5. jan 18 or 8. jan 18) seems ok, and then evaluate if the later versions can be fixed.
 
 At the start of the project, it was based on just html and css (scss was attempted, but is not being used anymore).  
 
